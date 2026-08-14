@@ -1,0 +1,16 @@
+# Local Python environment
+.venv/
+
+# Python-generated files
+__pycache__/
+*.pyc
+*.pyo
+
+# Private and large recordings
+data/raw/
+data/private_raw/
+
+# Local editor and operating-system files
+.vscode/
+Thumbs.db
+.DS_Store
