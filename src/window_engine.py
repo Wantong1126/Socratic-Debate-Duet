@@ -5,6 +5,10 @@ from pylsl import StreamInlet, resolve_streams
 
 from eeg_features import relative_band_powers
 
+from body_features import extract_body_features
+
+from body_calibration import BodyCalibrator
+
 WINDOW_SECONDS = 2.0
 UPDATE_SECONDS = 0.25
 EXPECTED_CHANNELS = 8
@@ -59,6 +63,11 @@ inlet = StreamInlet(stream, max_buflen=10)
 buffer = deque(maxlen=window_samples)
 samples_since_update = 0
 
+body_calibrator = BodyCalibrator(
+    duration_seconds=20.0,
+    update_interval_seconds=UPDATE_SECONDS,
+)
+
 try:
     while True:
         chunk, timestamps = inlet.pull_chunk(
@@ -94,16 +103,33 @@ try:
             sample_rate,
         )
 
+        body = extract_body_features(
+            window,
+            sample_rate,
+        )
+
+        if not body_calibrator.ready:
+            body_calibrator.add(body)
+            print(
+                f"Calibrating body: "
+                f"{body_calibrator.progress * 100:5.1f}% | "
+                f"EOG_RMS={body['eog_activity']:7.2f} | "
+                f"EMG_RMS={body['emg_activity']:7.2f}"
+            )
+            continue
+
+        body_controls = body_calibrator.normalize(body)
+
         low = features["4_8_hz"] * 100
         middle = features["8_13_hz"] * 100
         high = features["13_30_hz"] * 100
 
         print(
-            f"t={timestamps[-1]:.3f} | "
-            f"4–8 Hz={low:5.1f}% | "
-            f"8–13 Hz={middle:5.1f}% | "
-            f"13–30 Hz={high:5.1f}% | "
-            f"sum={low + middle + high:5.1f}%"
+            f"EEG={low:4.1f}/{middle:4.1f}/{high:4.1f}% | "
+            f"EOG raw={body['eog_activity']:7.2f} "
+            f"control={body_controls['eog_control']:.2f} | "
+            f"EMG raw={body['emg_activity']:7.2f} "
+            f"control={body_controls['emg_control']:.2f}"
         )
 
 except KeyboardInterrupt:
