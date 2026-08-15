@@ -9,6 +9,8 @@ from body_features import extract_body_features
 
 from body_calibration import BodyCalibrator
 
+from osc_sender import FeatureOscSender
+
 WINDOW_SECONDS = 2.0
 UPDATE_SECONDS = 0.25
 EXPECTED_CHANNELS = 8
@@ -68,6 +70,11 @@ body_calibrator = BodyCalibrator(
     update_interval_seconds=UPDATE_SECONDS,
 )
 
+osc_sender = FeatureOscSender(
+    host="127.0.0.1",
+    port=9000,
+)
+
 try:
     while True:
         chunk, timestamps = inlet.pull_chunk(
@@ -119,6 +126,11 @@ try:
             continue
 
         body_controls = body_calibrator.normalize(body)
+
+        osc_sender.send(
+            eeg_features=features,
+            body_controls=body_controls,
+        )
 
         low = features["4_8_hz"] * 100
         middle = features["8_13_hz"] * 100
