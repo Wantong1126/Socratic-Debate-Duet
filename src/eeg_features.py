@@ -10,6 +10,14 @@ FREQUENCY_BANDS = {
 }
 
 
+def clean_eeg(eeg_window):
+    """Return the existing per-channel mean-centred EEG representation."""
+    eeg_window = np.asarray(eeg_window, dtype=float)
+    if eeg_window.ndim != 2 or eeg_window.shape[1] != 6:
+        raise ValueError("Expected EEG data shaped (samples, 6 channels).")
+    return eeg_window - np.mean(eeg_window, axis=0, keepdims=True)
+
+
 def relative_band_powers(eeg_window, sample_rate):
     """
     Calculate mean relative power across six EEG channels.
@@ -32,12 +40,8 @@ def relative_band_powers(eeg_window, sample_rate):
             "Expected EEG data shaped (samples, 6 channels)."
         )
 
-    # Remove the mean of each channel.
-    centered = eeg_window - np.mean(
-        eeg_window,
-        axis=0,
-        keepdims=True,
-    )
+    # Remove the mean of each channel through the shared cleaning path.
+    centered = clean_eeg(eeg_window)
 
     # Use one-second segments with 50% internal overlap.
     segment_samples = min(sample_rate, centered.shape[0])

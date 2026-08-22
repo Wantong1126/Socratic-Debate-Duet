@@ -16,3 +16,4 @@ Thumbs.db
 .DS_Store
 
 reports/eeg_audification/
+reports/eeg_control/

@@ -47,7 +47,8 @@ def connect_openbci_lsl(wait_time=5.0, expected_channels=EXPECTED_CHANNELS):
     return StreamInlet(stream, max_buflen=10), stream, sample_rate
 
 
-def record_lsl_seconds(seconds, wait_time=5.0, expected_channels=EXPECTED_CHANNELS):
+def record_lsl_seconds(seconds, wait_time=5.0, expected_channels=EXPECTED_CHANNELS,
+                       chunk_callback=None):
     """Record a fixed number of samples through the shared LSL chunk path."""
     if seconds <= 0:
         raise ValueError("seconds must be positive")
@@ -60,6 +61,8 @@ def record_lsl_seconds(seconds, wait_time=5.0, expected_channels=EXPECTED_CHANNE
             raise RuntimeError(f"LSL stream stalled after {len(samples)}/{target} samples.")
         chunk, chunk_times = inlet.pull_chunk(timeout=1.0, max_samples=min(target - len(samples), 1024))
         if chunk:
+            if chunk_callback is not None:
+                chunk_callback(np.asarray(chunk, dtype=float), np.asarray(chunk_times, dtype=float), sample_rate)
             samples.extend(row[:expected_channels] for row in chunk)
             timestamps.extend(chunk_times)
     return LSLRecording(np.asarray(samples, dtype=float), np.asarray(timestamps, dtype=float), sample_rate, stream.name())
