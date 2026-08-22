@@ -233,3 +233,15 @@ s.waitForBoot({
     "AGORA DUET READY — listening on UDP 9000".postln;
 });
 )
+
+(
+OSCdef(\eegLowInput).free;
+OSCdef(\eegMidInput).free;
+OSCdef(\eegHighInput).free;
+OSCdef(\eogInput).free;
+OSCdef(\emgInput).free;
+
+~agoraDuet.free;
+
+"AGORA DUET STOPPED".postln;
+)
