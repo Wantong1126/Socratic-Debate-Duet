@@ -2,6 +2,8 @@
 import numpy as np
 from scipy.signal import welch
 
+from .eeg_preprocessing import EEGFilterConfig, preprocess_eeg
+
 
 FREQUENCY_BANDS = {
     "4_8_hz": (4.0, 8.0),
@@ -11,11 +13,13 @@ FREQUENCY_BANDS = {
 
 
 def clean_eeg(eeg_window):
-    """Return the existing per-channel mean-centred EEG representation."""
-    eeg_window = np.asarray(eeg_window, dtype=float)
-    if eeg_window.ndim != 2 or eeg_window.shape[1] != 6:
-        raise ValueError("Expected EEG data shaped (samples, 6 channels).")
-    return eeg_window - np.mean(eeg_window, axis=0, keepdims=True)
+    """Return the established live mean-centred representation.
+
+    Cutoffs remain disabled here deliberately so existing live theta/alpha/beta
+    behaviour is unchanged; offline audification enables the documented filter.
+    """
+    legacy = EEGFilterConfig(highpass_hz=None, lowpass_hz=None, notch_hz=None)
+    return preprocess_eeg(eeg_window, 1.0, legacy)
 
 
 def relative_band_powers(eeg_window, sample_rate):

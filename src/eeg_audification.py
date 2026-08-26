@@ -6,6 +6,8 @@ from fractions import Fraction
 import numpy as np
 from scipy.signal import resample_poly
 
+from .eeg_preprocessing import EEGFilterConfig, preprocess_eeg, validate_eeg
+
 CHANNEL_LABELS = ("F3", "F4", "C3", "C4", "P3", "P4")
 OUTPUT_RATE = 48_000
 
@@ -20,6 +22,13 @@ class AudificationConfig:
     fm_depth_hz: float = 0.0
     robust_percentile: float = 99.5
     robust_target: float = 0.9
+    highpass_hz: float = 0.5
+    highpass_order: int = 4
+    lowpass_hz: float = 45.0
+    lowpass_order: int = 4
+    notch_hz: float = 50.0
+    notch_q: float = 30.0
+    flatline_peak_to_peak_uv: float = 1e-6
 
 
 @dataclass
@@ -31,8 +40,9 @@ class AudificationResult:
     modulated: list[np.ndarray]
     input_rate: float
     config: AudificationConfig
-    initial_gain: float
-    safety_gain: float
+    initial_gain: np.ndarray
+    safety_gain: np.ndarray
+    valid_channels: np.ndarray
 
     @property
     def normalization_gain(self):
@@ -40,11 +50,7 @@ class AudificationResult:
 
 
 def _validate(eeg, sample_rate, config):
-    eeg = np.asarray(eeg, dtype=np.float64)
-    if eeg.ndim != 2 or eeg.shape[1] != 6 or eeg.shape[0] < 2:
-        raise ValueError("Expected EEG data shaped (at least 2 samples, 6 channels).")
-    if not np.all(np.isfinite(eeg)):
-        raise ValueError("EEG input contains non-finite samples.")
+    eeg = validate_eeg(eeg)
     if sample_rate <= 0 or config.audification_rate <= 0 or config.output_rate <= 0:
         raise ValueError("All sample rates must be positive.")
     if not 0 <= config.am_depth <= 1:
@@ -75,13 +81,18 @@ def _edge_fade(signal, sample_rate, fade_ms):
 def process_eeg(eeg, sample_rate, config=AudificationConfig()):
     """Create time-compressed and carrier-modulated audio for each channel."""
     raw = _validate(eeg, sample_rate, config).copy()
-    cleaned = raw - np.mean(raw, axis=0, keepdims=True)
-
-    robust_level = float(np.percentile(np.abs(cleaned), config.robust_percentile))
-    initial_gain = config.robust_target / robust_level if robust_level > 0 else 1.0
+    filter_config = EEGFilterConfig(config.highpass_hz, config.highpass_order,
+                                    config.lowpass_hz, config.lowpass_order,
+                                    config.notch_hz, config.notch_q)
+    cleaned = preprocess_eeg(raw, sample_rate, filter_config, zero_phase=True)
+    valid_channels = np.ptp(raw, axis=0) > config.flatline_peak_to_peak_uv
+    robust_level = np.percentile(np.abs(cleaned), config.robust_percentile, axis=0)
+    initial_gain = np.divide(config.robust_target, robust_level,
+                             out=np.zeros(6), where=(robust_level > 0) & valid_channels)
     initially_normalized = cleaned * initial_gain
-    initial_peak = float(np.max(np.abs(initially_normalized)))
-    input_safety_gain = min(1.0, 0.999 / initial_peak) if initial_peak > 0 else 1.0
+    initial_peak = np.max(np.abs(initially_normalized), axis=0)
+    input_safety_gain = np.minimum(1.0, np.divide(0.999, initial_peak,
+                                                  out=np.ones(6), where=initial_peak > 0))
     normalized = initially_normalized * input_safety_gain
 
     audified, modulated = [], []
@@ -100,13 +111,18 @@ def process_eeg(eeg, sample_rate, config=AudificationConfig()):
                                   config.output_rate, compressed_samples)
         preliminary_audified.append(_edge_fade(shifted, config.output_rate, config.fade_ms))
 
-    rendered_peak = max(float(np.max(np.abs(x))) for x in preliminary_audified)
-    output_safety_gain = min(1.0, 0.999 / rendered_peak) if rendered_peak > 0 else 1.0
+    rendered_peak = np.asarray([np.max(np.abs(x)) for x in preliminary_audified])
+    output_safety_gain = np.minimum(1.0, np.divide(0.999, rendered_peak,
+                                                   out=np.ones(6), where=rendered_peak > 0))
     safety_gain = input_safety_gain * output_safety_gain
     normalized *= output_safety_gain
-    audified = [(x * output_safety_gain).astype(np.float32) for x in preliminary_audified]
+    audified = [(x * output_safety_gain[ch]).astype(np.float32)
+                for ch, x in enumerate(preliminary_audified)]
 
     for channel in range(6):
+        if not valid_channels[channel]:
+            modulated.append(np.zeros(modulation_samples, dtype=np.float32))
+            continue
         envelope_signal = np.interp(output_t, source_t, normalized[:, channel])
         instantaneous_hz = config.carrier_hz + config.fm_depth_hz * envelope_signal
         phase = 2.0 * np.pi * np.cumsum(instantaneous_hz) / config.output_rate
@@ -114,7 +130,8 @@ def process_eeg(eeg, sample_rate, config=AudificationConfig()):
         modulated.append((amplitude * np.sin(phase)).astype(np.float32))
 
     return AudificationResult(raw, cleaned, normalized, audified, modulated,
-                              float(sample_rate), config, initial_gain, safety_gain)
+                              float(sample_rate), config, initial_gain, safety_gain,
+                              valid_channels)
 
 
 def signal_metrics(signal):
