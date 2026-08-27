@@ -1,12 +1,3 @@
--- hey, this is an example of an arpeggio
-
-d1 $ arp "up" # n "c'maj'7" # s "supermandolin"
-    #room 0.7
-    #sz 0.75
-    #legato 2
-
-
-
+d1 $ s "bd"
 
 hush
-

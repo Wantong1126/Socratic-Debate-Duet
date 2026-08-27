@@ -6,23 +6,18 @@ import numpy as np
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import ThreadingOSCUDPServer
 
-from src.eeg_control_demo import ControlSession
-from src.eeg_control_features import EEGControlFeatureEngine
+from src.eeg_control_demo import (ControlSession, parse_args, run_synthetic_tidal,
+                                  synthetic_controls, synthetic_sweep)
+from src.eeg_control_features import EEGControlFeatureEngine, control_names
+from src.eeg_preprocessing import StreamingEEGPreprocessor
 from src.tidal_osc import TidalControlOscSender
-
 
 RATE = 250.0
 
 
-def tones(seconds=2.0):
-    t = np.arange(round(seconds * RATE)) / RATE
-    return np.column_stack([(i + 1) * np.sin(2 * np.pi * (4 + 2 * i) * t + i * 0.13) for i in range(6)])
-
-
 class NullSender:
     def __init__(self):
-        self.last_values = {}
-        self.packet_count = 0
+        self.last_values, self.packet_count = {}, 0
         self.host, self.port = "none", 0
 
     def send(self, controls):
@@ -31,44 +26,101 @@ class NullSender:
 
 
 class EEGControlTests(unittest.TestCase):
-    def test_channels_are_separate_finite_normalized_and_not_averaged(self):
-        eeg = tones()
-        engine = EEGControlFeatureEngine(RATE, baseline_seconds=1)
-        frame = engine.update(eeg)
+    def test_exact_controls_are_finite_bounded_and_channels_stay_separate(self):
+        samples, _ = synthetic_sweep(6.0)
+        sender = NullSender()
+        session = ControlSession(RATE, 4.0, 1.0, sender, diagnostics=False)
+        session.add_chunk(samples)
+        frame = session.frames[-1]
+        self.assertEqual(tuple(frame.raw), control_names())
+        self.assertEqual(tuple(frame.normalized), control_names())
         self.assertTrue(all(np.isfinite(list(frame.raw.values()))))
         self.assertTrue(all(0 <= value <= 1 for value in frame.normalized.values()))
-        energies = [frame.raw[f"{name}_energy"] for name in ("f3", "f4", "c3", "c4", "p3", "p4")]
-        self.assertTrue(all(a < b for a, b in zip(energies, energies[1:])))
-        changed = eeg.copy(); changed[:, 0] *= 3
-        other = EEGControlFeatureEngine(RATE, baseline_seconds=1).update(changed)
-        self.assertGreater(other.raw["f3_energy"], frame.raw["f3_energy"] * 2.5)
-        self.assertAlmostEqual(other.raw["f4_energy"], frame.raw["f4_energy"], places=10)
+        self.assertEqual(sender.packet_count, 18 * sum(bool(f.normalized) for f in session.frames))
+        self.assertGreater(len({round(frame.raw[f"eeg{i}_energy"], 8) for i in range(1, 7)}), 1)
 
-    def test_expected_energy_centroid_entropy_and_mobility_response(self):
+    def test_descriptors_respond_continuously_without_cross_channel_mixing(self):
         t = np.arange(round(2 * RATE)) / RATE
         base = np.column_stack([np.sin(2 * np.pi * 6 * t)] * 6)
         reference = EEGControlFeatureEngine(RATE).update(base)
         changed = base.copy()
         changed[:, 0] *= 2
         changed[:, 1] = np.sin(2 * np.pi * 24 * t)
-        changed[:, 2] = sum(np.sin(2 * np.pi * f * t + f) for f in (4, 9, 15, 23, 31)) / np.sqrt(5)
         response = EEGControlFeatureEngine(RATE).update(changed)
-        self.assertGreater(response.raw["f3_energy"], reference.raw["f3_energy"] * 1.8)
-        self.assertGreater(response.raw["f4_centroid"], reference.raw["f4_centroid"] * 2)
-        self.assertGreater(response.raw["f4_mobility"], reference.raw["f4_mobility"] * 2)
-        self.assertGreater(response.raw["c3_entropy"], reference.raw["c3_entropy"])
+        self.assertGreater(response.raw["eeg1_energy"], reference.raw["eeg1_energy"] * 3.5)
+        self.assertGreater(response.raw["eeg2_centroid"], reference.raw["eeg2_centroid"] * 2)
+        self.assertGreater(response.raw["eeg2_mobility"], reference.raw["eeg2_mobility"] * 2)
+        self.assertAlmostEqual(response.raw["eeg3_energy"], reference.raw["eeg3_energy"], places=12)
 
-    def test_pair_asymmetry_similarity_and_positive_delayed_second_signal_lag(self):
+    def test_stream_filter_is_causal_stateful_and_chunk_invariant(self):
+        samples, _ = synthetic_sweep(3.0)
+        eeg = samples[:, :6]
+        whole = StreamingEEGPreprocessor(RATE).process(eeg)
+        split_filter = StreamingEEGPreprocessor(RATE)
+        split = np.vstack([split_filter.process(eeg[:137]), split_filter.process(eeg[137:421]),
+                           split_filter.process(eeg[421:])])
+        np.testing.assert_allclose(split, whole, atol=1e-12)
+
+    def test_live_session_uses_requested_rate_range_and_never_mixes_ch1(self):
+        samples, _ = synthetic_sweep(5.0)
+        changed = samples.copy(); changed[:, 0] *= 4.0
+        first = ControlSession(RATE, 4.0, 1.0, NullSender(),
+                               analysis_low_hz=5.0, analysis_high_hz=35.0,
+                               diagnostics=False)
+        second = ControlSession(RATE, 4.0, 1.0, NullSender(),
+                                analysis_low_hz=5.0, analysis_high_hz=35.0,
+                                diagnostics=False)
+        first.add_chunk(samples); second.add_chunk(changed)
+        self.assertEqual((first.engine.sample_rate, first.engine.low_hz, first.engine.high_hz),
+                         (RATE, 5.0, 35.0))
+        self.assertGreater(second.frames[-1].raw["eeg1_energy"],
+                           first.frames[-1].raw["eeg1_energy"] * 10)
+        for channel in range(2, 7):
+            for descriptor in ("energy", "centroid", "mobility"):
+                key = f"eeg{channel}_{descriptor}"
+                self.assertAlmostEqual(first.frames[-1].raw[key],
+                                       second.frames[-1].raw[key], places=12)
+
+    def test_calibration_bounds_are_fixed_and_flatline_is_safe(self):
+        engine = EEGControlFeatureEngine(RATE, update_rate=4, baseline_seconds=1,
+                                         smoothing_seconds=0)
         t = np.arange(round(2 * RATE)) / RATE
-        signal = np.sin(2 * np.pi * 7 * t) * (1 + 0.3 * np.sin(2 * np.pi * 0.8 * t))
-        delay = round(0.04 * RATE)
-        delayed = np.concatenate((np.zeros(delay), signal[:-delay]))
-        eeg = tones()
-        eeg[:, 0], eeg[:, 1] = 2 * signal, delayed
-        frame = EEGControlFeatureEngine(RATE).update(eeg)
-        self.assertGreater(frame.raw["f3_f4_asymmetry"], 0)
-        self.assertGreater(frame.raw["f3_f4_similarity"], -0.2)
-        self.assertAlmostEqual(frame.raw["f3_f4_lag"], 0.04, delta=1 / RATE)
+        for amplitude in (1, 2, 3, 4):
+            eeg = np.column_stack([amplitude * np.sin(2 * np.pi * (6 + i) * t) for i in range(6)])
+            frame = engine.update(eeg)
+        self.assertTrue(engine.ready)
+        bounds = dict(engine.bounds)
+        frame = engine.update(np.zeros((len(t), 6)))
+        self.assertEqual(bounds, engine.bounds)
+        self.assertTrue(all(np.isfinite(list(frame.normalized.values()))))
+        self.assertTrue(all(value == 0.0 for value in frame.normalized.values()))
+
+    def test_invalid_samples_are_repaired_causally_and_safely(self):
+        samples, _ = synthetic_sweep(5.0)
+        samples[510:515, 0] = np.nan
+        samples[700, 4] = np.inf
+        sender = NullSender()
+        session = ControlSession(RATE, 4.0, 1.0, sender, diagnostics=False)
+        session.add_chunk(samples)
+        self.assertTrue(all(np.isfinite(list(session.frames[-1].raw.values()))))
+        self.assertTrue(all(np.isfinite(list(session.frames[-1].normalized.values()))))
+
+    def test_synthetic_connection_controls_change_independently(self):
+        first = synthetic_controls(0.0)
+        second = synthetic_controls(1.0)
+        self.assertEqual(tuple(first), control_names())
+        self.assertTrue(all(0 <= value <= 1 and np.isfinite(value) for value in first.values()))
+        self.assertTrue(all(first[name] != second[name] for name in control_names()))
+        energy_values = [first[f"eeg{i}_energy"] for i in range(1, 7)]
+        self.assertGreater(len(set(energy_values)), 3)
+        sender = NullSender()
+        run_synthetic_tidal(sender, update_rate=1000.0, max_updates=3)
+        self.assertEqual(sender.packet_count, 54)
+
+    def test_documented_modes_parse(self):
+        self.assertEqual(parse_args(["--mode", "synthetic-tidal"]).mode, "synthetic-tidal")
+        args = parse_args(["--mode", "tidal-live", "--calibration-seconds", "20"])
+        self.assertEqual((args.mode, args.calibration_seconds), ("tidal-live", 20.0))
 
     def test_actual_udp_ctrl_packet_encoding(self):
         received = []
@@ -78,23 +130,15 @@ class EEGControlTests(unittest.TestCase):
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         try:
             sender = TidalControlOscSender("127.0.0.1", server.server_address[1])
-            sender.send({"f3_energy": 0.25, "p3_p4_lag": 0.75})
+            sender.send({"eeg1_energy": 0.25, "eeg6_mobility": 0.75})
             deadline = time.monotonic() + 2
             while len(received) < 2 and time.monotonic() < deadline:
                 time.sleep(0.01)
-            self.assertEqual({item[1][0] for item in received}, {"f3_energy", "p3_p4_lag"})
+            self.assertEqual({item[1][0] for item in received}, {"eeg1_energy", "eeg6_mobility"})
             self.assertTrue(all(item[0] == "/ctrl" and isinstance(item[1][1], float) for item in received))
             sender.close()
         finally:
             server.shutdown(); server.server_close(); thread.join(timeout=2)
-
-    def test_configurable_feature_and_packet_rate(self):
-        eeg = tones(5.0)
-        slow = ControlSession(RATE, 2.0, 2.0, NullSender()); slow.add_chunk(eeg)
-        fast = ControlSession(RATE, 4.0, 2.0, NullSender()); fast.add_chunk(eeg)
-        self.assertGreater(len(fast.frames), len(slow.frames))
-        self.assertAlmostEqual(len(fast.frames) / len(slow.frames), 2.0, delta=0.35)
-        self.assertEqual(fast.sender.packet_count, len(fast.frames) * len(fast.frames[-1].normalized))
 
 
 if __name__ == "__main__":

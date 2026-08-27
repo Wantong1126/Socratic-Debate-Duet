@@ -1,38 +1,23 @@
--- EEG control probe: technical validation only, not a composition.
---
--- Prerequisites (not installed by this repository): TidalCycles, SuperCollider,
--- SuperDirt, and a Tidal editor integration. Boot SuperDirt and Tidal normally.
--- The Python bridge sends: /ctrl <control-name> <float> to UDP 127.0.0.1:6010.
--- Start it with:
---   python -m src.eeg_control_demo --seconds 60 --open-dashboard
---
--- All probes use the same neutral SuperDirt synth and pitch. `segment 4` limits
--- control sampling to four updates/cycle. Mobility controls temporal activity;
--- energy controls gain; centroid controls low-pass register; entropy controls
--- tremolo depth. Evaluate definitions first, then one d1..d6 line at a time.
+-- Six-voice EEG instrument. Evaluate after BootTidal.hs has started Tidal.
+-- Python sends /ctrl <name> <float> to 127.0.0.1:6010 at approximately 4 Hz.
+-- Each voice keeps one electrode independent: energy -> gain,
+-- centroid -> low-pass brightness, Hjorth mobility -> continuous pattern speed.
 
-let eegProbe energy mobility centroid entropy =
+let eegVoice number soundName pitchName =
       segment 4
-    $ fast (range 0.5 3 mobility)
-    $ s "superpiano"
-    # n 0
-    # gain (range 0.03 0.55 energy)
-    # lpf (range 250 5000 centroid)
-    # tremolodepth (range 0 0.7 entropy)
-    # tremolorate 4
+    $ fast (range 0.55 2.4 $ cF 0.5 ("eeg" ++ show number ++ "_mobility"))
+    $ s soundName
+    # n pitchName
+    # gain (range 0.03 0.42 $ cF 0.5 ("eeg" ++ show number ++ "_energy"))
+    # lpf (range 350 6500 $ cF 0.5 ("eeg" ++ show number ++ "_centroid"))
+    # legato 1.4
 
-d1 $ eegProbe (cF 0.5 "f3_energy") (cF 0.5 "f3_mobility") (cF 0.5 "f3_centroid") (cF 0.5 "f3_entropy")
-d2 $ eegProbe (cF 0.5 "f4_energy") (cF 0.5 "f4_mobility") (cF 0.5 "f4_centroid") (cF 0.5 "f4_entropy")
-d3 $ eegProbe (cF 0.5 "c3_energy") (cF 0.5 "c3_mobility") (cF 0.5 "c3_centroid") (cF 0.5 "c3_entropy")
-d4 $ eegProbe (cF 0.5 "c4_energy") (cF 0.5 "c4_mobility") (cF 0.5 "c4_centroid") (cF 0.5 "c4_entropy")
-d5 $ eegProbe (cF 0.5 "p3_energy") (cF 0.5 "p3_mobility") (cF 0.5 "p3_centroid") (cF 0.5 "p3_entropy")
-d6 $ eegProbe (cF 0.5 "p4_energy") (cF 0.5 "p4_mobility") (cF 0.5 "p4_centroid") (cF 0.5 "p4_entropy")
+d1 $ eegVoice 1 "superpiano" "c3 e3 g3 e3"
+d2 $ eegVoice 2 "superpiano" "d3 a3 f3 a3" # pan 0.7
+d3 $ eegVoice 3 "supermandolin" "g2 d3 a3 d3" # pan 0.25
+d4 $ eegVoice 4 "supermandolin" "a2 e3 b3 e3" # pan 0.75
+d5 $ eegVoice 5 "supersaw" "c2 g2 eb3 g2" # pan 0.35
+d6 $ eegVoice 6 "supersaw" "d2 a2 f3 a2" # pan 0.65
 
--- Pair inspection: evaluate only one of these d7 lines at a time.
--- Asymmetry -> gain, similarity -> filter, lag -> stereo position.
-d7 $ segment 4 $ s "superpiano" # n 0 # gain (range 0.03 0.55 $ cF 0.5 "f3_f4_asymmetry") # lpf (range 250 5000 $ cF 0.5 "f3_f4_similarity") # pan (cF 0.5 "f3_f4_lag")
-d7 $ segment 4 $ s "superpiano" # n 0 # gain (range 0.03 0.55 $ cF 0.5 "c3_c4_asymmetry") # lpf (range 250 5000 $ cF 0.5 "c3_c4_similarity") # pan (cF 0.5 "c3_c4_lag")
-d7 $ segment 4 $ s "superpiano" # n 0 # gain (range 0.03 0.55 $ cF 0.5 "p3_p4_asymmetry") # lpf (range 250 5000 $ cF 0.5 "p3_p4_similarity") # pan (cF 0.5 "p3_p4_lag")
-
--- Silence all diagnostic probes.
-hush
+-- Stop all six voices.
+-- hush

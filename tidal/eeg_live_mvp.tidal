@@ -1,0 +1,78 @@
+-- EEG LIVE MVP
+-- Requires the standard SuperDirt "superpiano" synth family.
+-- The mappings below are artistic defaults, not scientifically mandatory
+-- relationships. Edit this file—not Python—to explore texture, rhythm,
+-- dynamics, harmony, timbre, space, fast, off timing, or juxBy structures.
+
+-- 1. EXTERNAL EEG CONTROL DEFINITIONS ---------------------------------------
+let eeg1Energy   = cF 0.5 "eeg1_energy"
+    eeg1Centroid = cF 0.5 "eeg1_centroid"
+    eeg1Mobility = cF 0.5 "eeg1_mobility"
+    eeg2Energy   = cF 0.5 "eeg2_energy"
+    eeg2Centroid = cF 0.5 "eeg2_centroid"
+    eeg2Mobility = cF 0.5 "eeg2_mobility"
+    eeg3Energy   = cF 0.5 "eeg3_energy"
+    eeg3Centroid = cF 0.5 "eeg3_centroid"
+    eeg3Mobility = cF 0.5 "eeg3_mobility"
+    eeg4Energy   = cF 0.5 "eeg4_energy"
+    eeg4Centroid = cF 0.5 "eeg4_centroid"
+    eeg4Mobility = cF 0.5 "eeg4_mobility"
+    eeg5Energy   = cF 0.5 "eeg5_energy"
+    eeg5Centroid = cF 0.5 "eeg5_centroid"
+    eeg5Mobility = cF 0.5 "eeg5_mobility"
+    eeg6Energy   = cF 0.5 "eeg6_energy"
+    eeg6Centroid = cF 0.5 "eeg6_centroid"
+    eeg6Mobility = cF 0.5 "eeg6_mobility"
+
+-- 2. EDITABLE MAPPING RANGES AND FIXED PITCH SCAFFOLD ----------------------
+-- C-major-sixth scaffold: edit these six pitches in one place.
+let f3Pitch = "c3"
+    f4Pitch = "e3"
+    c3Pitch = "g3"
+    c4Pitch = "a3"
+    p3Pitch = "c4"
+    p4Pitch = "e4"
+    gainLow = 0.035
+    gainHigh = 0.32
+    lpfLow = 450
+    lpfHigh = 6500
+    roomLow = 0.05
+    roomHigh = 0.55
+
+-- 3. SIX VOICE DEFINITIONS -------------------------------------------------
+-- fast 2 gives a new event about every 0.9 seconds at Tidal's default tempo.
+let f3Voice = fast 2 $ s "superpiano" # n f3Pitch
+      # gain (range gainLow gainHigh eeg1Energy)
+      # lpf (range lpfLow lpfHigh eeg1Centroid)
+      # room (range roomLow roomHigh eeg1Mobility) # pan 0.05
+    f4Voice = fast 2 $ s "superpiano" # n f4Pitch
+      # gain (range gainLow gainHigh eeg2Energy)
+      # lpf (range lpfLow lpfHigh eeg2Centroid)
+      # room (range roomLow roomHigh eeg2Mobility) # pan 0.23
+    c3Voice = fast 2 $ s "superpiano" # n c3Pitch
+      # gain (range gainLow gainHigh eeg3Energy)
+      # lpf (range lpfLow lpfHigh eeg3Centroid)
+      # room (range roomLow roomHigh eeg3Mobility) # pan 0.41
+    c4Voice = fast 2 $ s "superpiano" # n c4Pitch
+      # gain (range gainLow gainHigh eeg4Energy)
+      # lpf (range lpfLow lpfHigh eeg4Centroid)
+      # room (range roomLow roomHigh eeg4Mobility) # pan 0.59
+    p3Voice = fast 2 $ s "superpiano" # n p3Pitch
+      # gain (range gainLow gainHigh eeg5Energy)
+      # lpf (range lpfLow lpfHigh eeg5Centroid)
+      # room (range roomLow roomHigh eeg5Mobility) # pan 0.77
+    p4Voice = fast 2 $ s "superpiano" # n p4Pitch
+      # gain (range gainLow gainHigh eeg6Energy)
+      # lpf (range lpfLow lpfHigh eeg6Centroid)
+      # room (range roomLow roomHigh eeg6Mobility) # pan 0.95
+
+-- 4. START ALL SIX VOICES (EVALUATE THIS BLOCK) ----------------------------
+d1 $ f3Voice
+d2 $ f4Voice
+d3 $ c3Voice
+d4 $ c4Voice
+d5 $ p3Voice
+d6 $ p4Voice
+
+-- 5. STOP EVERYTHING (EVALUATE THIS LINE) ----------------------------------
+hush

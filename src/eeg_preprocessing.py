@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.signal import butter, iirnotch, sosfiltfilt, tf2sos
+from scipy.signal import butter, iirnotch, sosfilt, sosfiltfilt, tf2sos
 
 
 @dataclass(frozen=True)
@@ -64,3 +64,43 @@ def preprocess_eeg(eeg, sample_rate, config=EEGFilterConfig(), *, zero_phase=Tru
         return sosfiltfilt(sos, cleaned, axis=0)
     except ValueError as exc:
         raise ValueError("EEG window is too short for the configured zero-phase filters.") from exc
+
+
+def _filter_sections(sample_rate, config):
+    """Design an HP -> LP -> notch SOS cascade."""
+    sample_rate = float(sample_rate)
+    if sample_rate <= 0:
+        raise ValueError("sample_rate must be positive")
+    nyquist = sample_rate / 2.0
+    sections = []
+    for cutoff, order, kind in ((config.highpass_hz, config.highpass_order, "highpass"),
+                                (config.lowpass_hz, config.lowpass_order, "lowpass")):
+        if cutoff is None:
+            continue
+        if not 0 < cutoff < nyquist or order < 1:
+            raise ValueError(f"Invalid {kind} cutoff/order for {sample_rate:g} Hz data.")
+        sections.append(butter(order, cutoff, btype=kind, fs=sample_rate, output="sos"))
+    if config.notch_hz is not None:
+        if not 0 < config.notch_hz < nyquist or config.notch_q <= 0:
+            raise ValueError("Invalid notch frequency/Q for this sample rate.")
+        b, a = iirnotch(config.notch_hz, config.notch_q, fs=sample_rate)
+        sections.append(tf2sos(b, a))
+    return np.vstack(sections) if sections else np.empty((0, 6))
+
+
+class StreamingEEGPreprocessor:
+    """Causal, stateful per-channel SOS filtering for live EEG chunks."""
+
+    def __init__(self, sample_rate, config=EEGFilterConfig(), channels=6):
+        self.channels = int(channels)
+        self.sos = _filter_sections(sample_rate, config)
+        self.zi = np.zeros((len(self.sos), 2, self.channels), dtype=float)
+
+    def process(self, chunk):
+        data = validate_eeg(chunk, channels=self.channels, minimum_samples=1)
+        if not len(self.sos):
+            return data.copy()
+        cleaned, self.zi = sosfilt(self.sos, data, axis=0, zi=self.zi)
+        if not np.all(np.isfinite(cleaned)):
+            raise ValueError("EEG filtering produced non-finite samples.")
+        return cleaned
