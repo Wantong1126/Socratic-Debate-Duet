@@ -3,47 +3,66 @@ host = "127.0.0.1"
 port = 57120
 frame_address = "/eeg/organism/frame"
 config_address = "/eeg/organism/config"
+audition_address = "/eeg/organism/audition"
 stop_address = "/eeg/organism/stop"
 
 [stream]
 control_hz = 4.0
 
-[ranges]
-presence_min = 0.012
-presence_max = 0.085
-cutoff_min_hz = 450.0
-cutoff_max_hz = 8500.0
-movement_min_hz = 0.12
-movement_max_hz = 11.0
-room_min = 0.08
-room_max = 0.62
+[tonal]
+# D2. Every cell uses integer harmonics of this single fundamental.
+fundamental_hz = 73.42
 
-[lags]
-energy_seconds = 0.35
-centroid_seconds = 0.45
-mobility_seconds = 0.25
+[harmonics]
+# Artistic orchestration only: P=foundation, C=resonance, F=air/shimmer.
+P = [1.0, 2.0, 3.0, 4.0]
+C = [3.0, 4.0, 5.0, 6.0]
+F = [6.0, 8.0, 10.0, 12.0]
+
+[energy]
+# Approximately 20 dB of cell-level motion, about 15% wider than Phase 1.
+minimum_db = -36.0
+maximum_db = -16.0
+lag_seconds = 0.35
+
+[centroid]
+# -1 is the lower-partial weighting and +1 the upper-partial weighting.
+tilt_min = -0.85
+tilt_max = 0.85
+high_compensation_db = -1.0
+lag_seconds = 0.45
+
+[mobility]
+rate_min_hz = 0.08
+rate_max_hz = 5.0
+depth_min = 0.05
+depth_max = 0.45
+lag_seconds = 0.30
+
+[smoothing]
 varlag_curve = -3.0
 
-[depths]
-presence = 1.0
-brightness = 1.0
-movement = 1.0
-space = 0.45
+[source]
+# Gain applied to every RMS-normalized harmonic bank before cell amplitude.
+cell_level = 0.28
+
+[reverb]
+# Fixed during all validation modes; no EEG descriptor changes these values.
+mix = 0.16
+room = 0.72
+damping = 0.58
 
 [master]
 level = 0.42
 limiter_level = 0.82
-attack_seconds = 0.25
+attack_seconds = 0.35
 release_seconds = 1.5
 watchdog_fade_seconds = 0.8
 
-[tonal]
-centre_hz = 110.0
-
 [pan]
-F3 = -0.82
-F4 = 0.82
-C3 = -0.46
-C4 = 0.46
-P3 = -0.68
-P4 = 0.68
+F3 = -0.38
+F4 = 0.38
+C3 = -0.28
+C4 = 0.28
+P3 = -0.20
+P4 = 0.20

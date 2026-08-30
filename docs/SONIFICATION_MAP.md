@@ -1,141 +1,206 @@
-# Phase 1 EEG organism
+# Phase 1B: sustained EEG harmonic organism
 
-This is a new path beside the successful Tidal MVP and the historical SuperCollider sketches. It does not modify or replace them:
+Phase 1B keeps the successful Phase 1 transport and lifecycle engineering but replaces its sound design. One debater is now a sustained atmospheric harmonic body. This is not yet the ambient-techno composition: there is no rhythm layer, EOG/EMG, second debater, relationship mapping, Tidal structure or raw-window synthesis.
+
+## Why Phase 1 sounded like noise and pulses
+
+The listening failure followed directly from the old sources:
+
+- F cells mixed an always-on `PinkNoise` air source with random `LFNoise` drift.
+- C cells used `Impulse` and `Decay2` to retrigger resonators continuously. Raising mobility accelerated those audible note-like attacks.
+- P cells used `Dust` to trigger Brown/Pink-noise grains and sent them through tails.
+- Filtering those different sources into similarly dark resonances made F, C and P converge perceptually.
+- Energy, centroid and mobility all affected combinations of level, filtering, articulation or space, so their identities were not orthogonal.
+
+Phase 1B removes those sources completely. The production engine contains no noise bed, Dust, audible Impulse trigger, sequence, random note, grain event or fixed pulse.
+
+## Architecture and stable nodes
 
 ```text
-synthetic or real six-channel EEG
-        -> Python feature/calibration path
-        -> one /eeg/organism/frame packet, about 4 times/second
-        -> six persistent SuperCollider cells
-        -> one dedicated stereo bus and organism mixer
-        -> stereo hardware output
+synthetic scene or real six-channel EEG
+  -> existing Python filtering/features/calibration
+  -> one /eeg/organism/frame packet at 4 Hz
+  -> six persistent harmonic cells in one Group
+  -> one private stereo bus
+  -> one fixed-space mixer, master gain and limiter
+  -> stereo output summed alongside SuperDirt
 ```
+
+The frame protocol and canonical order are unchanged:
+
+```text
+F3 energy, centroid, mobility, F4 energy, centroid, mobility,
+C3 energy, centroid, mobility, C4 energy, centroid, mobility,
+P3 energy, centroid, mobility, P4 energy, centroid, mobility
+```
+
+One frame is exactly 18 finite 0..1 floats in one `/eeg/organism/frame` packet. Configuration is sent once on `/eeg/organism/config`. Audition modes send a six-value `/eeg/organism/audition` mask that multiplies existing cell outputs; it creates or frees no nodes.
+
+Stable expected tree: **one Group + six cell Synths + one mixer Synth = eight server nodes**. The bus is routing, not a node. Frame, config and audition callbacks use `.set` only.
+
+## One harmonic source, three register families
+
+Every source is a deterministic bank of four sine partials derived from the same configurable D2 fundamental, `tonal.fundamental_hz = 73.42` Hz. The assignments are artistic orchestration choices, not neurological claims.
+
+| EEG cells | Role | Default harmonics | Frequencies at 73.42 Hz |
+|---|---|---:|---:|
+| P3/P4 | low foundation/body | 1, 2, 3, 4 | 73, 147, 220, 294 Hz |
+| C3/C4 | middle resonance | 3, 4, 5, 6 | 220, 294, 367, 441 Hz |
+| F3/F4 | upper air/shimmer | 6, 8, 10, 12 | 441, 587, 734, 881 Hz |
+
+Odd/even partners have the same exact frequencies. They differ only in modest pan, oscillator starting phase and modulation phase; stereo does not introduce a second pitch. Each of the six incoming EEG channels still controls its own cell independently—there is no averaging.
+
+## Orthogonal descriptor formulas
+
+### Energy: presence only
+
+For normalized energy `E`:
+
+```text
+level_dB = energy.minimum_db + E * (energy.maximum_db - energy.minimum_db)
+amplitude = 10 ^ (level_dB / 20)
+```
+
+Defaults are -36 to -16 dB, a 20 dB span. Phase 1's 0.012..0.085 linear range was about 17 dB, so the cell-level modulation span is approximately 18% wider—close to the requested 15% increase. `energy.lag_seconds = 0.35` smooths it. Energy does not alter frequency, partial weights, motion rate, reverb or note duration.
+
+Tune after listening:
+
+- More/less energy contrast: lower/raise `energy.minimum_db` or raise/lower `energy.maximum_db`.
+- Faster/slower response: lower/raise `energy.lag_seconds`.
+- Do not use `master.level` to tune energy contrast; it changes the whole organism.
+
+### Spectral centroid: brightness only
+
+The cell always uses the same four frequencies. Centroid `C` only tilts their weights:
+
+```text
+tilt = centroid.tilt_min + C * (centroid.tilt_max - centroid.tilt_min)
+blend = (tilt + 1) / 2
+dark weights   = [1.00, 0.72, 0.30, 0.10]
+bright weights = [0.28, 0.58, 0.86, 1.00]
+weights = dark * (1 - blend) + bright * blend
+normalized weights = weights / sqrt(sum(weights ^ 2))
+```
+
+Defaults sweep tilt from -0.85 to +0.85. Euclidean normalization keeps oscillator-bank RMS comparatively stable. A final configurable high-end correction is:
+
+```text
+compensation = 10 ^ ((C * centroid.high_compensation_db) / 20)
+```
+
+The default is -1 dB at maximum brightness. Centroid never changes pitch, event rate, duration, motion rate or reverb.
+
+Tune after listening:
+
+- Stronger/weaker dark-to-bright contrast: widen/narrow `centroid.tilt_min` and `centroid.tilt_max` within -1..1.
+- If the bright end sounds louder/quieter: make `centroid.high_compensation_db` more negative/positive.
+- Faster/slower colour response: lower/raise `centroid.lag_seconds`.
+
+### Mobility: continuous motion only
+
+Mobility `M` controls deterministic sine amplitude modulation:
+
+```text
+rate = rate_min * (rate_max / rate_min) ^ M
+depth = depth_min + M * (depth_max - depth_min)
+motion = (1 + depth * sin(2*pi*rate*time + fixed_phase))
+         / sqrt(1 + depth^2 / 2)
+```
+
+Defaults are 0.08..5 Hz and depth 0.05..0.45. The denominator compensates theoretical sine-AM RMS, keeping average loudness reasonably stable. Low mobility is nearly steady, the middle breathes/undulates, and high mobility flutters. Mobility does not retrigger the source, change its harmonic weights or control reverb.
+
+Tune after listening:
+
+- Faster/slower maximum flutter: `mobility.rate_max_hz`.
+- Slower/faster minimum breathing: `mobility.rate_min_hz`.
+- More/less audible movement: `mobility.depth_min` and `mobility.depth_max`.
+- Faster/slower control response: `mobility.lag_seconds`.
+
+## Fixed space and safety
+
+All six cells share one fixed mixer reverb. `reverb.mix`, `reverb.room` and `reverb.damping` do not receive EEG data and remain constant in isolated tests. Change these only to tune the overall space after descriptor validation.
+
+`source.cell_level` is the pre-cell safety scale. `master.level` controls the whole organism, and `master.limiter_level` is the organism's final ceiling. Gate envelopes use `master.attack_seconds` and `master.release_seconds`; `doneAction: 2` frees synths after graceful release. The two-second watchdog uses `master.watchdog_fade_seconds` to fade the mixer but leaves node identities stable for resumed input.
+
+## Sound source, descriptor, mapping and composition
+
+- A **sound source** generates audio. Here it is the sustained harmonic sine bank.
+- A **descriptor** is a measured EEG feature: energy, spectral centroid or mobility.
+- A **mapping** is the formula connecting one descriptor to one sound property. Phase 1B maps them to amplitude, spectral tilt and continuous AM respectively.
+- A **musical composition** organizes sound over larger time: rhythm, sections, tension and arrangement. That later layer is deliberately absent here; the synthetic scene is only an auditionable atmospheric source.
 
 ## Launch order
 
-1. Start SuperDirt/scsynth in the usual project setup. `BootTidal.hs` remains unchanged. The organism file never boots or reboots the server.
-2. In PowerShell, open the engine: `Invoke-Item .\sound\eeg_organism_engine.scd`.
-3. In the SuperCollider IDE, evaluate the parenthesized engine block with `Ctrl+Enter`. The post window must say `EEG ORGANISM READY on UDP 57120` and report eight stable nodes.
-4. In a second PowerShell window, from `D:\sdd-sonification`, run the full synthetic texture:
+1. Start the existing SuperDirt/scsynth setup. `BootTidal.hs` is unchanged.
+2. From PowerShell in `D:\sdd-sonification`, open the engine:
 
    ```powershell
-   .\scripts\start_eeg_organism.ps1
+   Invoke-Item .\sound\eeg_organism_engine.scd
    ```
 
-   For real OpenBCI LSL input after its stream is available:
+3. Evaluate the single parenthesized block in the SuperCollider IDE. It never calls `s.boot` or `s.reboot`.
+4. Start one Python audition mode below.
 
-   ```powershell
-   .\scripts\start_eeg_organism.ps1 -Mode supercollider-live
-   ```
+The post window should show `EEG ORGANISM PHASE 1B READY`, six fixed cell IDs, one mixer ID and an eight-node total. `input active` prints after the first frame. Node IDs must not change while controls or audition masks update.
 
-The helper uses `.venv\Scripts\python.exe` when present, otherwise `python`. The direct equivalent is:
+## Exact audition commands and expected result
 
-```powershell
-.\.venv\Scripts\python.exe -m src.eeg_control_demo --mode synthetic-supercollider --config .\config\sonification.toml
-```
-
-The existing Tidal command still works independently:
+Full deterministic organism:
 
 ```powershell
-.\.venv\Scripts\python.exe -m src.eeg_control_demo --mode synthetic-tidal
+.\scripts\start_eeg_organism.ps1 -Mode synthetic-supercollider
 ```
 
-## What Python does
+Expected: one sustained harmonic body slowly breathing, brightening and moving through offset six-channel trajectories. There should be no autonomous beat, repeated note, random note or constant noise floor.
 
-For live EEG, Python keeps F3, F4, C3, C4, P3 and P4 separate, causally filters them, measures each two-second analysis window, calibrates each channel/descriptor against its own baseline, normalizes it to 0..1 and applies the existing light feature smoothing. Synthetic mode bypasses EEG acquisition and emits known 0..1 test movements.
-
-The SuperCollider sender loads `config/sonification.toml`, sends its tunable values once, then sends one bounded OSC frame per update. It clamps non-finite or out-of-range test values before transmission. SuperCollider clamps all 18 controls again.
-
-## OSC frame
-
-The address is `/eeg/organism/frame`. One packet carries exactly 18 float arguments in channel-major order:
-
-```text
-F3 energy, F3 centroid, F3 mobility,
-F4 energy, F4 centroid, F4 mobility,
-C3 energy, C3 centroid, C3 mobility,
-C4 energy, C4 centroid, C4 mobility,
-P3 energy, P3 centroid, P3 mobility,
-P4 energy, P4 centroid, P4 mobility
-```
-
-At the default `stream.control_hz = 4.0`, this is four OSC messages per second—not 72 individual control messages. `/eeg/organism/config` is one 28-value startup packet. `/eeg/organism/stop` requests graceful release.
-
-## The six cells
-
-All cells share `tonal.centre_hz`; they are roles in one texture, not six chord notes.
-
-| Cell | Role | Expected character |
-|---|---|---|
-| F3 | left shimmer/air | slowly drifting low harmonic body with filtered air |
-| F4 | right shimmer/air | a related, oppositely drifting harmonic field |
-| C3 | left pulse/articulation | resonant breaths/taps whose rate and edge change |
-| C4 | right pulse/articulation | a paired pulse cell with a small rate offset |
-| P3 | left grain/noise/tail | filtered noise grains feeding a spatial tail |
-| P4 | right grain/noise/tail | an independently triggered partner texture |
-
-Each cell is one continuously running Synth node. Internal impulses or noise grains do not create server nodes. A dedicated Group owns six cell synths followed by one mixer synth. Stable expected server-tree size is **one Group + seven Synths = eight nodes**. The stereo bus is an audio routing allocation, not a node.
-
-## Descriptor map and exact tuning controls
-
-| Per-channel descriptor | Audible result | Make it stronger/weaker |
-|---|---|---|
-| `energy` | presence between a quiet floor and restrained ceiling | raise/lower `depths.presence`; set endpoints with `ranges.presence_min` and `ranges.presence_max` |
-| `spectral_centroid` | dark-to-bright filtering and more/fewer upper harmonics or noise edge | raise/lower `depths.brightness`; widen/narrow `ranges.cutoff_min_hz` to `ranges.cutoff_max_hz` |
-| `mobility` | slow/smooth to fast/jagged shimmer, pulse or grain activity | raise/lower `depths.movement`; widen/narrow `ranges.movement_min_hz` to `ranges.movement_max_hz` |
-| `mobility` (secondary) | more or less spatial tail in P3/P4 | raise/lower `depths.space`; set endpoints with `ranges.room_min` and `ranges.room_max` |
-
-Other ordinary adjustments require only `config/sonification.toml`:
-
-- Overall level: `master.level`. The final safety ceiling is `master.limiter_level`.
-- Response speed: `lags.energy_seconds`, `lags.centroid_seconds` and `lags.mobility_seconds`; larger values move more slowly.
-- Transition shape for centroid/mobility: `lags.varlag_curve`.
-- Stereo placement: `pan.F3` through `pan.P4`, from -1 (left) to +1 (right).
-- Pitch scaffold: `tonal.centre_hz`.
-- Start/stop fades: `master.attack_seconds` and `master.release_seconds`.
-- Missing-input fade: `master.watchdog_fade_seconds`.
-- Update rate: `stream.control_hz`, with Python enforcing a maximum of 4 Hz.
-
-Restart the Python sender after a config edit so it resends the configuration. SynthDef code does not need editing.
-
-## Terms in plain language
-
-- `gate` is the on/off control for a cell's lifecycle envelope. Turning it off fades the node according to `master.release_seconds`; `doneAction: 2` then removes that synth.
-- `Lag` and `VarLag` glide between incoming values to avoid steps and clicks. `VarLag` also allows a curved transition.
-- A `Group` is a server-side folder that gives this engine ownership and execution order for its nodes. Re-evaluating the engine frees the old folder first, preventing orphans.
-- A `bus` is the private two-channel cable from the six cells to their mixer. It keeps organism processing separate from SuperDirt and is summed safely into stereo output.
-- The `Limiter` is a final ceiling on this organism only. It catches peaks after the mixer; it is not a substitute for conservative listening level.
-
-## Isolated listening checks
-
-Each command holds all non-selected controls at 0.5 and sweeps only one 0.05..0.95 value over eight seconds:
+Strict energy isolation:
 
 ```powershell
-.\scripts\start_eeg_organism.ps1 -Descriptor energy -Channel F3
-.\scripts\start_eeg_organism.ps1 -Descriptor centroid -Channel C4
-.\scripts\start_eeg_organism.ps1 -Descriptor mobility -Channel P4
+.\scripts\start_eeg_organism.ps1 -Mode isolated-supercollider -Descriptor energy -Channel P3
 ```
 
-Replace the channel with F3, F4, C3, C4, P3 or P4 to check every cell independently.
+Expected: P3 alone; the same sustained low harmonic colour and motion while only loudness moves low -> mid -> high -> mid -> low.
 
-- Energy alone: only the chosen cell should become more and less present; timbre and activity should stay broadly fixed.
-- Centroid alone: only the chosen cell should sweep clearly dark to bright without becoming a new pitch.
-- Mobility alone: F cells move from slow/smooth to active/jagged, C cells from sparse/rounded to rapid/crisp articulation, and P cells from sparse/long grains to active/granular noise with a secondary space change.
+Strict centroid isolation:
 
-These are connection and mapping checks, not physiological validation.
+```powershell
+.\scripts\start_eeg_organism.ps1 -Mode isolated-supercollider -Descriptor centroid -Channel C3
+```
 
-## Post window and watchdog
+Expected: C3 alone; unchanged pitch, sustain and motion with a dark/rounded -> open/rich -> dark sweep at approximately stable loudness.
 
-On start, watch for `EEG ORGANISM READY`, the six cell node IDs and one mixer ID. The IDs must remain unchanged as frames arrive. The engine prints `input active` once, not once per packet. It rejects any frame whose argument count is not exactly 18.
+Strict mobility isolation:
 
-If frames stop for more than two seconds, the post window says `WATCHDOG` and the mixer fades to silence using `master.watchdog_fade_seconds`. The six nodes remain stable and resume on the next valid frame. This silence is expected and is not a server crash.
+```powershell
+.\scripts\start_eeg_organism.ps1 -Mode isolated-supercollider -Descriptor mobility -Channel F3
+```
+
+Expected: F3 alone; unchanged upper harmonic colour and approximate average loudness, moving from nearly steady through slow undulation to faster flutter and back.
+
+Python prints `AUDITION STAGE: LOW`, `MID` and `HIGH` with no marker sounds. The selected descriptor follows a deterministic 16-second low -> high -> low cycle. Other descriptor references are fixed at energy 0.65, centroid 0.50 and mobility 0.25. A one-hot audition mask completely mutes the five unselected cells.
+
+Family comparison with identical descriptor values:
+
+```powershell
+.\scripts\start_eeg_organism.ps1 -Mode family-supercollider
+```
+
+Expected: six seconds of the P3/P4 low foundation, then C3/C4 middle resonance, then F3/F4 upper air/shimmer, repeating. Only the mask changes; all families receive energy 0.65, centroid 0.50 and mobility 0.25.
+
+Live EEG:
+
+```powershell
+.\scripts\start_eeg_organism.ps1 -Mode supercollider-live
+```
+
+The successful Tidal MVP remains independently available with `--mode synthetic-tidal`.
 
 ## Stop
 
-First stop the foreground Python helper with `Ctrl+C`. The watchdog will fade the mixer within two seconds. Then request full graceful node release:
+Stop foreground Python with `Ctrl+C`, then release the engine:
 
 ```powershell
 .\scripts\stop_eeg_organism.ps1
 ```
 
-Alternatively, open and evaluate the explicit block in `sound/stop_eeg_organism.scd`. The post window should say `graceful release started`; after `master.release_seconds`, the dedicated group and bus are freed. `hush` is neither required nor used, so the existing Tidal/SuperDirt session is not stopped.
+Alternatively evaluate `sound/stop_eeg_organism.scd`. `hush` is not used and the existing SuperDirt session is not stopped.

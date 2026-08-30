@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("synthetic-supercollider", "supercollider-live")]
+    [ValidateSet("synthetic-supercollider", "isolated-supercollider", "family-supercollider", "supercollider-live")]
     [string]$Mode = "synthetic-supercollider",
 
     [ValidateSet("energy", "centroid", "mobility", "all")]
@@ -31,7 +31,10 @@ if ($ControlHz -gt 0) {
     $arguments += @("--control-hz", $ControlHz.ToString([Globalization.CultureInfo]::InvariantCulture))
 }
 
-Write-Host "SuperCollider must already show 'EEG ORGANISM READY on UDP 57120'."
+Write-Host "SuperCollider must already show 'EEG ORGANISM PHASE 1B READY on UDP 57120'."
+if ($Mode -eq "isolated-supercollider" -and ($Descriptor -eq "all" -or $Channel -eq "all")) {
+    throw "isolated-supercollider requires -Descriptor energy|centroid|mobility and -Channel F3|F4|C3|C4|P3|P4"
+}
 Write-Host "Starting $Mode; press Ctrl+C to stop Python. The SC watchdog will then fade output."
 Push-Location $projectRoot
 try {

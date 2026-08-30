@@ -2,7 +2,6 @@
 
 import argparse
 from collections import deque
-from functools import partial
 import time
 
 import numpy as np
@@ -17,6 +16,9 @@ from .tidal_osc import TidalControlOscSender
 DEFAULT_CONTROL_HZ = 2.0
 MAX_CONTROL_HZ = 4.0
 CONTROLS_PER_FRAME = 18
+ISOLATED_REFERENCE = {"energy": 0.65, "centroid": 0.50, "mobility": 0.25}
+ISOLATED_SWEEP_SECONDS = 16.0
+FAMILY_STAGE_SECONDS = 6.0
 
 
 class RateLimitedControlTransmitter:
@@ -202,12 +204,93 @@ def synthetic_controls(elapsed_seconds):
     return controls
 
 
-def synthetic_organism_controls(elapsed_seconds, sweep_descriptor="all", sweep_channel="all"):
-    """Connection-test frame that can isolate exactly one descriptor and channel.
+def _reference_controls():
+    return {
+        f"eeg{channel}_{descriptor}": ISOLATED_REFERENCE[descriptor]
+        for channel in range(1, 7) for descriptor in DESCRIPTORS
+    }
 
-    Non-selected controls stay at 0.5. Use, for example, ``energy`` and ``F3``
-    to prove that only F3 presence changes while every other mapping stays fixed.
-    """
+
+def isolated_audition_mask(channel):
+    """Return a strict one-cell mask in canonical F3..P4 order."""
+    if channel not in CHANNELS:
+        raise ValueError(f"channel must be one of {CHANNELS}")
+    selected = CHANNELS.index(channel)
+    return tuple(1.0 if index == selected else 0.0 for index in range(6))
+
+
+def isolated_sweep_value(elapsed_seconds):
+    """Deterministic low -> mid -> high -> mid -> low sweep."""
+    phase = (float(elapsed_seconds) % ISOLATED_SWEEP_SECONDS) / ISOLATED_SWEEP_SECONDS
+    return round(float(0.5 - (0.45 * np.cos(2.0 * np.pi * phase))), 12)
+
+
+def isolated_sweep_stage(elapsed_seconds):
+    value = isolated_sweep_value(elapsed_seconds)
+    if value < 0.25:
+        return "LOW"
+    if value > 0.75:
+        return "HIGH"
+    return "MID"
+
+
+def isolated_organism_controls(elapsed_seconds, descriptor, channel):
+    """Hold 17 mappings fixed and sweep one descriptor on one audible cell."""
+    if descriptor not in DESCRIPTORS:
+        raise ValueError(f"descriptor must be one of {DESCRIPTORS}")
+    if channel not in CHANNELS:
+        raise ValueError(f"channel must be one of {CHANNELS}")
+    controls = _reference_controls()
+    channel_index = CHANNELS.index(channel) + 1
+    controls[f"eeg{channel_index}_{descriptor}"] = isolated_sweep_value(elapsed_seconds)
+    return controls
+
+
+def full_organism_controls(elapsed_seconds):
+    """Slow deterministic, offset trajectories for one sustained harmonic body."""
+    elapsed = float(elapsed_seconds)
+    controls = {}
+    ranges = {
+        "energy": (0.38, 0.76, 24.0),
+        "centroid": (0.24, 0.78, 32.0),
+        "mobility": (0.08, 0.62, 19.0),
+    }
+    descriptor_phase = {"energy": 0.0, "centroid": 1.1, "mobility": 2.3}
+    for channel in range(1, 7):
+        channel_phase = (channel - 1) * 0.47
+        for descriptor in DESCRIPTORS:
+            low, high, period = ranges[descriptor]
+            unit = 0.5 + 0.5 * np.sin(
+                (2.0 * np.pi * elapsed / period) + channel_phase + descriptor_phase[descriptor]
+            )
+            controls[f"eeg{channel}_{descriptor}"] = float(low + ((high - low) * unit))
+    return controls
+
+
+def family_comparison_controls(elapsed_seconds=0.0):
+    """Identical descriptor references for every family comparison stage."""
+    del elapsed_seconds
+    return _reference_controls()
+
+
+def family_comparison_stage(elapsed_seconds):
+    return ("P", "C", "F")[int(float(elapsed_seconds) // FAMILY_STAGE_SECONDS) % 3]
+
+
+def family_audition_mask(family):
+    masks = {
+        "P": (0.0, 0.0, 0.0, 0.0, 1.0, 1.0),
+        "C": (0.0, 0.0, 1.0, 1.0, 0.0, 0.0),
+        "F": (1.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+    }
+    try:
+        return masks[family]
+    except KeyError as exc:
+        raise ValueError("family must be P, C, or F") from exc
+
+
+def synthetic_organism_controls(elapsed_seconds, sweep_descriptor="all", sweep_channel="all"):
+    """Compatibility entry point for the full scene or a strict isolated sweep."""
     valid_descriptors = (*DESCRIPTORS, "all")
     valid_channels = (*CHANNELS, "all")
     if sweep_descriptor not in valid_descriptors:
@@ -215,16 +298,10 @@ def synthetic_organism_controls(elapsed_seconds, sweep_descriptor="all", sweep_c
     if sweep_channel not in valid_channels:
         raise ValueError(f"sweep_channel must be one of {valid_channels}")
     if sweep_descriptor == "all" and sweep_channel == "all":
-        return synthetic_controls(elapsed_seconds)
-
-    controls = {name: 0.5 for name in control_names()}
-    channel_indexes = range(1, 7) if sweep_channel == "all" else (CHANNELS.index(sweep_channel) + 1,)
-    descriptors = DESCRIPTORS if sweep_descriptor == "all" else (sweep_descriptor,)
-    sweep = 0.5 + 0.45 * np.sin(2.0 * np.pi * elapsed_seconds / 8.0)
-    for channel_index in channel_indexes:
-        for descriptor in descriptors:
-            controls[f"eeg{channel_index}_{descriptor}"] = float(np.clip(sweep, 0.05, 0.95))
-    return controls
+        return full_organism_controls(elapsed_seconds)
+    if sweep_descriptor == "all" or sweep_channel == "all":
+        raise ValueError("An isolated sweep requires exactly one descriptor and one channel")
+    return isolated_organism_controls(elapsed_seconds, sweep_descriptor, sweep_channel)
 
 
 def format_diagnostic(controls):
@@ -238,17 +315,27 @@ def format_diagnostic(controls):
 
 def _run_synthetic(sender, controls_at, control_hz, max_updates=None,
                    clock=time.monotonic, sleeper=time.sleep, stop_event=None,
-                   diagnostics=True):
+                   diagnostics=True, stage_at=None, on_stage=None):
     """Send generated frames at a bounded, non-catching-up rate."""
     transmitter = RateLimitedControlTransmitter(sender, control_hz, clock)
     started = clock()
     updates = 0
     last_printed_second = 0
+    last_stage = None
     while max_updates is None or updates < max_updates:
         if stop_event is not None and stop_event.is_set():
             break
         now = clock()
-        controls = controls_at(now - started)
+        elapsed = now - started
+        if stage_at is not None:
+            stage = stage_at(elapsed)
+            if stage != last_stage:
+                if on_stage is not None:
+                    on_stage(stage)
+                if diagnostics:
+                    print(f"AUDITION STAGE: {stage}")
+                last_stage = stage
+        controls = controls_at(elapsed)
         transmitter.offer(controls)
         if transmitter.maybe_send(now):
             updates += 1
@@ -280,12 +367,39 @@ def run_synthetic_supercollider(sender, control_hz=MAX_CONTROL_HZ,
                                 max_updates=None, clock=time.monotonic,
                                 sleeper=time.sleep, stop_event=None,
                                 diagnostics=True):
-    """Send one bounded organism packet per update, optionally as an isolated sweep."""
-    controls_at = partial(synthetic_organism_controls,
-                          sweep_descriptor=sweep_descriptor,
-                          sweep_channel=sweep_channel)
-    return _run_synthetic(sender, controls_at, control_hz, max_updates,
+    """Send the full scene, or preserve the earlier API for a strict isolated sweep."""
+    if sweep_descriptor != "all" or sweep_channel != "all":
+        return run_isolated_supercollider(
+            sender, control_hz, sweep_descriptor, sweep_channel, max_updates,
+            clock, sleeper, stop_event, diagnostics
+        )
+    sender.send_audition_mask((1.0,) * 6)
+    return _run_synthetic(sender, full_organism_controls, control_hz, max_updates,
                           clock, sleeper, stop_event, diagnostics)
+
+
+def run_isolated_supercollider(sender, control_hz, descriptor, channel,
+                               max_updates=None, clock=time.monotonic,
+                               sleeper=time.sleep, stop_event=None,
+                               diagnostics=True):
+    """Mute five cells, hold two descriptors fixed, and sweep exactly one."""
+    sender.send_audition_mask(isolated_audition_mask(channel))
+    controls_at = lambda elapsed: isolated_organism_controls(elapsed, descriptor, channel)
+    return _run_synthetic(
+        sender, controls_at, control_hz, max_updates, clock, sleeper, stop_event,
+        diagnostics, stage_at=isolated_sweep_stage
+    )
+
+
+def run_family_comparison(sender, control_hz=MAX_CONTROL_HZ, max_updates=None,
+                          clock=time.monotonic, sleeper=time.sleep, stop_event=None,
+                          diagnostics=True):
+    """Cycle P, C, F pairs with identical descriptor values."""
+    return _run_synthetic(
+        sender, family_comparison_controls, control_hz, max_updates, clock,
+        sleeper, stop_event, diagnostics, stage_at=family_comparison_stage,
+        on_stage=lambda family: sender.send_audition_mask(family_audition_mask(family))
+    )
 
 
 def run_live(args, sender):
@@ -310,6 +424,7 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", required=True, choices=(
         "synthetic-tidal", "tidal-live", "synthetic-supercollider",
+        "isolated-supercollider", "family-supercollider",
         "supercollider-live", "stop-supercollider"
     ))
     parser.add_argument("--update-rate", type=float, default=4.0)
@@ -324,9 +439,9 @@ def parse_args(argv=None):
     parser.add_argument("--osc-port", type=int)
     parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH))
     parser.add_argument("--sweep-descriptor", choices=(*DESCRIPTORS, "all"), default="all",
-                        help="SuperCollider synthetic mode: vary only this descriptor")
+                        help="Isolated SuperCollider mode: vary exactly this descriptor")
     parser.add_argument("--sweep-channel", choices=(*CHANNELS, "all"), default="all",
-                        help="SuperCollider synthetic mode: vary only this channel")
+                        help="Isolated SuperCollider mode: make exactly this channel audible")
     args = parser.parse_args(argv)
     if "supercollider" in args.mode:
         config = load_sonification_config(args.config)
@@ -355,6 +470,7 @@ def main(argv=None):
         sender = OrganismOscSender(
             args.osc_host, args.osc_port,
             frame_address=osc["frame_address"], config_address=osc["config_address"],
+            audition_address=osc["audition_address"],
             stop_address=osc["stop_address"]
         )
     else:
@@ -368,13 +484,23 @@ def main(argv=None):
             run_synthetic_tidal(sender, args.control_hz)
         elif args.mode == "synthetic-supercollider":
             sender.send_config(config)
-            print("Synthetic SuperCollider organism test (not EEG validation). Press Ctrl+C to stop.")
-            print(f"Sweep descriptor={args.sweep_descriptor}, channel={args.sweep_channel}")
-            run_synthetic_supercollider(sender, args.control_hz, args.sweep_descriptor,
-                                        args.sweep_channel)
+            print("Full sustained SuperCollider organism scene (not EEG validation). Press Ctrl+C to stop.")
+            run_synthetic_supercollider(sender, args.control_hz)
+        elif args.mode == "isolated-supercollider":
+            if args.sweep_descriptor == "all" or args.sweep_channel == "all":
+                raise SystemExit("isolated-supercollider requires --sweep-descriptor and --sweep-channel")
+            sender.send_config(config)
+            print(f"Strict isolated sweep: {args.sweep_channel} {args.sweep_descriptor}.")
+            run_isolated_supercollider(sender, args.control_hz, args.sweep_descriptor,
+                                       args.sweep_channel)
+        elif args.mode == "family-supercollider":
+            sender.send_config(config)
+            print("Family comparison: P foundation -> C resonance -> F air, six seconds each.")
+            run_family_comparison(sender, args.control_hz)
         else:
             if is_supercollider:
                 sender.send_config(config)
+                sender.send_audition_mask((1.0,) * 6)
             run_live(args, sender)
     except KeyboardInterrupt:
         print(f"\nStopped. Sent {sender.packet_count} OSC packets to {sender.host}:{sender.port}.")
