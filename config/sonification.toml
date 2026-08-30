@@ -1,0 +1,49 @@
+[osc]
+host = "127.0.0.1"
+port = 57120
+frame_address = "/eeg/organism/frame"
+config_address = "/eeg/organism/config"
+stop_address = "/eeg/organism/stop"
+
+[stream]
+control_hz = 4.0
+
+[ranges]
+presence_min = 0.012
+presence_max = 0.085
+cutoff_min_hz = 450.0
+cutoff_max_hz = 8500.0
+movement_min_hz = 0.12
+movement_max_hz = 11.0
+room_min = 0.08
+room_max = 0.62
+
+[lags]
+energy_seconds = 0.35
+centroid_seconds = 0.45
+mobility_seconds = 0.25
+varlag_curve = -3.0
+
+[depths]
+presence = 1.0
+brightness = 1.0
+movement = 1.0
+space = 0.45
+
+[master]
+level = 0.42
+limiter_level = 0.82
+attack_seconds = 0.25
+release_seconds = 1.5
+watchdog_fade_seconds = 0.8
+
+[tonal]
+centre_hz = 110.0
+
+[pan]
+F3 = -0.82
+F4 = 0.82
+C3 = -0.46
+C4 = 0.46
+P3 = -0.68
+P4 = 0.68

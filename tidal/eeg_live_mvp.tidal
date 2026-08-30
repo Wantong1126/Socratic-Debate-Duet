@@ -35,43 +35,66 @@ let voiceSound = "supermandolin"
     c4Pitch = "a3"
     p3Pitch = "c4"
     p4Pitch = "e4"
-    gainLow = 0.15
-    gainHigh = 0.65
-    lpfLow = 1200
-    lpfHigh = 8000
+    gainLow = 0.55
+    gainHigh = 1.85
+    djfLow = 0.15
+    djfHigh = 0.85
     roomLow = 0.05
-    roomHigh = 0.55
+    roomHigh = 0.95
+    sizeLow = 0.20
+    sizeHigh = 0.95
+    dryLow = 0.90
+    dryHigh = 0.45
+    sustainShort = 0.85
+    sustainLong = 3.5
+let inverseSustain energyControl centroidControl =
+      range sustainShort sustainLong
+      $ 1 - ((energyControl * centroidControl) / 2)
+      -- 如果需要更drastic改乘法
 
 -- 3. SIX VOICE DEFINITIONS -------------------------------------------------
--- fast 2 gives a new event about every 0.9 seconds at Tidal's default tempo.
-let f3Voice = fast 2 $ s voiceSound # n f3Pitch
+-- One finite event per voice per cycle keeps SuperDirt load predictable.
+-- Inactive future alternative: replace djf with
+--   # note (range (-12) 12 eeg1Centroid)
+-- for a continuous centroid-to-register mapping.
+let f3Voice = s voiceSound # n f3Pitch # sustain (inverseSustain eeg1Energy eeg1Centroid)
       # gain (range gainLow gainHigh eeg1Energy)
-      # lpf (range lpfLow lpfHigh eeg1Centroid)
-      # room (range roomLow roomHigh eeg1Mobility) # pan 0.05
-    f4Voice = fast 2 $ s voiceSound # n f4Pitch
+      # djf (range djfLow djfHigh eeg1Centroid)
+      # room (range roomLow roomHigh eeg1Mobility)
+      # size (range sizeLow sizeHigh eeg1Mobility)
+      # dry (range dryLow dryHigh eeg1Mobility) # pan 0.05
+    f4Voice = s voiceSound # n f4Pitch # sustain (inverseSustain eeg2Energy eeg2Centroid)
       # gain (range gainLow gainHigh eeg2Energy)
-      # lpf (range lpfLow lpfHigh eeg2Centroid)
-      # room (range roomLow roomHigh eeg2Mobility) # pan 0.23
-    c3Voice = fast 2 $ s voiceSound # n c3Pitch
+      # djf (range djfLow djfHigh eeg2Centroid)
+      # room (range roomLow roomHigh eeg2Mobility)
+      # size (range sizeLow sizeHigh eeg2Mobility)
+      # dry (range dryLow dryHigh eeg2Mobility) # pan 0.23
+    c3Voice = s voiceSound # n c3Pitch # sustain (inverseSustain eeg3Energy eeg3Centroid)
       # gain (range gainLow gainHigh eeg3Energy)
-      # lpf (range lpfLow lpfHigh eeg3Centroid)
-      # room (range roomLow roomHigh eeg3Mobility) # pan 0.41
-    c4Voice = fast 2 $ s voiceSound # n c4Pitch
+      # djf (range djfLow djfHigh eeg3Centroid)
+      # room (range roomLow roomHigh eeg3Mobility)
+      # size (range sizeLow sizeHigh eeg3Mobility)
+      # dry (range dryLow dryHigh eeg3Mobility) # pan 0.41
+    c4Voice = s voiceSound # n c4Pitch # sustain (inverseSustain eeg4Energy eeg4Centroid)
       # gain (range gainLow gainHigh eeg4Energy)
-      # lpf (range lpfLow lpfHigh eeg4Centroid)
-      # room (range roomLow roomHigh eeg4Mobility) # pan 0.59
-    p3Voice = fast 2 $ s voiceSound # n p3Pitch
+      # djf (range djfLow djfHigh eeg4Centroid)
+      # room (range roomLow roomHigh eeg4Mobility)
+      # size (range sizeLow sizeHigh eeg4Mobility)
+      # dry (range dryLow dryHigh eeg4Mobility) # pan 0.59
+    p3Voice = s voiceSound # n p3Pitch # sustain (inverseSustain eeg5Energy eeg5Centroid)
       # gain (range gainLow gainHigh eeg5Energy)
-      # lpf (range lpfLow lpfHigh eeg5Centroid)
-      # room (range roomLow roomHigh eeg5Mobility) # pan 0.77
-    p4Voice = fast 2 $ s voiceSound # n p4Pitch
+      # djf (range djfLow djfHigh eeg5Centroid)
+      # room (range roomLow roomHigh eeg5Mobility)
+      # size (range sizeLow sizeHigh eeg5Mobility)
+      # dry (range dryLow dryHigh eeg5Mobility) # pan 0.77
+    p4Voice = s voiceSound # n p4Pitch # sustain (inverseSustain eeg6Energy eeg6Centroid)
       # gain (range gainLow gainHigh eeg6Energy)
-      # lpf (range lpfLow lpfHigh eeg6Centroid)
-      # room (range roomLow roomHigh eeg6Mobility) # pan 0.95
+      # djf (range djfLow djfHigh eeg6Centroid)
+      # room (range roomLow roomHigh eeg6Mobility)
+      # size (range sizeLow sizeHigh eeg6Mobility)
+      # dry (range dryLow dryHigh eeg6Mobility) # pan 0.95
 
--- 4. START ALL SIX VOICES (EVALUATE THIS BLOCK) ----------------------------
--- Ctrl+Enter this block after sections 1-3. Then start Python.
--- Do NOT evaluate section 5 until you actually want to stop the sound.
+-- 4. START ALL SIX VOICES (EVALUATE THIS BLOCK, then start python) ----------------------------
 do
   d1 $ f3Voice
   d2 $ f4Voice
@@ -80,5 +103,5 @@ do
   d5 $ p3Voice
   d6 $ p4Voice
 
--- 5. STOP EVERYTHING (EVALUATE THIS LINE) ----------------------------------
+-- 5. STOP EVERYTHING ----------------------------------
 hush

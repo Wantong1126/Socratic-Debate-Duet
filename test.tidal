@@ -1,7 +1,22 @@
-d1 $ n "c3*2"
-  # s "supermandolin"
-  # gain 1
-  # sustain 0.75
-  # lpf 6000
+let tsdelay = pF "tsdelay"
+    xsdelay = pI "xsdelay"
+
+d1 $ sound "can*4" # tsdelay "0 0.25 0.5 0.75 1" # xsdelay "3 124 3 12 62 2"
 
 hush
+
+d1 
+$ slow 1.5
+$arp "diverge pinkyup down thumbup"
+$ (off 0.125 ( + 12) $ n "c'maj'7 f'min'7")
+# s "superfork"
+# sz 1
+
+d2
+$ slow 1.5
+$arp "diverge pinkyup down thumbup"
+$ (off 0.125 ( + 12) $ n "c'maj'7 f'min'7")
+# s "superpwm"
+# sz 1
+
+mute 2

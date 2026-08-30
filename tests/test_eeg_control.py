@@ -6,7 +6,9 @@ import numpy as np
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import ThreadingOSCUDPServer
 
-from src.eeg_control_demo import (ControlSession, parse_args, run_synthetic_tidal,
+from src.eeg_control_demo import (CONTROLS_PER_FRAME, MAX_CONTROL_HZ,
+                                  ControlSession, RateLimitedControlTransmitter,
+                                  parse_args, run_synthetic_tidal,
                                   synthetic_controls, synthetic_sweep)
 from src.eeg_control_features import EEGControlFeatureEngine, control_names
 from src.eeg_preprocessing import StreamingEEGPreprocessor
@@ -25,6 +27,32 @@ class NullSender:
         self.packet_count += len(controls)
 
 
+class FakeClock:
+    def __init__(self):
+        self.now = 0.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+class TimedSender(NullSender):
+    def __init__(self, clock, send_duration=0.0):
+        super().__init__()
+        self.clock = clock
+        self.send_duration = send_duration
+        self.send_times = []
+
+    def send(self, controls):
+        self.send_times.append(self.clock.now)
+        super().send(controls)
+        self.clock.now += self.send_duration
+
+
 class EEGControlTests(unittest.TestCase):
     def test_exact_controls_are_finite_bounded_and_channels_stay_separate(self):
         samples, _ = synthetic_sweep(6.0)
@@ -36,7 +64,8 @@ class EEGControlTests(unittest.TestCase):
         self.assertEqual(tuple(frame.normalized), control_names())
         self.assertTrue(all(np.isfinite(list(frame.raw.values()))))
         self.assertTrue(all(0 <= value <= 1 for value in frame.normalized.values()))
-        self.assertEqual(sender.packet_count, 18 * sum(bool(f.normalized) for f in session.frames))
+        self.assertEqual(sender.packet_count, CONTROLS_PER_FRAME)
+        self.assertEqual(sender.last_values, frame.normalized)
         self.assertGreater(len({round(frame.raw[f"eeg{i}_energy"], 8) for i in range(1, 7)}), 1)
 
     def test_descriptors_respond_continuously_without_cross_channel_mixing(self):
@@ -113,14 +142,48 @@ class EEGControlTests(unittest.TestCase):
         self.assertTrue(all(first[name] != second[name] for name in control_names()))
         energy_values = [first[f"eeg{i}_energy"] for i in range(1, 7)]
         self.assertGreater(len(set(energy_values)), 3)
-        sender = NullSender()
-        run_synthetic_tidal(sender, update_rate=1000.0, max_updates=3)
-        self.assertEqual(sender.packet_count, 54)
+
+    def test_synthetic_rate_is_two_frames_and_36_messages_per_second(self):
+        clock = FakeClock()
+        sender = TimedSender(clock)
+        transmitter = run_synthetic_tidal(sender, control_hz=2.0, max_updates=5,
+                                           clock=clock.monotonic, sleeper=clock.sleep,
+                                           diagnostics=False)
+        self.assertEqual(sender.packet_count, 5 * CONTROLS_PER_FRAME)
+        np.testing.assert_allclose(np.diff(sender.send_times), 0.5, atol=1e-12)
+        frame_rate, message_rate = transmitter.rate_snapshot()
+        self.assertAlmostEqual(frame_rate, 2.0)
+        self.assertAlmostEqual(message_rate, 36.0)
+        self.assertTrue(clock.sleeps)
+        self.assertTrue(all(delay > 0 for delay in clock.sleeps))
+
+    def test_missed_deadlines_are_dropped_without_catch_up_bursts(self):
+        clock = FakeClock()
+        sender = TimedSender(clock, send_duration=1.5)
+        run_synthetic_tidal(sender, control_hz=2.0, max_updates=4,
+                            clock=clock.monotonic, sleeper=clock.sleep,
+                            diagnostics=False)
+        np.testing.assert_allclose(np.diff(sender.send_times), 2.0, atol=1e-12)
+        self.assertTrue(all(delay == 0.5 for delay in clock.sleeps))
+
+    def test_stop_event_exits_without_sending_or_sleeping(self):
+        stop = threading.Event(); stop.set()
+        clock = FakeClock(); sender = TimedSender(clock)
+        transmitter = run_synthetic_tidal(sender, control_hz=2.0,
+                                           clock=clock.monotonic, sleeper=clock.sleep,
+                                           stop_event=stop, diagnostics=False)
+        self.assertEqual((transmitter.frames_sent, sender.packet_count, clock.sleeps),
+                         (0, 0, []))
+
+    def test_rate_limiter_rejects_unsafe_rates(self):
+        with self.assertRaises(ValueError):
+            RateLimitedControlTransmitter(NullSender(), MAX_CONTROL_HZ + 0.01)
 
     def test_documented_modes_parse(self):
         self.assertEqual(parse_args(["--mode", "synthetic-tidal"]).mode, "synthetic-tidal")
         args = parse_args(["--mode", "tidal-live", "--calibration-seconds", "20"])
-        self.assertEqual((args.mode, args.calibration_seconds), ("tidal-live", 20.0))
+        self.assertEqual((args.mode, args.calibration_seconds, args.control_hz),
+                         ("tidal-live", 20.0, 2.0))
 
     def test_actual_udp_ctrl_packet_encoding(self):
         received = []
