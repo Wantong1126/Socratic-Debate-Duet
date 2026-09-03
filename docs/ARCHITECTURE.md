@@ -1,0 +1,32 @@
+# Sonification architecture
+
+The project keeps one linear responsibility chain. New harmonic work should extend these boundaries instead of creating another acquisition or preprocessing pipeline.
+
+```text
+LSL / acquisition
+  -> EEG preprocessing
+  -> feature extraction
+  -> normalization / mapping
+  -> OSC protocol
+  -> SuperCollider instrument
+```
+
+| Responsibility | Current canonical files | Status and boundary |
+|---|---|---|
+| LSL / acquisition | `src/window_engine.py`, `src/lsl_probe.py` | Discovers or records the existing six-channel stream. Do not add acquisition loops inside sonification modules. |
+| EEG preprocessing | `src/eeg_preprocessing.py` | Stateful causal filtering and same-channel invalid-sample repair. Audification continues to use its existing path unchanged. |
+| Feature extraction | `src/eeg_control_features.py`, with earlier helpers in `src/eeg_features.py` | The approved legacy engine currently extracts energy, centroid, and mobility. EEG band extraction for the harmonic instrument is not connected yet. |
+| Normalization / mapping | Legacy calibration in `src/eeg_control_features.py`; candidate band routing in `src/sonification/harmonics_mapping.py` | Absolute presence becomes `master_energy`; normalized delta/theta/alpha/beta distribution becomes groups 1-4. Mapping code is pure and has no I/O. |
+| OSC protocol | Live legacy protocol in `src/organism_osc.py`; candidate five-value contract in `src/sonification/harmonics_protocol.py` | Protocol modules own addresses, ordering, validation, clamping, and serialization. They do not extract features. |
+| SuperCollider instrument | Candidate core/manual files under `sound/eeg_harmonic_field_core.scd` and `sound/eeg_harmonics_manual.scd`; legacy live engine in `sound/eeg_organism_engine.scd` | The candidate remains one persistent Synth and has no EEG OSC handler pending palette approval. SuperCollider owns synthesis, smoothing, effects, and output safety. |
+
+`src/sonification/harmonics_synthetic_demo.py` is a boundary test, not a second pipeline. Its default mode prints deterministic candidate frames without networking. Explicit `--send` only exercises the OSC producer and currently has no approved SuperCollider receiver.
+
+## Entry points that remain valid
+
+- Existing live/control modes: `python -m src.eeg_control_demo ...`
+- Existing organism launcher: `scripts/start_eeg_organism.ps1`
+- Existing manual harmonic instrument: evaluate `sound/eeg_harmonics_manual.scd`
+- New dry-run harmonic controls: `python -m src.sonification.harmonics_synthetic_demo --sweep brightness`
+
+Do not duplicate LSL discovery, filters, channel repair, baseline calibration, or OSC schemas in future composition/demo files. Import the canonical stage above, and add a compatibility wrapper before relocating any established entry point.

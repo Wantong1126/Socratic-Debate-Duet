@@ -1,65 +1,88 @@
-// Shared synthesis definition for the disconnected Harmonics manual prototype.
+// Shared synthesis definition for the disconnected Harmonics instrument.
 //
-// Musical principle adapted from Stephen Whitmarsh / EEGsynth's 2019 and 2020
-// Harmonics articles and the official EEGsynth akusmata patch: independently
-// controlled, normalized EEG-band values are mapped to harmonic amplitudes of
-// one oscillator. This is an original SuperCollider implementation; it does
-// not contain or load EEGsynth, FieldTrip, or Redis code.
-//
-// Evaluating this file only defines a language-side factory function. It does
-// not boot a server, create a node, register OSC, or connect live EEG.
+// The musical mapping principle is adapted from Stephen Whitmarsh / EEGsynth.
+// This is an original SuperCollider implementation; it does not load EEGsynth,
+// FieldTrip, or Redis and does not claim to reproduce Verbos hardware timbre.
+// Evaluating this file only defines a factory function.
 
-~makeEegHarmonicFieldSynthDef = { |defName = \eegManualHarmonicField|
+~makeEegHarmonicFieldSynthDef = { |defName = \eegManualHarmonicField, preset|
+    if(preset.isNil) { Error("A centralized harmonic preset is required.").throw };
+
     SynthDef(defName, {
-        |out = 0, gate = 1,
-        fundamental = 73.42, harmonicCount = 12,
-        group1 = 1.0, group2 = 0.70, group3 = 0.34, group4 = 0.16,
-        masterEnergy = 0.72, controlLag = 1.25, energyLag = 0.90,
-        stereoWidth = 0.62, saturationDrive = 1.25,
-        reverbMix = 0.22, reverbRoom = 34, reverbTime = 4.8,
-        reverbDamping = 0.58, outputTrim = 0.82,
-        attack = 1.2, release = 2.8|
-        var harmonicNumbers, pans, groups, groupTrims, partialTrims;
-        var partials, perceptualWeights;
-        var groupLevels, perceptualNorm, source, width, energy, energyAmp;
-        var saturated, wet, signal, life;
+        |out = 0, gate = 1|
+        var harmonicNumbers, fundamental, harmonicCount, harmonicRollOff;
+        var groupControls, groupTrims, groupLoudnessComp, panPositions;
+        var groupLevels, partialLoudnessComp;
+        var spectralShapes, perceptualWeights, perceptualNorm, partials;
+        var controlLag, energyLag, width, source, delayed, delayMix;
+        var energy, energyAmp, saturated, wet, signal, life;
+        var saturationDrive, limiterDb;
 
         harmonicNumbers = (1..12);
-        // Fixed alternating locations create width without detuning, delays,
-        // stochastic motion, beating, triggers, or modulation.
-        pans = [-0.82, 0.68, -0.38, 0.88, -0.68, 0.34,
-            -0.92, 0.56, -0.22, 0.76, -0.52, 0.18];
-        groups = [group1, group2, group3, group4].collect { |value|
-            VarLag.kr(value.clip(0, 1), controlLag.clip(0.02, 8), warp: -4)
-        };
-        // Small fixed trims compensate measured group-to-group differences
-        // introduced by the saturation/reverb chain. They do not move in time.
-        groupTrims = [0.95, 1.10, 0.80, 1.18];
-        width = VarLag.kr(stereoWidth.clip(0, 1), controlLag.clip(0.02, 8), warp: -4);
+        controlLag = NamedControl.kr(\controlLag, preset[\controlLag]).clip(0.02, 8);
+        energyLag = NamedControl.kr(\energyLag, preset[\energyLag]).clip(0.02, 8);
+        fundamental = VarLag.kr(
+            NamedControl.kr(\fundamental, preset[\fundamental]),
+            controlLag, warp: -4
+        );
+        harmonicCount = NamedControl.kr(\harmonicCount, preset[\harmonicCount]);
+        harmonicRollOff = VarLag.kr(
+            NamedControl.kr(\harmonicRollOff, preset[\harmonicRollOff]),
+            controlLag, warp: -4
+        );
+        groupControls = NamedControl.kr(\groupAmplitudes, preset[\baseGroups]);
+        groupTrims = NamedControl.kr(\groupTrims, preset[\groupTrims]);
+        groupLoudnessComp = NamedControl.kr(
+            \groupLoudnessComp,
+            preset[\groupLoudnessComp]
+        );
+        panPositions = NamedControl.kr(\panPositions, preset[\panPositions]);
 
-        // For 12 partials the four groups are 1-3, 4-6, 7-9, 10-12.
-        // For 8 partials they become 1-2, 3-4, 5-6, 7-8.
-        groupLevels = harmonicNumbers.collect { |harmonic|
-            var groupFor12, groupFor8, useEight, active;
-            groupFor12 = groups[((harmonic - 1) / 3).floor];
-            groupFor8 = groups[(((harmonic - 1) / 2).floor).min(3)];
-            useEight = harmonicCount <= 8;
-            active = harmonic <= harmonicCount;
-            Select.kr(useEight, [groupFor12, groupFor8]) * active;
+        groupControls = groupControls.collect { |value|
+            VarLag.kr(value.clip(0, 1), controlLag, warp: -4)
         };
-        partialTrims = harmonicNumbers.collect { |harmonic|
-            var trimFor12, trimFor8, useEight;
+        groupTrims = groupTrims.collect { |value|
+            VarLag.kr(value.clip(0.1, 2), controlLag, warp: -4)
+        };
+        groupLoudnessComp = groupLoudnessComp.collect { |value|
+            VarLag.kr(value.clip(0.25, 2), controlLag, warp: -4)
+        };
+        panPositions = panPositions.collect { |value|
+            VarLag.kr(value.clip(-1, 1), controlLag, warp: -4)
+        };
+        width = VarLag.kr(
+            NamedControl.kr(\stereoWidth, preset[\stereoWidth]).clip(0, 1),
+            controlLag, warp: -4
+        );
+
+        // 12 partials: 1-3, 4-6, 7-9, 10-12. Eight partials: pairs.
+        groupLevels = harmonicNumbers.collect { |harmonic|
+            var groupFor12, groupFor8, trimFor12, trimFor8, useEight, active;
+            groupFor12 = groupControls[((harmonic - 1) / 3).floor];
+            groupFor8 = groupControls[(((harmonic - 1) / 2).floor).min(3)];
             trimFor12 = groupTrims[((harmonic - 1) / 3).floor];
             trimFor8 = groupTrims[(((harmonic - 1) / 2).floor).min(3)];
             useEight = harmonicCount <= 8;
-            Select.kr(useEight, [trimFor12, trimFor8]);
+            active = Lag.kr(harmonic <= harmonicCount, controlLag);
+            Select.kr(useEight,
+                [groupFor12 * trimFor12, groupFor8 * trimFor8]) * active;
+        };
+        partialLoudnessComp = harmonicNumbers.collect { |harmonic|
+            var compFor12, compFor8, useEight;
+            compFor12 = groupLoudnessComp[((harmonic - 1) / 3).floor];
+            compFor8 = groupLoudnessComp[(((harmonic - 1) / 2).floor).min(3)];
+            useEight = harmonicCount <= 8;
+            Select.kr(useEight, [compFor12, compFor8]);
         };
 
-        // Work in an approximate perceptual-energy domain. A gentle 1/sqrt(n)
-        // voicing keeps the complete field grounded; inverse A-weighting then
-        // compensates some low-frequency sensitivity loss (capped at +14 dB).
-        // The L2 norm is calculated before that compensation so redistribution
-        // preserves approximate A-weighted energy, not merely sample RMS.
+        // Trim and roll-off live inside the same perceptual-energy norm.
+        spectralShapes = harmonicNumbers.collect { |harmonic, index|
+            groupLevels[index] * (harmonic ** harmonicRollOff.neg)
+        };
+        perceptualNorm = (spectralShapes.collect(_.squared).sum + 1e-9).sqrt;
+
+        // Capped inverse A-weighting is a pragmatic approximation, not a model
+        // of human hearing.
         perceptualWeights = harmonicNumbers.collect { |harmonic, index|
             var frequency, f2, numerator, denominator, aDb, compensation;
             frequency = fundamental.clip(40, 160) * harmonic;
@@ -70,53 +93,87 @@
                 * (f2 + 12194.squared);
             aDb = (numerator / denominator).ampdb + 2.0;
             compensation = aDb.neg.dbamp.clip(0.35, 5.0);
-            groupLevels[index] * harmonic.sqrt.reciprocal
-                * compensation * partialTrims[index];
+            spectralShapes[index] * compensation
+                * partialLoudnessComp[index] / perceptualNorm;
         };
-        perceptualNorm = (harmonicNumbers.collect { |harmonic, index|
-            (groupLevels[index] * harmonic.sqrt.reciprocal).squared
-        }.sum + 1e-9).sqrt;
 
         partials = harmonicNumbers.collect { |harmonic, index|
-            var oscillator, amplitude;
-            amplitude = perceptualWeights[index] / perceptualNorm;
-            oscillator = SinOsc.ar(fundamental.clip(40, 160) * harmonic, 0, amplitude);
-            Pan2.ar(oscillator, pans[index] * width);
+            Pan2.ar(
+                SinOsc.ar(fundamental.clip(40, 160) * harmonic, 0,
+                    perceptualWeights[index]),
+                panPositions[index].clip(-1, 1) * width
+            )
         };
         source = LeakDC.ar(Mix(partials));
 
-        // ENERGY is strictly post-spectrum gain on a perceptual dB curve.
-        energy = VarLag.kr(masterEnergy.clip(0, 1), energyLag.clip(0.02, 8), warp: -4);
-        energyAmp = energy.linlin(0, 1, -38, -15).dbamp;
+        // Fixed cross-channel delay only: no feedback and no modulation.
+        delayed = [
+            DelayC.ar(source[1], 0.08,
+                NamedControl.kr(\delayTimeLeft, preset[\delayTimeLeft]).clip(0.001, 0.08)),
+            DelayC.ar(source[0], 0.08,
+                NamedControl.kr(\delayTimeRight, preset[\delayTimeRight]).clip(0.001, 0.08))
+        ];
+        delayMix = VarLag.kr(
+            NamedControl.kr(\delayMix, preset[\delayMix]).clip(0, 0.15),
+            controlLag, warp: -4
+        );
+        source = XFade2.ar(source, delayed, (delayMix * 2) - 1);
+
+        // Master energy is strictly post-spectrum gain.
+        energy = VarLag.kr(
+            NamedControl.kr(\masterEnergy, preset[\masterEnergy]).clip(0, 1),
+            energyLag, warp: -4
+        );
+        energyAmp = energy.linlin(
+            0, 1,
+            NamedControl.kr(\energyMinDb, preset[\energyMinDb]),
+            NamedControl.kr(\energyMaxDb, preset[\energyMaxDb])
+        ).dbamp;
         source = source * energyAmp;
 
-        // Gentle symmetrical saturation catches additive peaks without adding
-        // an envelope or temporal articulation.
-        saturated = (source * saturationDrive.clip(1, 2)).tanh
-            / saturationDrive.clip(1, 2);
+        saturationDrive = VarLag.kr(
+            NamedControl.kr(\saturationDrive, preset[\saturationDrive]),
+            controlLag, warp: -4
+        ).clip(1, 2);
+        saturated = (source * saturationDrive).tanh / saturationDrive;
 
-        // GVerb supplies a diffuse algorithmic stereo tail. Its controls are
-        // manual/fixed during the tests and are never driven by EEG.
         wet = GVerb.ar(
             saturated.sum * 0.5,
-            roomsize: reverbRoom.clip(8, 80),
-            revtime: reverbTime.clip(0.5, 12),
-            damping: reverbDamping.clip(0, 1),
-            inputbw: 0.72,
-            spread: 28,
+            roomsize: NamedControl.kr(\reverbRoom, preset[\reverbRoom]).clip(8, 80),
+            revtime: NamedControl.kr(\reverbTime, preset[\reverbTime]).clip(0.5, 12),
+            damping: NamedControl.kr(\reverbDamping, preset[\reverbDamping]).clip(0, 1),
+            inputbw: NamedControl.kr(\reverbInputBw, preset[\reverbInputBw]).clip(0.1, 1),
+            spread: NamedControl.kr(\reverbSpread, preset[\reverbSpread]).clip(0, 43),
             drylevel: 0,
-            earlyreflevel: 0.24,
-            taillevel: 0.62,
+            earlyreflevel: NamedControl.kr(\reverbEarly, preset[\reverbEarly]).clip(0, 1),
+            taillevel: NamedControl.kr(\reverbTail, preset[\reverbTail]).clip(0, 1),
             maxroomsize: 80
         );
-        signal = XFade2.ar(saturated, wet, (reverbMix.clip(0, 1) * 2) - 1);
+        signal = XFade2.ar(
+            saturated, wet,
+            (VarLag.kr(
+                NamedControl.kr(\reverbMix, preset[\reverbMix]).clip(0, 1),
+                controlLag, warp: -4
+            ) * 2) - 1
+        );
 
         life = EnvGen.kr(
-            Env.asr(attack.clip(0.05, 8), 1, release.clip(0.1, 15), curve: -4),
+            Env.asr(
+                NamedControl.kr(\attack, preset[\attack]).clip(0.05, 8), 1,
+                NamedControl.kr(\release, preset[\release]).clip(0.1, 15),
+                curve: -4
+            ),
             gate,
             doneAction: 2
         );
-        signal = Limiter.ar(signal * outputTrim.clip(0, 1) * life, (-1.5).dbamp, 0.01);
+        limiterDb = NamedControl.kr(\limiterDb, preset[\limiterDb]).clip(-12, -0.1);
+        signal = Limiter.ar(
+            signal * VarLag.kr(
+                NamedControl.kr(\outputTrim, preset[\outputTrim]).clip(0, 1),
+                controlLag, warp: -4
+            ) * life,
+            limiterDb.dbamp, 0.01
+        );
         Out.ar(out, signal);
     });
 };

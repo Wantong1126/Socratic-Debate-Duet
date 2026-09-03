@@ -1,16 +1,22 @@
 // DISCONNECTED MANUAL AUDITION: one persistent additive harmonic field.
 //
-// This prototype deliberately has no /eeg/organism/frame OSCdef and no LSL,
-// Python, FieldTrip, Redis, clocks, triggers, notes, noise, or autonomous motion.
-// It does not boot/reboot scsynth and does not replace eeg_organism_engine.scd.
+// No /eeg/organism/frame OSCdef, LSL, Python, FieldTrip, Redis, clocked sound,
+// random source, note trigger, or autonomous modulation is created here.
+// This file never boots, reboots, or quits the existing server.
 
 (
-var here, config, def, state, oldState, synthArgs, setGroups, setEnergy;
+var here, library, presets, audition, defaultName, defaultPreset;
+var def, state, oldState, setGroups, setEnergy, setPreset;
 var auditionGroup, sweepMaster, sweepBrightness, sweepGroups, stop;
 
 here = PathName(thisProcess.nowExecutingPath).pathOnly;
 thisProcess.interpreter.executeFile(here +/+ "eeg_harmonic_field_core.scd");
-config = thisProcess.interpreter.executeFile(here +/+ "eeg_harmonics_manual_config.scd");
+thisProcess.interpreter.executeFile(here +/+ "eeg_harmonics_preset_support.scd");
+library = thisProcess.interpreter.executeFile(here +/+ "eeg_harmonics_manual_config.scd");
+presets = library[\presets];
+audition = library[\audition];
+defaultName = library[\defaultPreset];
+defaultPreset = presets[defaultName];
 
 oldState = ~eegHarmonicsManual;
 if(oldState.notNil and: { oldState[\stop].notNil }) {
@@ -18,19 +24,45 @@ if(oldState.notNil and: { oldState[\stop].notNil }) {
 };
 
 state = IdentityDictionary.new;
-state[\config] = config.copy;
+state[\library] = library;
+state[\presets] = presets;
+state[\audition] = audition;
+state[\presetName] = defaultName;
+state[\preset] = defaultPreset.copy;
 state[\stopping] = false;
 ~eegHarmonicsManual = state;
 
-setGroups = { |g1 = 1, g2 = 0.7, g3 = 0.34, g4 = 0.16|
-    state[\synth].tryPerform(\set,
-        \group1, g1.clip(0, 1), \group2, g2.clip(0, 1),
-        \group3, g3.clip(0, 1), \group4, g4.clip(0, 1));
-    [g1, g2, g3, g4].collect(_.clip(0, 1)).postln;
+setGroups = { |g1, g2, g3, g4|
+    var values;
+    values = if(g1.isNil) {
+        state[\preset][\baseGroups].copy
+    } {
+        [g1, g2, g3, g4].collect { |value| value.asFloat.clip(0, 1) }
+    };
+    state[\synth].tryPerform(\setn, \groupAmplitudes, values);
+    ("Harmonic groups: " ++ values).postln;
 };
-setEnergy = { |value = 0.72|
-    state[\synth].tryPerform(\set, \masterEnergy, value.clip(0, 1));
-    ("Harmonics master energy: " ++ value.clip(0, 1)).postln;
+setEnergy = { |value|
+    var target;
+    target = value ? state[\preset][\masterEnergy];
+    target = target.asFloat.clip(0, 1);
+    state[\synth].tryPerform(\set, \masterEnergy, target);
+    ("Harmonics master energy: " ++ target).postln;
+};
+setPreset = { |name = \warm_organic|
+    var key, preset;
+    key = name.asSymbol;
+    preset = presets[key];
+    if(preset.isNil) {
+        ("Unknown harmonic preset: " ++ key
+            ++ ". Available: " ++ presets.keys.asArray.sort).warn;
+    } {
+        state[\sweep].tryPerform(\stop);
+        state[\presetName] = key;
+        state[\preset] = preset.copy;
+        ~applyEegHarmonicPreset.value(state[\synth], preset);
+        ("Harmonic preset -> " ++ key ++ " (same persistent Synth)").postln;
+    };
 };
 auditionGroup = { |oneBasedIndex = 1|
     var values, index;
@@ -41,23 +73,27 @@ auditionGroup = { |oneBasedIndex = 1|
     ("Harmonics isolated group " ++ (index + 1)).postln;
 };
 
-// These are finite, manually invoked demonstrations; none loops or retriggers.
+// Finite, manually invoked control demonstrations. No routine loops.
 sweepMaster = {
     state[\sweep].tryPerform(\stop);
     state[\sweep] = Routine({
-        setGroups.value(1, 0.70, 0.34, 0.16);
-        setEnergy.value(0.18); 3.wait;
-        setEnergy.value(1.00); 4.wait;
-        setEnergy.value(0.18);
+        setGroups.value(*state[\preset][\baseGroups]);
+        setEnergy.value(audition[\masterLow]);
+        audition[\masterStageSeconds].wait;
+        setEnergy.value(audition[\masterHigh]);
+        audition[\masterStageSeconds].wait;
+        setEnergy.value(audition[\masterLow]);
     }).play(AppClock);
 };
 sweepBrightness = {
     state[\sweep].tryPerform(\stop);
     state[\sweep] = Routine({
-        setEnergy.value(0.72);
-        setGroups.value(1.00, 0.34, 0.08, 0.02); 3.wait;
-        setGroups.value(0.02, 0.08, 0.34, 1.00); 4.wait;
-        setGroups.value(1.00, 0.34, 0.08, 0.02);
+        setEnergy.value(state[\preset][\masterEnergy]);
+        setGroups.value(*audition[\warmGroups]);
+        audition[\spectrumStageSeconds].wait;
+        setGroups.value(*audition[\brightGroups]);
+        audition[\spectrumStageSeconds].wait;
+        setGroups.value(*audition[\warmGroups]);
     }).play(AppClock);
 };
 sweepGroups = {
@@ -65,9 +101,9 @@ sweepGroups = {
     state[\sweep] = Routine({
         4.do { |index|
             auditionGroup.value(index + 1);
-            3.wait;
+            audition[\groupStageSeconds].wait;
         };
-        setGroups.value(1, 0.70, 0.34, 0.16);
+        setGroups.value(*state[\preset][\baseGroups]);
     }).play(AppClock);
 };
 stop = { |immediate = false|
@@ -80,7 +116,7 @@ stop = { |immediate = false|
         } {
             state[\synth].tryPerform(\set, \gate, 0);
             Routine({
-                (config[\release] + 0.25).wait;
+                (state[\preset][\release] + 0.25).wait;
                 state[\group].tryPerform(\free);
             }).play(AppClock);
         };
@@ -90,6 +126,7 @@ stop = { |immediate = false|
 
 state[\setGroups] = setGroups;
 state[\setEnergy] = setEnergy;
+state[\setPreset] = setPreset;
 state[\auditionGroup] = auditionGroup;
 state[\sweepMaster] = sweepMaster;
 state[\sweepBrightness] = sweepBrightness;
@@ -99,30 +136,26 @@ state[\stop] = stop;
 if(s.serverRunning) {
     Routine({
         var group, synth;
-        def = ~makeEegHarmonicFieldSynthDef.value(\eegManualHarmonicField);
+        def = ~makeEegHarmonicFieldSynthDef.value(
+            \eegManualHarmonicField,
+            defaultPreset
+        );
         def.add;
         s.sync;
         if(state[\stopping].not) {
             group = Group.tail(s);
-            synthArgs = config.asKeyValuePairs;
-            // Enforce the documented 8-or-12 choice.
-            synthArgs[synthArgs.indexOf(\harmonicCount) + 1] =
-                if(config[\harmonicCount] <= 8) { 8 } { 12 };
-            synth = Synth.tail(group, \eegManualHarmonicField, synthArgs);
+            synth = Synth.tail(group, \eegManualHarmonicField);
             state[\group] = group;
             state[\synth] = synth;
-            "DISCONNECTED EEG HARMONICS MANUAL PALETTE READY".postln;
-            "Stable tree: one dedicated Group + one continuous Synth.".postln;
+            "DISCONNECTED EEG HARMONICS PRESET PALETTE READY".postln;
+            ("Preset: " ++ state[\presetName]).postln;
+            "Stable tree: one Group + one continuous Synth.".postln;
             "No live EEG OSC endpoint was registered.".postln;
-            "Try: ~eegHarmonicsManual[\sweepMaster].value;".postln;
-            "     ~eegHarmonicsManual[\sweepBrightness].value;".postln;
-            "     ~eegHarmonicsManual[\sweepGroups].value;".postln;
-            "     ~eegHarmonicsManual[\auditionGroup].value(1); // 1..4".postln;
+            "Switch: ~eegHarmonicsManual[\\setPreset].value(\\warm_organic);".postln;
+            "        \\air_glass or \\dark_mineral".postln;
         };
     }).play(AppClock);
 } {
-    "Harmonics manual palette NOT started: start the existing scsynth/SuperDirt server, then evaluate again.".warn;
+    "Harmonics palette NOT started: start the existing scsynth/SuperDirt server, then evaluate again.".warn;
 };
 )
-
-s.quit;

@@ -1,71 +1,66 @@
-# Disconnected EEGsynth-inspired Harmonics palette
+# Disconnected EEGsynth-inspired Harmonics instrument
 
-This is a manual-audition prototype for one continuous additive harmonic field. It preserves the project's LSL -> Python -> OSC -> persistent SuperCollider architecture, but deliberately does **not** connect the six EEG channels. The historical production engine, OSC addresses, Python transport, configuration and Tidal files remain unchanged.
+This is a manual-palette candidate for one continuous additive harmonic field. It preserves the project's LSL -> Python -> OSC -> persistent SuperCollider architecture, but deliberately does not connect the six EEG channels. `eeg_organism_engine.scd`, its OSC addresses, Python transport, and historical recordings remain intact.
 
 ## Attribution and adaptation boundary
 
-The musical principle is adapted, with attribution, from Stephen Whitmarsh and the EEGsynth project:
+The high-level musical principle is adapted from Stephen Whitmarsh and EEGsynth:
 
-- [EEG harmonics and rat intracellular recordings (2019)](https://www.eegsynth.org/?p=1986) describes decomposing EEG into delta, theta, alpha and beta, normalizing and smoothing those bands, and using each band to control different harmonic overtones.
-- [Confinement diary #1: updating Harmonics patch (2020)](https://www.eegsynth.org/?p=2066) summarizes the patch as mapping EEG frequency bands to harmonics added on one oscillator, with reverb, and discusses switching mappings only at low levels to reduce clicks.
-- The official [EEGsynth repository](https://github.com/eegsynth/eegsynth) and its `spectral` module compute configurable band magnitudes from detrended, Hann-tapered FFT windows. The official `patches/akusmata` configuration normalizes delta/theta/alpha/beta, smooths them with the slew limiter and sends them as separate hardware control channels to a Verbos Harmonic Oscillator.
+- [EEG harmonics and rat intracellular recordings (2019)](https://www.eegsynth.org/?p=1986) describes normalizing and smoothing delta, theta, alpha, and beta values and using them to control different harmonic overtones.
+- [Confinement diary #1: updating Harmonics patch (2020)](https://www.eegsynth.org/?p=2066) describes EEG-band-to-harmonic mapping, reverb, and reassignment of controls among harmonics.
+- The official [EEGsynth repository](https://github.com/eegsynth/eegsynth) provides the referenced spectral extraction, normalization, smoothing, and routing modules.
 
-Only this high-level musical relationship is adapted: **four independently smoothed control values redistribute energy among harmonic overtones of one fundamental**. No EEGsynth Python is copied or executed, and this project does not import its runtime, FieldTrip buffer or Redis.
+No EEGsynth runtime, FieldTrip buffer, or Redis service is imported. The sine-bank oscillator, exact group boundaries, perceptual normalization, preset values, saturation, stereo image, delay, GVerb, and audition score are original SuperCollider design choices. They do not reproduce or claim to reproduce the Verbos Harmonic Oscillator hardware timbre.
 
-The following are independent design work, not exact EEGsynth reproduction:
+## One persistent Synth
 
-- SuperCollider sine-bank implementation of the hardware harmonic oscillator;
-- selectable 8/12-partial grouping and the exact group boundaries;
-- `1/sqrt(harmonic)` base voicing;
-- inverse A-weighting approximation, perceptual L2 normalization and measured fixed group trims;
-- dB master-energy law, smoothing times and saturation;
-- fixed alternating stereo placement;
-- GVerb settings, output trim, limiter and all audition trajectories.
+`sound/eeg_harmonic_field_core.scd` defines one SynthDef containing 8 or 12 exact integer harmonics of one fundamental. `sound/eeg_harmonics_manual.scd` creates exactly one dedicated Group and one persistent Synth. Preset switching sends only control updates to that Synth; it does not free or recreate the node.
 
-The articles and official patch do not prescribe these DSP formulas, a fundamental pitch, stereo image, saturation, loudness compensation or reverb algorithm. This prototype should therefore be described as **EEGsynth Harmonics-inspired**, not a port or reproduction.
+There are no note triggers, impulses, random UGens, noise sources, detuning, LFOs, moving pans, feedback delay, sequencers, or autonomous routines. The only routines are finite manual demonstrations invoked by the user.
 
-## Synthesis components
+## Synthesis path
 
-1. **One fundamental and one continuous field.** Twelve phase-stable sine partials use exact integer multiples of the configurable fundamental (73.42 Hz / D2 by default). `harmonicCount` selects 8 or 12. There are no envelopes retriggering notes, clocks, impulses, random UGens, LFOs, detuning or delayed voice copies.
-2. **Four independent groups.** In 12-partial mode the groups are harmonics 1-3, 4-6, 7-9 and 10-12. In 8-partial mode they are 1-2, 3-4, 5-6 and 7-8. Each amplitude is independently exposed as `group1` through `group4`.
-3. **Approximate constant perceived loudness.** Group values first scale a gentle `1/sqrt(n)` voicing. Their perceptual-domain vector is divided by its Euclidean norm before synthesis, so moving energy between groups does not simply add gain. A capped inverse A-weighting approximation compensates part of the ear's reduced low-frequency sensitivity. Small fixed trims (0.95, 1.10, 0.80 and 1.18) compensate measured group differences after saturation and reverb. It is an engineering approximation, not a psychoacoustic guarantee; listening approval remains the deciding test.
-4. **Master energy.** `masterEnergy` is applied only after the normalized spectrum and maps 0..1 to -38..-15 dB. It cannot change fundamental, harmonic ratios, group weights, stereo position or reverb settings.
-5. **Smoothing.** Curved `VarLag` smoothing (1.25 seconds for groups, 0.9 seconds for master energy by default) prevents clicks and abrupt spectral switching.
-6. **Restrained saturation and safety.** A low-drive symmetric `tanh` stage catches additive peaks. A final -1.5 dB limiter is a safety ceiling, not a loudness effect.
-7. **Stereo width without flutter.** Each exact harmonic has one fixed pan location. Width scales those positions toward or away from centre. There is no pitch offset, chorus, phase modulation or moving pan.
-8. **Reverb.** Fixed GVerb settings add a diffuse stereo room. Reverb is not assigned to master energy or any harmonic group.
+1. Four smoothed group amplitudes address harmonics 1-3, 4-6, 7-9, and 10-12. In eight-harmonic mode they address pairs.
+2. Each preset's group trim and `harmonicRollOff` shape the partial vector.
+3. That entire vector is L2-normalized in an approximate perceptual domain. Capped inverse A-weighting and a fixed per-group loudness calibration reduce post-effect group differences.
+4. Fixed partial pan positions and `stereoWidth` create width without pitch beating or moving pan.
+5. An optional fixed 23/31 ms cross-channel delay has no feedback and no modulation.
+6. `masterEnergy` is applied after spectral construction, on a preset-defined dB curve. It cannot change group weights, frequencies, width, or effect parameters.
+7. Restrained symmetric `tanh` saturation catches additive peaks.
+8. Fixed GVerb parameters add space. A final limiter provides a safety ceiling.
 
-## Manual audition
+All audible defaults and all audition timing values are centralized in `sound/eeg_harmonics_manual_config.scd`; the DSP file contains topology, mathematical constants, and safety bounds only.
 
-Start the existing SuperDirt/scsynth setup, open `sound/eeg_harmonics_manual.scd`, and evaluate its single block. It never boots or reboots the server. It creates one dedicated group and one persistent synth, registers no live EEG OSC endpoint, and coexists with the existing server.
+## Manual controls
 
-Run one demonstration at a time in the SuperCollider IDE:
+After the existing scsynth/SuperDirt server is running, evaluate `sound/eeg_harmonics_manual.scd` once.
 
 ```supercollider
-~eegHarmonicsManual[\sweepMaster].value;      // loudness only
-~eegHarmonicsManual[\sweepBrightness].value;  // warm -> bright -> warm
-~eegHarmonicsManual[\sweepGroups].value;      // groups 1, 2, 3, 4
-~eegHarmonicsManual[\auditionGroup].value(1); // isolate any group, 1..4
-~eegHarmonicsManual[\setGroups].value(1, 0.7, 0.34, 0.16);
-~eegHarmonicsManual[\setEnergy].value(0.72);
-```
+~eegHarmonicsManual[\setPreset].value(\warm_organic);
+~eegHarmonicsManual[\setPreset].value(\air_glass);
+~eegHarmonicsManual[\setPreset].value(\dark_mineral);
 
-Edit `sound/eeg_harmonics_manual_config.scd` for the fundamental, 8/12-partial choice, group levels, smoothing, width, saturation, space and trim. Re-evaluate the manual file after editing. Stop gracefully with:
-
-```supercollider
+~eegHarmonicsManual[\sweepMaster].value;
+~eegHarmonicsManual[\sweepBrightness].value;
+~eegHarmonicsManual[\sweepGroups].value;
+~eegHarmonicsManual[\auditionGroup].value(1); // 1..4
+~eegHarmonicsManual[\setGroups].value(1, 0.7, 0.3, 0.1);
+~eegHarmonicsManual[\setEnergy].value(0.66);
 ~eegHarmonicsManual[\stop].value;
 ```
 
-## Offline isolated recordings
+Preset switching is smoothed and retains the same Synth node. Select a preset before judging its palette; switching fundamental while sound is active necessarily produces a smoothed pitch transition.
 
-The renderer uses scsynth non-realtime mode and the exact same SynthDef/config as manual audition. It neither uses an audio input device nor starts the live EEG pipeline:
+## Comparable preset renders
 
 ```powershell
-.\scripts\render_eeg_harmonics_manual.ps1
+.\scripts\render_eeg_harmonic_presets.ps1
 ```
 
-If `sclang` is not on `PATH`, pass `-SclangPath`. Six 48 kHz, stereo, 24-bit WAV files are written to `recordings/eeg_harmonics_manual`: master-energy sweep, warm/bright redistribution sweep, and one isolated recording for each group.
+This writes three equal-duration, 48 kHz, stereo, 24-bit PCM WAV files under `recordings/eeg_harmonic_presets`. Each uses the same timeline: base mix; master low/high/low; warm/bright/warm redistribution; groups 1/2/3/4; base mix return. The README in that directory lists parameters, intended character, and objective QA measurements.
+
+The earlier six isolated prototype renders and their legacy renderer remain available under `recordings/eeg_harmonics_manual`.
 
 ## Approval gate
 
-No mapping from F3, F4, C3, C4, P3 or P4 has been added. The prototype has no `/eeg/organism/frame` handler. Any live mapping requires a separate, explicit palette approval and a later integration step.
+No mapping from F3, F4, C3, C4, P3, or P4 has been added. The manual instrument has no `/eeg/organism/frame` handler. Live integration remains a later explicit step after palette approval.

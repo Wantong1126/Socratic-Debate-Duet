@@ -8,10 +8,11 @@ from scipy.io import wavfile
 
 ROOT = Path(__file__).resolve().parents[1]
 RECORDINGS = ROOT / "recordings" / "eeg_harmonics_manual"
+PRESET_RECORDINGS = ROOT / "recordings" / "eeg_harmonic_presets"
 
 
-def _segment_metrics(filename, start, end):
-    sample_rate, raw = wavfile.read(RECORDINGS / filename)
+def _segment_metrics(filename, start, end, directory=RECORDINGS):
+    sample_rate, raw = wavfile.read(directory / filename)
     # scipy left-justifies 24-bit PCM in int32.
     audio = raw.astype(np.float64) / (2**31)
     segment = audio[int(start * sample_rate) : int(end * sample_rate)]
@@ -47,6 +48,8 @@ def test_manual_engine_is_disconnected_and_has_no_autonomous_articulation():
 
     assert "OSCdef(" not in executable
     assert "'/eeg/organism/frame'" not in executable
+    assert "s.quit" not in executable
+    assert manual.count("Synth.tail(") == 1
     for forbidden in (
         "Impulse.",
         "Dust.",
@@ -56,8 +59,30 @@ def test_manual_engine_is_disconnected_and_has_no_autonomous_articulation():
         "SinOsc.kr",
         "Demand.",
         "TDuty.",
+        "LocalIn.",
+        "CombN.",
+        "CombL.",
+        "CombC.",
     ):
         assert forbidden not in executable
+
+
+def test_three_centralized_presets_are_available_without_live_mapping():
+    config = (ROOT / "sound" / "eeg_harmonics_manual_config.scd").read_text()
+    support = (ROOT / "sound" / "eeg_harmonics_preset_support.scd").read_text()
+    manual = (ROOT / "sound" / "eeg_harmonics_manual.scd").read_text()
+
+    for name in ("warm_organic", "air_glass", "dark_mineral"):
+        assert f"{name}: (" in config
+    for parameter in (
+        "fundamental", "harmonicCount", "baseGroups", "groupTrims",
+        "groupLoudnessComp", "harmonicRollOff", "panPositions",
+        "stereoWidth", "saturationDrive", "delayMix", "reverbMix",
+        "reverbTime", "reverbDamping", "limiterDb",
+    ):
+        assert f"{parameter}:" in config
+    assert "setPreset" in manual
+    assert "groupLoudnessComp" in support
 
 
 def test_all_six_recordings_are_stereo_48k_24bit_with_headroom():
@@ -112,6 +137,53 @@ def test_isolated_groups_have_distinct_ordered_spectral_contributions():
     assert max(levels) - min(levels) < 2.5
     assert centroids == sorted(centroids)
     assert all(right - left > 150 for left, right in zip(centroids, centroids[1:]))
+
+
+def test_preset_auditions_share_format_duration_headroom_and_sequence_behavior():
+    files = sorted(PRESET_RECORDINGS.glob("*.wav"))
+    assert [path.name for path in files] == [
+        "01_warm_organic.wav", "02_air_glass.wav", "03_dark_mineral.wav"
+    ]
+    frame_counts = []
+    for path in files:
+        with wave.open(str(path), "rb") as recording:
+            assert recording.getnchannels() == 2
+            assert recording.getframerate() == 48000
+            assert recording.getsampwidth() == 3
+            frame_counts.append(recording.getnframes())
+        _, raw = wavfile.read(path)
+        peak = np.max(np.abs(raw.astype(np.float64) / (2**31)))
+        assert 0.01 < peak < 0.85
+    assert len(set(frame_counts)) == 1
+    assert abs(frame_counts[0] / 48000 - 56) < 0.01
+
+    for path in files:
+        filename = path.name
+        low_start = _segment_metrics(filename, 5.5, 6.5, PRESET_RECORDINGS)
+        high = _segment_metrics(filename, 8.5, 9.5, PRESET_RECORDINGS)
+        low_return = _segment_metrics(filename, 12.4, 13.4, PRESET_RECORDINGS)
+        assert high[0] - low_start[0] > 10
+        assert abs(low_return[0] - low_start[0]) < 1.5
+
+        warm_start = _segment_metrics(filename, 16.5, 17.5, PRESET_RECORDINGS)
+        bright = _segment_metrics(filename, 20.5, 21.5, PRESET_RECORDINGS)
+        warm_return = _segment_metrics(filename, 24.5, 25.5, PRESET_RECORDINGS)
+        levels = [warm_start[0], bright[0], warm_return[0]]
+        assert max(levels) - min(levels) < 0.7
+        assert bright[1] / warm_start[1] > 4
+
+        groups = [
+            _segment_metrics(filename, start, start + 1, PRESET_RECORDINGS)
+            for start in (28.5, 32.5, 36.5, 40.5)
+        ]
+        group_levels = [item[0] for item in groups]
+        group_centroids = [item[1] for item in groups]
+        assert max(group_levels) - min(group_levels) < 0.7
+        assert group_centroids == sorted(group_centroids)
+
+        base = _segment_metrics(filename, 2.2, 3.5, PRESET_RECORDINGS)
+        base_return = _segment_metrics(filename, 44.5, 47.0, PRESET_RECORDINGS)
+        assert abs(base_return[0] - base[0]) < 0.3
 
 
 def load_tests(loader, tests, pattern):
