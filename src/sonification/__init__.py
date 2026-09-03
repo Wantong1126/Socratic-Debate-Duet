@@ -4,6 +4,22 @@ This package does not acquire EEG or start a live pipeline. Existing acquisition
 preprocessing, feature extraction, and SuperCollider entry points remain in place.
 """
 
+from .controls import (
+    BAND_FIELDS,
+    DESCRIPTOR_FIELDS,
+    HarmonicInstrumentControls,
+    frame_to_instrument_controls,
+)
+from .protocol import (
+    ORGANISM_FRAME_ADDRESS,
+    ORGANISM_PARAMETER_ORDER,
+    ORGANISM_PROTOCOL_VERSION,
+    ORGANISM_STOP_ADDRESS,
+    OrganismControlFrame,
+    OrganismControlSender,
+)
+
+# Compatibility exports for the already documented five-control manual demo.
 from .harmonics_mapping import (
     EEG_BAND_ORDER,
     band_controls_to_group_amplitudes,
@@ -16,10 +32,20 @@ from .harmonics_protocol import (
 )
 
 __all__ = (
+    "BAND_FIELDS",
+    "DESCRIPTOR_FIELDS",
     "EEG_BAND_ORDER",
     "HARMONICS_FRAME_ADDRESS",
     "HARMONICS_PARAMETER_ORDER",
+    "HarmonicInstrumentControls",
     "HarmonicsControlFrame",
+    "ORGANISM_FRAME_ADDRESS",
+    "ORGANISM_PARAMETER_ORDER",
+    "ORGANISM_PROTOCOL_VERSION",
+    "ORGANISM_STOP_ADDRESS",
+    "OrganismControlFrame",
+    "OrganismControlSender",
     "band_controls_to_group_amplitudes",
     "band_controls_to_harmonics_frame",
+    "frame_to_instrument_controls",
 )
