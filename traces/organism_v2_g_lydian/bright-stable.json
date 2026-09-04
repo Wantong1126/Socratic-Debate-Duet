@@ -1,0 +1,491 @@
+{
+  "scenario": "bright-stable",
+  "seed": 20260904,
+  "pitch_material": [
+    "G",
+    "A",
+    "B",
+    "C#",
+    "D",
+    "E",
+    "F#"
+  ],
+  "controls": {
+    "energy": 0.45,
+    "centroid": 0.86,
+    "mobility": 0.18,
+    "spectral_entropy": 0.18,
+    "novelty": 0.05
+  },
+  "mapping_status": "artistic mapping; not a mental-state inference",
+  "decisions": [
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        67,
+        74,
+        81
+      ],
+      "note_names": [
+        "G4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        391.995436,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303605,
+        0.329735,
+        0.36666
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.76,
+        "interval_tension": 0.24,
+        "entropy_fit": 0.957778,
+        "register_fit": 0.991701,
+        "spacing": 0.913931,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.268631
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        66,
+        74,
+        81
+      ],
+      "note_names": [
+        "F#4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        369.994423,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303191,
+        0.329931,
+        0.366878
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.833333,
+        "interval_tension": 0.166667,
+        "entropy_fit": 0.94037,
+        "register_fit": 0.964533,
+        "spacing": 0.843779,
+        "common_tone_retention": 0.666667,
+        "voice_leading": 0.870325,
+        "voice_leading_semitones": 0.333333,
+        "density_fit": 1.0,
+        "total": 9.813702
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=0.67, motion=0.33 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        66,
+        74,
+        81
+      ],
+      "note_names": [
+        "F#4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        369.994423,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303191,
+        0.329931,
+        0.366878
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.833333,
+        "interval_tension": 0.166667,
+        "entropy_fit": 0.94037,
+        "register_fit": 0.964533,
+        "spacing": 0.843779,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.152055
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        66,
+        74,
+        81
+      ],
+      "note_names": [
+        "F#4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        369.994423,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303191,
+        0.329931,
+        0.366878
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.833333,
+        "interval_tension": 0.166667,
+        "entropy_fit": 0.94037,
+        "register_fit": 0.964533,
+        "spacing": 0.843779,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.152055
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        66,
+        74,
+        81
+      ],
+      "note_names": [
+        "F#4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        369.994423,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303191,
+        0.329931,
+        0.366878
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.833333,
+        "interval_tension": 0.166667,
+        "entropy_fit": 0.94037,
+        "register_fit": 0.964533,
+        "spacing": 0.843779,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.152055
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    },
+    {
+      "midi_notes": [
+        66,
+        74,
+        81
+      ],
+      "note_names": [
+        "F#4",
+        "D5",
+        "A5"
+      ],
+      "frequencies_hz": [
+        369.994423,
+        587.329536,
+        880.0
+      ],
+      "weights": [
+        0.303191,
+        0.329931,
+        0.366878
+      ],
+      "hold_duration_seconds": 9.803,
+      "scores": {
+        "scale_membership": 1.0,
+        "interval_consonance": 0.833333,
+        "interval_tension": 0.166667,
+        "entropy_fit": 0.94037,
+        "register_fit": 0.964533,
+        "spacing": 0.843779,
+        "common_tone_retention": 1.0,
+        "voice_leading": 1.0,
+        "voice_leading_semitones": 0.0,
+        "density_fit": 1.0,
+        "total": 11.152055
+      },
+      "reason": "high register from centroid; consonant interval target from entropy; 3/6 active slots; retention=1.00, motion=0.00 st; hold=9.803s from mobility",
+      "active_voice_count": 3,
+      "capacity_slots": 6
+    }
+  ]
+}

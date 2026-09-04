@@ -1,6 +1,7 @@
 // Render one steady-state organism v2 LOW or HIGH condition in NRT.
 (
-var here, library, v2Config, preset, field, level, outputPath;
+var here, library, v2Config, preset, betaProfileName, betaProfile;
+var field, level, outputPath, oscScorePath, archiveDirectory;
 var groups, bandNames, bandIndex, definition, score, options;
 var gateTime, renderDuration;
 
@@ -13,11 +14,24 @@ v2Config = thisProcess.interpreter.executeFile(
 preset = library[\presets][v2Config[\basePreset]].copy;
 v2Config[\synthOverrides].keysValuesDo { |key, value| preset[key] = value };
 preset[\harmonicGroups] = v2Config[\harmonicGroups];
+betaProfileName = ("EEG_ORGANISM_V2_BETA_PROFILE".getenv
+    ? v2Config[\betaProfile].asString).asSymbol;
+betaProfile = v2Config[\betaProfiles][betaProfileName];
+if(betaProfile.isNil) {
+    ("Unknown organism v2 beta profile: " ++ betaProfileName).error;
+    1.exit
+};
+betaProfile.keysValuesDo { |key, value| preset[key] = value };
 
 field = ("EEG_ORGANISM_V2_FIELD".getenv ? "energy").asSymbol;
 level = ("EEG_ORGANISM_V2_LEVEL".getenv ? "low").asSymbol;
 outputPath = "EEG_ORGANISM_V2_OUTPUT".getenv;
 if(outputPath.isNil) { "EEG_ORGANISM_V2_OUTPUT is required.".error; 1.exit };
+// Keep the temporary NRT score beside the requested workspace output instead
+// of relying on a user-profile temp directory that may not be writable.
+oscScorePath = outputPath ++ ".osc";
+archiveDirectory = "EEG_ORGANISM_V2_ARCHIVE_DIR".getenv;
+if(archiveDirectory.notNil) { Archive.archiveDir = archiveDirectory };
 
 groups = preset[\baseGroups].copy;
 if(field == \energy) {
@@ -55,6 +69,7 @@ options.blockSize = 64;
 options.memSize = 65536;
 
 Score(score).recordNRT(
+    oscFilePath: oscScorePath,
     outputFilePath: outputPath,
     sampleRate: 48000,
     headerFormat: "WAV",
@@ -62,6 +77,7 @@ Score(score).recordNRT(
     options: options,
     duration: renderDuration,
     action: {
+        File.delete(oscScorePath);
         ("RENDERED V2 " ++ field ++ " " ++ level ++ " -> " ++ outputPath).postln;
         0.exit;
     }

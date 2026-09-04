@@ -3,12 +3,13 @@
 // Evaluate only after the existing SuperDirt/scsynth server is running.
 // This file never boots, reboots, or quits the server. It reuses the tested
 // harmonic-field SynthDef factory and creates one dedicated Group + one Synth.
+// Both six-slot pitch banks live inside that one persistent Synth.
 // Frame order: energy, centroid, mobility, spectralEntropy, novelty,
 // delta, theta, alpha, beta.
 
 (
-var here, library, v2Config, preset, frameOrder, oldState, state;
-var clampUnit, stopReceiver, startReceiver;
+var here, library, v2Config, preset, betaProfile, frameOrder, oldState, state;
+var clampUnit, clampFrequency, stopReceiver, startReceiver;
 
 here = PathName(thisProcess.nowExecutingPath).pathOnly;
 thisProcess.interpreter.executeFile(here +/+ "eeg_harmonic_field_v2_core.scd");
@@ -20,6 +21,12 @@ v2Config = thisProcess.interpreter.executeFile(
 preset = library[\presets][v2Config[\basePreset]].copy;
 v2Config[\synthOverrides].keysValuesDo { |key, value| preset[key] = value };
 preset[\harmonicGroups] = v2Config[\harmonicGroups];
+preset[\voiceCapacity] = v2Config[\voiceCapacity];
+betaProfile = v2Config[\betaProfiles][v2Config[\betaProfile]];
+if(betaProfile.isNil) {
+    Error("Unknown organism v2 beta profile: " ++ v2Config[\betaProfile]).throw
+};
+betaProfile.keysValuesDo { |key, value| preset[key] = value };
 frameOrder = [
     \energy, \centroid, \mobility, \spectralEntropy, \novelty,
     \delta, \theta, \alpha, \beta
@@ -44,6 +51,10 @@ state[\config] = v2Config;
 state[\previousFrameAt] = nil;
 state[\receiveInterval] = 0.0;
 state[\lastDisplayFrameCount] = 0;
+state[\activeVoicingBank] = 0;
+state[\voicingCount] = 0;
+state[\lastVoicing] = IdentityDictionary.new;
+state[\nextVoicingAt] = Main.elapsedTime;
 ~eegOrganismV2 = state;
 
 clampUnit = { |item|
@@ -51,6 +62,15 @@ clampUnit = { |item|
     value = try { item.asFloat } { 0.0 };
     if(value.isNaN) { value = 0.0 };
     value.clip(0.0, 1.0);
+};
+clampFrequency = { |item|
+    var value;
+    value = try { item.asFloat } { preset[\fundamental].asFloat };
+    if(value.isNaN) { value = preset[\fundamental].asFloat };
+    value.clip(
+        preset[\voiceFrequencyMinHz],
+        preset[\voiceFrequencyMaxHz]
+    );
 };
 
 stopReceiver = { |immediate = false|
@@ -68,7 +88,8 @@ stopReceiver = { |immediate = false|
     } {
         if(state[\stopping].not) {
             state[\stopping] = true;
-            [\eegOrganismV2Frame, \eegOrganismV2Stop].do { |key|
+            [\eegOrganismV2Frame, \eegOrganismV2Voicing,
+                \eegOrganismV2Stop].do { |key|
                 OSCdef(key).tryPerform(\free)
             };
             state[\watchdog].tryPerform(\stop);
@@ -172,6 +193,45 @@ startReceiver = {
                 };
             }, '/eeg/organism/v2/frame', recvPort: 57120);
 
+            OSCdef(\eegOrganismV2Voicing, { |message|
+                var frequencies, weights, nextBank, now;
+                if(message.size == 13 and: { state[\stopping].not }) {
+                    now = Main.elapsedTime;
+                    frequencies = message.copyRange(1, 6).collect(clampFrequency);
+                    weights = message.copyRange(7, 12).collect(clampUnit);
+                    if(now < state[\nextVoicingAt]) {
+                        "Organism v2: voicing ignored until current crossfade completes.".warn;
+                    } {
+                        if(weights.sum > 0.0001) {
+                            // Populate only the inaudible bank, then crossfade the
+                            // same persistent Synth. No server object is allocated.
+                            nextBank = 1 - state[\activeVoicingBank];
+                            if(nextBank == 0) {
+                                synth.setn(\voiceFrequenciesA, frequencies);
+                                synth.setn(\voiceWeightsA, weights);
+                            } {
+                                synth.setn(\voiceFrequenciesB, frequencies);
+                                synth.setn(\voiceWeightsB, weights);
+                            };
+                            synth.set(\voicingBank, nextBank);
+                            state[\activeVoicingBank] = nextBank;
+                            state[\lastVoicing][\frequenciesHz] = frequencies;
+                            state[\lastVoicing][\weights] = weights;
+                            state[\voicingCount] = state[\voicingCount] + 1;
+                            state[\nextVoicingAt] = now + preset[\voicingCrossfade];
+                            ("Organism v2 voicing=" ++ state[\voicingCount]
+                                ++ " bank=" ++ nextBank
+                                ++ " frequenciesHz=" ++ frequencies
+                                ++ " weights=" ++ weights).postln;
+                        } {
+                            "Organism v2: rejected silent voicing (all weights zero).".warn;
+                        };
+                    };
+                } {
+                    "Organism v2: rejected voicing (expected 6 frequencies + 6 weights).".warn;
+                };
+            }, '/eeg/organism/v2/voicing', recvPort: 57120);
+
             OSCdef(\eegOrganismV2Stop, {
                 state[\stop].value(false);
             }, '/eeg/organism/v2/stop', recvPort: 57120);
@@ -198,8 +258,13 @@ startReceiver = {
             "Stable tree: one dedicated Group + one persistent harmonic Synth.".postln;
             ("Node IDs: " ++ state[\nodeIDs]).postln;
             "Waiting for /eeg/organism/v2/frame; silent until the first frame.".postln;
+            "Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).".postln;
             "Centroid, mobility, spectral entropy, and novelty are storage/display only.".postln;
             ("Exact harmonic groups: " ++ v2Config[\harmonicGroups]).postln;
+            ("Beta profile: " ++ v2Config[\betaProfile]
+                ++ " (ceiling=" ++ preset[\betaCeilingHz]
+                ++ " Hz, upper tilt=" ++ preset[\betaUpperPartialTiltDb]
+                ++ " dB, trim=" ++ preset[\betaTrim] ++ ")").postln;
         };
     }).play(AppClock);
 };

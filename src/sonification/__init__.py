@@ -10,13 +10,22 @@ from .controls import (
     HarmonicInstrumentControls,
     frame_to_instrument_controls,
 )
+from .features import (
+    NOVELTY_FEATURE_ORDER,
+    NoveltyEstimator,
+    spectral_entropy,
+)
 from .protocol import (
     ORGANISM_FRAME_ADDRESS,
     ORGANISM_PARAMETER_ORDER,
     ORGANISM_PROTOCOL_VERSION,
     ORGANISM_STOP_ADDRESS,
+    ORGANISM_VOICE_CAPACITY,
+    ORGANISM_VOICING_ADDRESS,
+    ORGANISM_VOICING_PARAMETER_ORDER,
     OrganismControlFrame,
     OrganismControlSender,
+    OrganismVoicingFrame,
 )
 
 # Compatibility exports for the already documented five-control manual demo.
@@ -43,9 +52,16 @@ __all__ = (
     "ORGANISM_PARAMETER_ORDER",
     "ORGANISM_PROTOCOL_VERSION",
     "ORGANISM_STOP_ADDRESS",
+    "ORGANISM_VOICE_CAPACITY",
+    "ORGANISM_VOICING_ADDRESS",
+    "ORGANISM_VOICING_PARAMETER_ORDER",
+    "NOVELTY_FEATURE_ORDER",
+    "NoveltyEstimator",
     "OrganismControlFrame",
     "OrganismControlSender",
+    "OrganismVoicingFrame",
     "band_controls_to_group_amplitudes",
     "band_controls_to_harmonics_frame",
     "frame_to_instrument_controls",
+    "spectral_entropy",
 )

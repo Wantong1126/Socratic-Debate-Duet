@@ -1,38 +1,112 @@
 // Targeted v2 variant of the tested additive harmonic field.
 //
-// The topology remains one continuous exact-harmonic SinOsc bank, fixed stereo
-// placement/delay, restrained saturation, GVerb, and limiter. Differences from
-// the historical manual core are confined to configurable exact harmonic groups,
-// normalization after perceptual weighting, and a post-effect transportAlive
-// watchdog control. Evaluating this file only defines a factory function.
+// The topology remains one continuous exact-harmonic oscillator field, fixed stereo
+// placement/delay, restrained saturation, GVerb, and limiter. The v2 core has
+// two internal six-slot banks so pitch material can crossfade without creating
+// nodes or changing the approved timbre. Evaluating this file only defines a
+// factory function.
 
 ~makeEegOrganismV2HarmonicFieldSynthDef = {
     |defName = \eegOrganismV2HarmonicField, preset|
-    var harmonicGroups, harmonicNumbers, groupIndexes;
+    var harmonicGroups, harmonicNumbers, groupIndexes, betaHarmonics;
+    var betaLowestHarmonic, betaHighestHarmonic;
+    var voiceCapacity, defaultVoiceFrequencies, defaultVoiceWeights;
+    var weightedShapes, groupWavetables, groupEnergyScales, groupPanPositions;
+    var wavetableSignalSize, maximumHarmonic;
     if(preset.isNil) { Error("A centralized v2 harmonic preset is required.").throw };
     harmonicGroups = preset[\harmonicGroups];
     if(harmonicGroups.isNil or: { harmonicGroups.size != 4 }) {
         Error("The v2 preset must define exactly four harmonicGroups.").throw
     };
     harmonicNumbers = harmonicGroups.flat;
+    betaHarmonics = harmonicGroups[3];
+    betaLowestHarmonic = betaHarmonics.minItem;
+    betaHighestHarmonic = betaHarmonics.maxItem;
+    voiceCapacity = preset[\voiceCapacity] ? 6;
+    if(voiceCapacity != 6) {
+        Error("The organism v2 voiceCapacity must remain exactly six.").throw
+    };
+    defaultVoiceFrequencies = Array.fill(voiceCapacity, preset[\fundamental]);
+    defaultVoiceWeights = [1.0] ++ Array.fill(voiceCapacity - 1, 0.0);
     groupIndexes = harmonicGroups.collect { |group, index|
         Array.fill(group.size, index)
     }.flat;
+    wavetableSignalSize = 128;
+    maximumHarmonic = harmonicNumbers.maxItem;
+
+    // Compile the approved harmonic envelope into four small persistent local
+    // wavetables. This keeps the graph narrow enough for an already-running
+    // default scsynth while preserving every configured exact harmonic number.
+    weightedShapes = harmonicNumbers.collect { |harmonic, index|
+        var frequency, f2, numerator, denominator, aDb, compensation;
+        var groupIndex, betaShape, betaPosition, ceilingRatio, betaTrim;
+        groupIndex = groupIndexes[index];
+        frequency = preset[\fundamental] * harmonic;
+        f2 = frequency.squared;
+        numerator = 12194.squared * f2.squared;
+        denominator = (f2 + 20.6.squared)
+            * ((f2 + 107.7.squared) * (f2 + 737.9.squared)).sqrt
+            * (f2 + 12194.squared);
+        aDb = (numerator / denominator).ampdb + 2.0;
+        compensation = aDb.neg.dbamp.clip(0.35, 5.0);
+        betaShape = if(groupIndex == 3) {
+            betaPosition = (harmonic - betaLowestHarmonic)
+                / (betaHighestHarmonic - betaLowestHarmonic).max(1);
+            ceilingRatio = (frequency / preset[\betaCeilingHz]).max(1.0);
+            (betaPosition * preset[\betaUpperPartialTiltDb]).dbamp
+                * ceilingRatio.squared.reciprocal
+        } {
+            1.0
+        };
+        betaTrim = if(groupIndexes[index] == 3) { preset[\betaTrim] } { 1.0 };
+        preset[\groupTrims][groupIndex]
+            * preset[\groupLoudnessComp][groupIndex]
+            * (harmonic ** preset[\harmonicRollOff].neg)
+            * compensation
+            * betaShape
+            * betaTrim;
+    };
+    if(weightedShapes.collect(_.squared).sum <= 0) {
+        Error("The organism v2 harmonic envelope must have nonzero energy.").throw
+    };
+    groupWavetables = harmonicGroups.collect { |group|
+        var amplitudes, signal;
+        amplitudes = Array.fill(maximumHarmonic, 0.0);
+        group.do { |harmonic|
+            amplitudes[harmonic - 1] = weightedShapes[harmonicNumbers.indexOf(harmonic)]
+        };
+        // Instance sineFill deliberately avoids class-side peak normalization;
+        // groupEnergyScales below is therefore the single level normalizer.
+        signal = Signal.newClear(wavetableSignalSize);
+        signal.sineFill(amplitudes);
+        signal.asWavetable;
+    };
+    groupEnergyScales = harmonicGroups.collect { |group|
+        (group.collect { |harmonic|
+            weightedShapes[harmonicNumbers.indexOf(harmonic)].squared
+        }.sum + 1e-9).sqrt
+    };
+    groupPanPositions = harmonicGroups.collect { |group|
+        var indexes, weights, weightSum;
+        indexes = group.collect { |harmonic| harmonicNumbers.indexOf(harmonic) };
+        weights = indexes.collect { |index| weightedShapes[index].abs };
+        weightSum = weights.sum.max(1e-9);
+        indexes.collect { |index, localIndex|
+            preset[\panPositions][index] * weights[localIndex]
+        }.sum / weightSum
+    };
 
     SynthDef(defName, {
         |out = 0, gate = 1|
-        var fundamental, harmonicRollOff, controlLag, energyLag;
-        var groupControls, groupTrims, groupLoudnessComp, panPositions;
-        var weightedShapes, perceptualNorm, partials, source, delayed, delayMix;
+        var controlLag, energyLag, groupControls, stereoWidth;
+        var wavetableBuffers, groupNorm, makeBank;
+        var sourceA, sourceB, bankPosition;
+        var source, delayed, delayMix;
         var energy, energyAmp, saturated, wet, signal, life, transportAlive;
         var saturationDrive, limiterDb;
+        var voiceFrequenciesA, voiceFrequenciesB, voiceWeightsA, voiceWeightsB;
+        var voiceFrequencyMinHz, voiceFrequencyMaxHz, polyphonySafetyTrim;
 
-        fundamental = NamedControl.kr(
-            \fundamental, preset[\fundamental]
-        ).clip(40, 160);
-        harmonicRollOff = NamedControl.kr(
-            \harmonicRollOff, preset[\harmonicRollOff]
-        ).clip(0, 2);
         controlLag = NamedControl.kr(
             \controlLag, preset[\controlLag]
         ).clip(0.02, 8);
@@ -44,52 +118,69 @@
         ).collect { |value|
             VarLag.kr(value.clip(0, 1), controlLag, warp: -4)
         };
-        groupTrims = NamedControl.kr(
-            \groupTrims, preset[\groupTrims]
-        ).collect { |value| value.clip(0.1, 2) };
-        groupLoudnessComp = NamedControl.kr(
-            \groupLoudnessComp, preset[\groupLoudnessComp]
-        ).collect { |value| value.clip(0.25, 2) };
-        panPositions = NamedControl.kr(
-            \panPositions, preset[\panPositions]
-        ).collect { |value| value.clip(-1, 1) };
-
-        // Normalize the final perceptually weighted amplitudes, so an isolated
-        // band changes spectral location much more than aggregate level.
-        weightedShapes = harmonicNumbers.collect { |harmonic, index|
-            var frequency, f2, numerator, denominator, aDb, compensation;
-            var groupIndex;
-            groupIndex = groupIndexes[index];
-            frequency = fundamental * harmonic;
-            f2 = frequency.squared;
-            numerator = 12194.squared * f2.squared;
-            denominator = (f2 + 20.6.squared)
-                * ((f2 + 107.7.squared) * (f2 + 737.9.squared)).sqrt
-                * (f2 + 12194.squared);
-            aDb = (numerator / denominator).ampdb + 2.0;
-            compensation = aDb.neg.dbamp.clip(0.35, 5.0);
-            groupControls[groupIndex]
-                * groupTrims[groupIndex]
-                * groupLoudnessComp[groupIndex]
-                * (harmonic ** harmonicRollOff.neg)
-                * compensation;
+        stereoWidth = NamedControl.kr(
+            \stereoWidth, preset[\stereoWidth]
+        ).clip(0, 1);
+        voiceFrequencyMinHz = NamedControl.kr(
+            \voiceFrequencyMinHz, preset[\voiceFrequencyMinHz]
+        ).clip(20, 200);
+        voiceFrequencyMaxHz = NamedControl.kr(
+            \voiceFrequencyMaxHz, preset[\voiceFrequencyMaxHz]
+        ).clip(200, 2000);
+        polyphonySafetyTrim = NamedControl.kr(
+            \polyphonySafetyTrim, preset[\polyphonySafetyTrim]
+        ).clip(0.5, 1.0);
+        voiceFrequenciesA = NamedControl.kr(
+            \voiceFrequenciesA, defaultVoiceFrequencies
+        ).collect { |value| value.clip(voiceFrequencyMinHz, voiceFrequencyMaxHz) };
+        voiceFrequenciesB = NamedControl.kr(
+            \voiceFrequenciesB, defaultVoiceFrequencies
+        ).collect { |value| value.clip(voiceFrequencyMinHz, voiceFrequencyMaxHz) };
+        voiceWeightsA = NamedControl.kr(
+            \voiceWeightsA, defaultVoiceWeights
+        ).collect { |value| value.clip(0, 1) };
+        voiceWeightsB = NamedControl.kr(
+            \voiceWeightsB, defaultVoiceWeights
+        ).collect { |value| value.clip(0, 1) };
+        wavetableBuffers = groupWavetables.collect { |wavetable|
+            LocalBuf.newFrom(wavetable)
         };
-        perceptualNorm = (weightedShapes.collect(_.squared).sum + 1e-9).sqrt;
-
-        partials = harmonicNumbers.collect { |harmonic, index|
-            Pan2.ar(
-                SinOsc.ar(
-                    fundamental * harmonic,
+        groupNorm = (groupControls.collect { |value, index|
+            (value * groupEnergyScales[index]).squared
+        }.sum + 1e-9).sqrt;
+        makeBank = { |frequencies, weights|
+            var weightNorm, groups;
+            // L2 normalization holds aggregate signal energy approximately
+            // steady as weighted polyphony changes. The fixed safety trim and
+            // final limiter cover correlated worst cases.
+            weightNorm = (weights.collect(_.squared).sum + 1e-9).sqrt;
+            groups = wavetableBuffers.collect { |buffer, index|
+                var voiceMix;
+                voiceMix = Mix(Osc.ar(
+                    buffer,
+                    frequencies,
                     0,
-                    weightedShapes[index] / perceptualNorm
-                ),
-                panPositions[index].clip(-1, 1)
-                    * NamedControl.kr(
-                        \stereoWidth, preset[\stereoWidth]
-                    ).clip(0, 1)
-            )
+                    weights / weightNorm
+                ));
+                Pan2.ar(
+                    voiceMix
+                        * groupControls[index]
+                        / groupNorm,
+                    groupPanPositions[index].clip(-1, 1) * stereoWidth
+                )
+            };
+            LeakDC.ar(Mix(groups)) * polyphonySafetyTrim;
         };
-        source = LeakDC.ar(Mix(partials));
+        sourceA = makeBank.value(voiceFrequenciesA, voiceWeightsA);
+        sourceB = makeBank.value(voiceFrequenciesB, voiceWeightsB);
+        bankPosition = VarLag.kr(
+            NamedControl.kr(\voicingBank, 0).clip(0, 1),
+            NamedControl.kr(
+                \voicingCrossfade, preset[\voicingCrossfade]
+            ).clip(0.1, 5),
+            warp: \sin
+        ) * 2 - 1;
+        source = XFade2.ar(sourceA, sourceB, bankPosition);
 
         // Fixed, feedback-free and unmodulated cross-channel delay.
         delayed = [
@@ -181,7 +272,7 @@
             \limiterDb, preset[\limiterDb]
         ).clip(-12, -0.1);
         signal = Limiter.ar(
-            signal
+            signal.sanitize
                 * NamedControl.kr(
                     \outputTrim, preset[\outputTrim]
                 ).clip(0, 1)
@@ -190,6 +281,9 @@
             limiterDb.dbamp,
             0.01
         );
+        // A final bounded guard catches pathological startup samples from the
+        // persistent local-wavetable/effect graph without changing normal audio.
+        signal = Clip.ar(signal.sanitize, limiterDb.dbamp.neg, limiterDb.dbamp);
         Out.ar(out, signal);
     });
 };
