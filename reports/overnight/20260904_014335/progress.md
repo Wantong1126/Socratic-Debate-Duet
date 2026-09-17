@@ -90,3 +90,14 @@ was the sole repository match and contains `00_rules.md` plus tasks 01–07.
 - Relevant full suite: `.venv\Scripts\python.exe -m unittest discover -s tests -q` — 90/90 passed.
 - Static/diff checks: Python `py_compile`, PowerShell parser, receiver sclang parse, and `git diff --check` passed (line-ending warnings only). Render temporary archive was removed; user processes were not stopped.
 - Pending/unresolved: morning listening must assess transition smoothness and timbral continuity; no automated/code blocker.
+
+## Task 06 — STOPPED: unexpected repository commit
+
+- Status: `BLOCKED / NOT VALIDATED`. Task 06 is not accepted as complete and Task 07 was not read or started.
+- During the Task 06 worker run, `HEAD` changed externally from the inspected baseline `bd4055d` to `210b7cc85846782b2c1901ef329117d2ca5b5e82`, and the previously uncommitted overnight work became committed with a clean worktree.
+- Commit metadata observed read-only: author/committer `Wantong1126 <s24452.zhang@stu.scie.com.cn>`, timestamp `2026-09-04 09:01:46 +0800`, subject beginning `1. beta softening`; it contains Tasks 01–05 artifacts plus a partial `src/sonification/synthetic_music_demo.py`.
+- This conflicts with the explicit queue rule `Do not commit`. Attribution cannot safely be inferred from Git metadata alone.
+- No reset, revert, amend, force operation, or other history rewrite was attempted. Undoing the commit would be destructive/ambiguous without explicit user direction.
+- The Task 06 worker also terminated due to its agent usage limit before final validation. Its partial implementation and committed traces/artifacts must not be treated as Task 06 results.
+- Last fully accepted validation remains Task 05: focused 7/7, full suite 90/90, and independent NRT render pass.
+- Required resolution: user must state whether commit `210b7cc` is intentional. If not intentional, explicitly authorize the desired recovery method; if intentional, authorize resuming Task 06 from that committed state.
