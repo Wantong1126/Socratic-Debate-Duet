@@ -1,25 +1,3 @@
-"""Versioned OSC contract for one candidate organism control frame."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-import math
-from typing import ClassVar, Mapping, Sequence
-
-
-ORGANISM_PROTOCOL_VERSION = 2
-ORGANISM_FRAME_ADDRESS = "/eeg/organism/v2/frame"
-ORGANISM_STOP_ADDRESS = "/eeg/organism/v2/stop"
-ORGANISM_VOICING_ADDRESS = "/eeg/organism/v2/voicing"
-ORGANISM_VOICE_CAPACITY = 6
-ORGANISM_VOICE_FREQUENCY_MIN_HZ = 40.0
-ORGANISM_VOICE_FREQUENCY_MAX_HZ = 500.0
-ORGANISM_VOICING_PARAMETER_ORDER = tuple(
-    f"frequency_{index}_hz" for index in range(1, ORGANISM_VOICE_CAPACITY + 1)
-) + tuple(f"weight_{index}" for index in range(1, ORGANISM_VOICE_CAPACITY + 1))
-ORGANISM_PARAMETER_ORDER = (
-    "energy",
-    "centroid",
     "mobility",
     "spectral_entropy",
     "novelty",

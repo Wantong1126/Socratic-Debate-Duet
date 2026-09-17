@@ -1,0 +1,657 @@
+{
+  "project": "SDD V1",
+  "date": "2026-09-17",
+  "status": "plan; not an implementation completion report",
+  "preferred_topological_order": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17",
+    "T18",
+    "T19",
+    "T20",
+    "T21",
+    "T22",
+    "T23",
+    "T24",
+    "T25",
+    "T26",
+    "T27",
+    "T28",
+    "T29",
+    "T30",
+    "T31",
+    "T32",
+    "T33",
+    "T34",
+    "T35",
+    "T36",
+    "T37"
+  ],
+  "parallel_ready_layers": [
+    [
+      "T01"
+    ],
+    [
+      "T02"
+    ],
+    [
+      "T03",
+      "T04",
+      "T10",
+      "T18",
+      "T29"
+    ],
+    [
+      "T05",
+      "T06",
+      "T11",
+      "T19"
+    ],
+    [
+      "T07",
+      "T12",
+      "T20"
+    ],
+    [
+      "T08",
+      "T21",
+      "T22",
+      "T23"
+    ],
+    [
+      "T09",
+      "T24"
+    ],
+    [
+      "T13",
+      "T14",
+      "T25"
+    ],
+    [
+      "T15",
+      "T26"
+    ],
+    [
+      "T16",
+      "T27",
+      "T31"
+    ],
+    [
+      "T17",
+      "T28",
+      "T32",
+      "T33"
+    ],
+    [
+      "T30"
+    ],
+    [
+      "T34"
+    ],
+    [
+      "T35",
+      "T36"
+    ],
+    [
+      "T37"
+    ]
+  ],
+  "tasks": [
+    {
+      "id": "T01",
+      "title": "确认能运行的 v2 起点",
+      "depends_on": [],
+      "kind": "verification",
+      "current_status": "代码存在；Task 06 未验收",
+      "files": [
+        "src/sonification/synthetic_music_demo.py",
+        "src/sonification/protocol.py",
+        "sound/eeg_organism_v2_receiver.scd",
+        "reports/overnight/20260904_014335/progress.md"
+      ],
+      "acceptance": "记录本地提交或源码哈希、启动命令、配置和实际接收器；针对 Task 06 跑已有相关测试与一次音频检查。输出哪些已验证、哪些未验证；不把旧的 90 passed 当成本次验证。"
+    },
+    {
+      "id": "T02",
+      "title": "定义带身份和时间的数据封套",
+      "depends_on": [
+        "T01"
+      ],
+      "kind": "code",
+      "current_status": "新增内部接口",
+      "files": [
+        "src/sdd/session_types.py（拟新增）"
+      ],
+      "acceptance": "每帧带 session_id、participant_id、seq、采样时间、接收时间、live/replay/fixture、valid/reason；事件带来源和目标。身份使用 A/B，不用真实姓名。保留现有 v2 九值帧，不偷偷追加字段。"
+    },
+    {
+      "id": "T03",
+      "title": "保存一次会话的可追溯记录",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "code",
+      "current_status": "新增",
+      "files": [
+        "src/sdd/session_recorder.py（拟新增）"
+      ],
+      "acceptance": "保存配置快照、代码版本、源元数据、种子、原始信号块及帧/按钮/质量事件；用同一单调时间轴并记录与墙钟的对应。只在明确开启采集记录时保存真人数据；模拟记录明确标记。"
+    },
+    {
+      "id": "T04",
+      "title": "提供确定性的模拟输入",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "code",
+      "current_status": "复用并封装",
+      "files": [
+        "src/sonification/synthetic_demo.py",
+        "src/sonification/synthetic_music_demo.py",
+        "tests/fixtures（拟新增）"
+      ],
+      "acceptance": "固定种子、固定输入序列可重复；可指定单字段扫值及断流。控制参数 fixture 和模拟原始 EEG 分开标记，都不能显示为真人脑电。"
+    },
+    {
+      "id": "T05",
+      "title": "按原时间回放已保存输入",
+      "depends_on": [
+        "T03",
+        "T04"
+      ],
+      "kind": "code",
+      "current_status": "新增",
+      "files": [
+        "src/sdd/replay_source.py（拟新增）"
+      ],
+      "acceptance": "同一记录经两种映射时读取相同输入、事件和种子；记录使用 raw replay 还是 control replay，不能把两者混用。暂停/恢复不产生补发洪峰。"
+    },
+    {
+      "id": "T06",
+      "title": "发送有节奏的 v2 控制帧",
+      "depends_on": [
+        "T01",
+        "T02",
+        "T04"
+      ],
+      "kind": "code",
+      "current_status": "已有机制；需统一入口",
+      "files": [
+        "src/sonification/protocol.py",
+        "src/sonification/synthetic_music_demo.py"
+      ],
+      "acceptance": "九字段顺序不变；以现有 4 Hz 为调试起点，只保留最新帧，落后时不追赶补发。4 Hz 是控制刷新率，不是 EEG 采样率。非法值在封套中标为无效，不能仅被 clamp 为 0。"
+    },
+    {
+      "id": "T07",
+      "title": "让单人声部持续发声",
+      "depends_on": [
+        "T06"
+      ],
+      "kind": "code",
+      "current_status": "已有；需验收",
+      "files": [
+        "sound/eeg_harmonic_field_v2_core.scd",
+        "sound/eeg_organism_v2_receiver.scd",
+        "src/sonification/voicing.py"
+      ],
+      "acceptance": "保持现有持续 Synth/Group、六音容量和内部换音交叉淡化；帧更新不新增 Synth。固定输入能复现；长时间运行节点数不增长。内部 A/B 音库不是两个参与者。"
+    },
+    {
+      "id": "T08",
+      "title": "实现失联与停止时的淡出",
+      "depends_on": [
+        "T07"
+      ],
+      "kind": "code",
+      "current_status": "接收器已有；需接通",
+      "files": [
+        "sound/eeg_organism_v2_receiver.scd",
+        "src/sdd/session_runtime.py（拟新增）"
+      ],
+      "acceptance": "新鲜有效帧才更新健康状态；拔流、Python 崩溃和停止命令都能在配置时间内实际淡出。日志写原因。保留现有 watchdog、limiter 和渐变，不能只把 GUI 写成 mute。"
+    },
+    {
+      "id": "T09",
+      "title": "提供只变化一项的基线声音映射",
+      "depends_on": [
+        "T03",
+        "T07",
+        "T08"
+      ],
+      "kind": "code",
+      "current_status": "从现有映射提取调试配置",
+      "files": [
+        "config/sdd_v1.toml（拟新增）",
+        "src/sonification/controls.py"
+      ],
+      "acceptance": "先固定其他维度，只开放一个已有映射维度；低/中/高输入产生可重复的可听差异。保存参数范围；不要先让所有 EEG 指标一起控制声音。"
+    },
+    {
+      "id": "T10",
+      "title": "把按键转成质疑事件",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "code",
+      "current_status": "上一包有初版",
+      "files": [
+        "v1_start/controller_demo.py（上一交付包）",
+        "src/sdd/invitation_input.py（拟新增）"
+      ],
+      "acceptance": "一次按键输出唯一事件，包含 source、target、prompt_id、时间；例如 audience→A。只表示有人邀请 A 重看比较标准，不自动判断论证或道德。"
+    },
+    {
+      "id": "T11",
+      "title": "计算质疑事件的变化包络",
+      "depends_on": [
+        "T10"
+      ],
+      "kind": "code",
+      "current_status": "上一包已有纯状态模块",
+      "files": [
+        "v1_start/reflection_controller.py（上一交付包）",
+        "src/sdd/reflection_controller.py（拟接入）"
+      ],
+      "acceptance": "复用渐入/保持/渐出、冷却与防连按；一人事件不改另一人状态。超时原因保持 timeout，不记录为 reflection_success。初始时长是可调参数。"
+    },
+    {
+      "id": "T12",
+      "title": "把变化量送给同一声部",
+      "depends_on": [
+        "T06",
+        "T11"
+      ],
+      "kind": "code",
+      "current_status": "新增 OSC 接口",
+      "files": [
+        "src/sdd/invitation_osc.py（拟新增）",
+        "sound/eeg_organism_v2_receiver.scd"
+      ],
+      "acceptance": "独立消息传变化量、目标及序号；不覆盖原九字段。receiver 只更新对应声部参数；重复/过期消息不会重触发。协议名称在实现时明确记录并两端一致。"
+    },
+    {
+      "id": "T13",
+      "title": "候选一：平滑改变原声部的音色",
+      "depends_on": [
+        "T09",
+        "T12"
+      ],
+      "kind": "code",
+      "current_status": "新增试听候选",
+      "files": [
+        "sound/eeg_harmonic_field_v2_core.scd",
+        "config/sdd_v1.toml（拟新增）"
+      ],
+      "acceptance": "在原声部中连续改变泛音权重，保持主要音高/声像；变化量为零回到基线。原 EEG 调制继续有效；补偿响度差，不靠突然变响提醒。它是否像自己仍待试听。"
+    },
+    {
+      "id": "T14",
+      "title": "候选二：给原声部加入浅的节律起伏",
+      "depends_on": [
+        "T09",
+        "T12"
+      ],
+      "kind": "code",
+      "current_status": "新增试听候选",
+      "files": [
+        "sound/eeg_harmonic_field_v2_core.scd",
+        "config/sdd_v1.toml（拟新增）"
+      ],
+      "acceptance": "用连续包络调制已有声音的强弱，零变化量回基线；周期/深度可调、峰值受控。不是宣称与脑波或呼吸同步，也不是已批准的最终艺术选择。"
+    },
+    {
+      "id": "T15",
+      "title": "让本人拒绝、暂停或结束变化",
+      "depends_on": [
+        "T08",
+        "T11",
+        "T13",
+        "T14"
+      ],
+      "kind": "code",
+      "current_status": "状态已有；音频动作待接通",
+      "files": [
+        "src/sdd/reflection_controller.py（拟接入）",
+        "sound/eeg_organism_v2_receiver.scd"
+      ],
+      "acceptance": "分别记录 decline、pause、end、timeout、signal_loss；中途退出平滑，无隐藏评分。暂停/掉线恢复不自动重启旧邀请，必须有新的明确操作。"
+    },
+    {
+      "id": "T16",
+      "title": "生成同输入的三种试听版本",
+      "depends_on": [
+        "T05",
+        "T13",
+        "T14",
+        "T15"
+      ],
+      "kind": "code",
+      "current_status": "新增",
+      "files": [
+        "src/sdd/render_comparison.py（拟新增）",
+        "recordings/sdd_v1（拟新增）"
+      ],
+      "acceptance": "输出基线/音色变化/节律变化三段，使用同一输入、事件时间和种子；保存配置与响度指标。随机试听顺序仅用于比较，不把合成输入称作 EEG 实测。"
+    },
+    {
+      "id": "T17",
+      "title": "试听：改变是否可辨、是否仍是同一声部",
+      "depends_on": [
+        "T16"
+      ],
+      "kind": "research_gate",
+      "current_status": "未做",
+      "files": [
+        "docs/listening_checks.md（拟新增）"
+      ],
+      "acceptance": "作者先标记变化发生处、哪种版本像另一段提示音、哪种保留连续性；保存判断和反例。这是初筛，不是参与者自我归属的证据；不满意则创建新映射版本再走 T13–T17。"
+    },
+    {
+      "id": "T18",
+      "title": "接入一个人的真实 LSL 源",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "code",
+      "current_status": "旧采集路径可复用",
+      "files": [
+        "src/lsl_probe.py",
+        "src/eeg_control_demo.py",
+        "src/sdd/lsl_source.py（拟新增）"
+      ],
+      "acceptance": "按 source_id 绑定到 A，读取实际采样率、通道与单位；保存源时间和到达时间及校时方式。断流显示失联，不用默认 250 Hz 或其他流冒充。"
+    },
+    {
+      "id": "T19",
+      "title": "构建因果滤波和滑动窗口",
+      "depends_on": [
+        "T18"
+      ],
+      "kind": "code",
+      "current_status": "复用并调整频段",
+      "files": [
+        "src/window_engine.py",
+        "src/eeg_preprocessing.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "仅使用已到达样本，窗口满才产出；输出频段和窗口时长可追溯。计算 delta 时不能使用已经 4 Hz 高通过的窗口；工频、单位、采样率与实际设备配置相符。"
+    },
+    {
+      "id": "T20",
+      "title": "给每个窗口标记质量",
+      "depends_on": [
+        "T19"
+      ],
+      "kind": "code",
+      "current_status": "已有基础检查；需独立状态",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "标记缺样、非有限、平线、饱和/明显异常等及理由；阈值可配置。记录说话/动作测试条件。质量检查是基本筛查，不等于已经去除了全部肌电/眼动伪影。"
+    },
+    {
+      "id": "T21",
+      "title": "从有效窗口计算 E/C/M 描述量",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "旧模块可复用",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "输出 energy、centroid、mobility 的物理定义、单位和所选通道；有独立已知信号验证。先选一个明确通道或一个明确的有效通道汇总策略，不混淆六通道与六个人。"
+    },
+    {
+      "id": "T22",
+      "title": "计算真实频带功率",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "新旧实现需核对",
+      "files": [
+        "src/eeg_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "从真实功率谱得到 delta/theta/alpha/beta，明确频段端点与归一化分母；用已知频率输入验收。不能沿用 synthetic demo 的预设频带常量作为 live 输出。"
+    },
+    {
+      "id": "T23",
+      "title": "计算真实谱熵",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "纯函数已有",
+      "files": [
+        "src/sonification/features.py"
+      ],
+      "acceptance": "调用已有谱熵函数并校验频段/窗口；无效窗口不因函数返回 0 就被当作低熵。输出值与 valid 标志分开。"
+    },
+    {
+      "id": "T24",
+      "title": "按个人基线缩放特征",
+      "depends_on": [
+        "T21",
+        "T22",
+        "T23"
+      ],
+      "kind": "code",
+      "current_status": "旧 ECM 校准可复用扩展",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/calibration.py（拟新增）"
+      ],
+      "acceptance": "只用有效样本形成个人范围；不足/范围退化时报告校准失败，不把噪声放大至全范围。一次比较中冻结缩放规则，记录限幅、平滑和实际敏感度。"
+    },
+    {
+      "id": "T25",
+      "title": "更新个人 novelty 历史",
+      "depends_on": [
+        "T24"
+      ],
+      "kind": "code",
+      "current_status": "纯类已有",
+      "files": [
+        "src/sonification/features.py"
+      ],
+      "acceptance": "每个参与者/独立特征流一个 estimator；只输入有效、已归一化帧；首次启动/重校准记录 warmup 与 reset，A/B 不共用历史。"
+    },
+    {
+      "id": "T26",
+      "title": "把真实九值帧接入声音循环",
+      "depends_on": [
+        "T03",
+        "T06",
+        "T08",
+        "T09",
+        "T25"
+      ],
+      "kind": "code",
+      "current_status": "新增桥接",
+      "files": [
+        "src/sdd/session_runtime.py（拟新增）",
+        "src/sonification/protocol.py"
+      ],
+      "acceptance": "同一封套把新鲜有效帧送音频、日志和 invitation controller；数据无效不续命。分开测窗口长度、计算/传输和听觉平滑造成的延迟，不能把 4 Hz 当 250 ms 全链延迟。"
+    },
+    {
+      "id": "T27",
+      "title": "提供单人熟悉声音的流程",
+      "depends_on": [
+        "T26"
+      ],
+      "kind": "code",
+      "current_status": "新增",
+      "files": [
+        "src/sdd/familiarisation.py（拟新增）"
+      ],
+      "acceptance": "可 solo、调整有限敏感度并比较自己的变化；记录开始/结束、所用映射及看见/听见的反馈。若没有稳定有效变化，提示重新校准/改映射，不能虚构频繁触发。"
+    },
+    {
+      "id": "T28",
+      "title": "给参与者说明来源和退出方式",
+      "depends_on": [
+        "T15",
+        "T27"
+      ],
+      "kind": "code",
+      "current_status": "新增简短界面文案",
+      "files": [
+        "docs/participant_brief.md（拟新增）",
+        "src/sdd/session_ui.py（拟新增）"
+      ],
+      "acceptance": "明确自己的 EEG 如何影响声部、观众/对手按钮会改变什么，以及拒绝/暂停方法。声音可听起来属于自己，同时外部按键来源透明；不暗示机器读出了价值观。"
+    },
+    {
+      "id": "T29",
+      "title": "准备一次小规模试听的记录方法",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "research",
+      "current_status": "未做",
+      "files": [
+        "docs/pilot_protocol.md（拟新增）"
+      ],
+      "acceptance": "写清问题、条件顺序、开放提问、哪些材料会保存及参与同意；IPQ 部分先与校内老师确认范围。分别记录辨认变化、影响感、可控感、自我归属和反思，不合成一个“成功分”。"
+    },
+    {
+      "id": "T30",
+      "title": "检验真人是否建立了声音联系",
+      "depends_on": [
+        "T17",
+        "T27",
+        "T28",
+        "T29"
+      ],
+      "kind": "research_gate",
+      "current_status": "未做",
+      "files": [
+        "docs/pilot_results.md（拟新增）"
+      ],
+      "acceptance": "先问听见哪些对应，再问变化后是否仍像自己的声部；允许回答没有。预先说明可能包含回放条件、事后解释；结果只支持所测体验。若基本联系未形成，回到参数/映射改版，不推断道德反思。"
+    },
+    {
+      "id": "T31",
+      "title": "创建独立的 B 声部实例",
+      "depends_on": [
+        "T15",
+        "T26"
+      ],
+      "kind": "code",
+      "current_status": "新增参与者隔离",
+      "files": [
+        "src/sdd/session_runtime.py（拟新增）",
+        "sound/eeg_organism_v2_receiver.scd"
+      ],
+      "acceptance": "A/B 分别持有源、校准、novelty、voicing、邀请状态和音频实例；隔离端口或版本化路由。A 的按钮/坏信号不改变 B；没有第二套硬件时 B 必须标 fixture，不能算双人实测完成。"
+    },
+    {
+      "id": "T32",
+      "title": "让两人的声音可分别辨认",
+      "depends_on": [
+        "T31"
+      ],
+      "kind": "code",
+      "current_status": "新增混音配置",
+      "files": [
+        "config/sdd_v1.toml（拟新增）",
+        "sound/eeg_harmonic_field_v2_core.scd"
+      ],
+      "acceptance": "支持 solo A/B 和固定声像/音色身份；合奏总增益受控。与同一人的内部双音库区分；让听者实际验证两声部可分辨。"
+    },
+    {
+      "id": "T33",
+      "title": "提供双方和观众的目标按钮",
+      "depends_on": [
+        "T10",
+        "T15",
+        "T31"
+      ],
+      "kind": "code",
+      "current_status": "从初版 GUI 接入",
+      "files": [
+        "src/sdd/session_ui.py（拟新增）"
+      ],
+      "acceptance": "audience/peer 的来源不丢失，可明确邀请 A 或 B；本人能拒绝自己的邀请并暂停。输入先用键盘/桌面按钮，物理按钮只需以后替换输入适配器。"
+    },
+    {
+      "id": "T34",
+      "title": "运行完整会话流程",
+      "depends_on": [
+        "T30",
+        "T32",
+        "T33"
+      ],
+      "kind": "code",
+      "current_status": "新增编排",
+      "files": [
+        "src/sdd/session_runtime.py（拟新增）"
+      ],
+      "acceptance": "顺序为准备→校准→分别熟悉→讨论→结束；暂停能从任何活动状态进入。能追到当前配置和邀请来源；没有以 EEG 自动判定“反思完成”的状态。"
+    },
+    {
+      "id": "T35",
+      "title": "排练并验证系统稳定性",
+      "depends_on": [
+        "T34"
+      ],
+      "kind": "verification",
+      "current_status": "未做",
+      "files": [
+        "tests/test_sdd_integration.py（拟新增）",
+        "reports/sdd_v1（拟新增）"
+      ],
+      "acceptance": "检查一次双人排练的丢帧、延迟、节点数、重复按键、断流、重启和退出；测试长度按真实使用计划设定。导出失败片段，区分合成、回放、真实硬件结果。"
+    },
+    {
+      "id": "T36",
+      "title": "观察讨论中是否出现重新比较标准",
+      "depends_on": [
+        "T29",
+        "T34"
+      ],
+      "kind": "research_gate",
+      "current_status": "未做",
+      "files": [
+        "docs/pilot_results.md（拟新增）"
+      ],
+      "acceptance": "问参与者在具体事件前后注意到了什么、有无换一种比较方式、是否更防御；记录反例。声部归属、反思和改变立场分别报告，不能从前两项推断第三项。"
+    },
+    {
+      "id": "T37",
+      "title": "导出可以写报告的证据包",
+      "depends_on": [
+        "T03",
+        "T16",
+        "T35",
+        "T36"
+      ],
+      "kind": "code",
+      "current_status": "新增导出",
+      "files": [
+        "src/sdd/export_session.py（拟新增）"
+      ],
+      "acceptance": "打包配置/版本、事件时间线、精选音频视频索引、匿名化观察和限制说明；不自动公开原始脑电。提供 NIME 作品说明所需素材与 IPQ 可独立分析的记录，不自动生成已评估结论。"
+    }
+  ]
+}
