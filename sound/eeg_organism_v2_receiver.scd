@@ -46,6 +46,7 @@ state[\lastFrameAt] = Main.elapsedTime;
 state[\lastDisplayAt] = Main.elapsedTime - 1;
 state[\timedOut] = true;
 state[\stopping] = false;
+state[\released] = false;
 state[\preset] = preset;
 state[\config] = v2Config;
 state[\previousFrameAt] = nil;
@@ -82,8 +83,13 @@ stopReceiver = { |immediate = false|
 
     if(immediate and: { state[\stopping] }) {
         state[\releaseTask].tryPerform(\stop);
-        group.tryPerform(\freeAll);
-        group.tryPerform(\free);
+        if(state[\released].not) {
+            // Mark before sending the frees: a later replacement must not issue
+            // a second free after this asynchronous server command completes.
+            state[\released] = true;
+            group.tryPerform(\freeAll);
+            group.tryPerform(\free);
+        };
         "Organism v2: in-progress release freed for replacement.".postln;
     } {
         if(state[\stopping].not) {
@@ -104,6 +110,9 @@ stopReceiver = { |immediate = false|
                         (watchdogFade + 0.1).wait;
                         synth.tryPerform(\set, \gate, 0);
                         (release + 0.25).wait;
+                        // Set before the asynchronous free so a later evaluate
+                        // can observe that this dedicated Group is gone.
+                        state[\released] = true;
                         group.tryPerform(\free);
                     }).play(AppClock);
                 };
@@ -125,7 +134,12 @@ startReceiver = {
             \eegOrganismV2HarmonicField,
             preset
         );
-        definition.add;
+        // The receiver is evaluated only with an already-running server. Send
+        // this definition directly instead of writing a user synthdef file.
+        // Register controls in the language-side SynthDesc library so callers
+        // can use the named controls without storing a project .scsyndef.
+        definition.asSynthDesc;
+        definition.send(s);
         s.sync;
 
         if(state[\stopping].not) {
@@ -140,7 +154,13 @@ startReceiver = {
 
             OSCdef(\eegOrganismV2Frame, { |message|
                 var values, now, displayElapsed, effectiveHz, age;
-                if(message.size == 10 and: { state[\stopping].not }) {
+                if(message.size == 10 and: { state[\stopping].not } and: {
+                    message.copyRange(1, 9).every { |item|
+                        item.isNumber and: { item.isNaN.not } and: {
+                            item >= 0 and: { item <= 1 }
+                        }
+                    }
+                }) {
                     now = Main.elapsedTime;
                     values = message.copyRange(1, 9).collect(clampUnit);
                     frameOrder.do { |key, index|
@@ -190,6 +210,7 @@ startReceiver = {
                     };
                 } {
                     "Organism v2: rejected frame (expected exactly 9 values).".warn;
+                    "Frame values must be finite numbers in [0,1]; watchdog not refreshed.".warn;
                 };
             }, '/eeg/organism/v2/frame', recvPort: 57120);
 

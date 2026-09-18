@@ -1,0 +1,17 @@
+{
+  "run": "runtime_live_session_clean",
+  "fixture_frames": 32,
+  "event_kinds": [
+    "signal_loss",
+    "stop"
+  ],
+  "watchdogs": 3,
+  "node_generations": 3,
+  "audio_rate": 48000,
+  "audio_channels": 2,
+  "audio_duration_seconds": 54.18,
+  "audio_finite": true,
+  "audio_peak": 0.0663723275065422,
+  "sc_default_synthdef_metadata_notices": 3,
+  "listening": "PENDING HUMAN LISTENING"
+}

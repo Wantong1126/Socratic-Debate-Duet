@@ -1,0 +1,182 @@
+compiling class library...
+	Found 873 primitives.
+	Compiling directory 'D:\OpenBCI\supercollider\SCClassLibrary'
+	Compiling directory 'C:\ProgramData\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Vowel'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Dirt-Samples'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\SuperDirt'
+	numentries = 1309095 / 20349168 = 0.064
+	5964 method selectors, 3412 classes
+	method table size 21236200 bytes, big table size 162793344
+	Number of Symbols 15331
+	Byte Code Size 464146
+	compiled 570 files in 9.28 seconds
+
+Info: 2 methods are currently overwritten by extensions. To see which, execute:
+MethodOverride.printAll
+
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+Class tree inited in 0.8 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help press F1.
+sddRuntimeTest : setting clientID to 0.
+Booting server 'sddRuntimeTest' on address 127.0.0.1:57130.
+
+Device options:
+- MME : Microsoft 声音映射器 - Input
+  (2 ins, 0 outs)
+- MME : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- MME : Microsoft 声音映射器 - Output
+  (0 ins, 2 outs)
+- MME : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows DirectSound : 主声音捕获驱动程序
+  (2 ins, 0 outs)
+- Windows DirectSound : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows DirectSound : 主声音驱动程序
+  (0 ins, 2 outs)
+- Windows DirectSound : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Headphones 1 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Headphones 2 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio 2nd output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Speakers 1 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Speakers 2 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 1 ()
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 2 ()
+  (2 ins, 0 outs)
+
+Requested devices:
+  Out:
+  - (default)
+
+Selecting default system output device
+
+Booting with:
+  Out: Windows WASAPI : 本机扬声器 (Audio Device)
+  Sample rate: 48000.000
+  Latency (in/out): 0.000 / 0.022 sec
+SC_AudioDriver: sample rate = 48000.000000, driver's block size = 64
+SuperCollider 3 server ready.
+Requested notification messages from server 'sddRuntimeTest'
+sddRuntimeTest: server process's maxLogins (1) matches with my options.
+sddRuntimeTest: keeping clientID (0) as confirmed by server process.
+Shared memory server interface initialized
+The system cannot find the path specified.
+Could Not Find C:\Users\cc_10\AppData\Local\SuperCollider\synthdefs\eegOrganismV2HarmonicField.*meta
+ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120
+Stable tree: one dedicated Group + one persistent harmonic Synth.
+Node IDs: [1000, 1001]
+Waiting for /eeg/organism/v2/frame; silent until the first frame.
+Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).
+Centroid, mobility, spectral entropy, and novelty are storage/display only.
+Exact harmonic groups: [[1, 2, 3], [4, 5, 6], [7, 9, 12], [24, 36, 48]]
+Beta profile: softened (ceiling=2700.0 Hz, upper tilt=-3.5 dB, trim=0.9)
+Preparing recording on 'sddRuntimeTest'
+Recording channels [0, 1] ... 
+path: 'scripts/..\reports/sdd_v1/runtime.wav'
+SDD_RUNTIME_READY
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+SDD_RUNTIME_TEST_TIMEOUT
+Recording Stopped: (runtime.wav)
+server 'sddRuntimeTest' disconnected shared memory interface
+'/quit' message sent to server 'sddRuntimeTest'.
+Server 'sddRuntimeTest' exited with exit code 0.
+cleaning up OSC

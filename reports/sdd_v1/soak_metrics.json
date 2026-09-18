@@ -1,0 +1,11 @@
+{
+  "duration": 320.17066666666665,
+  "rate": 48000,
+  "peak": 0.037633419036865234,
+  "finite": true,
+  "stable_queries": 30,
+  "disconnect_at": 311.6193293,
+  "disconnect_tail_peak": 3.672821824451944e-09,
+  "stop_at": 316.2999001,
+  "stop_tail_peak": 0.0
+}

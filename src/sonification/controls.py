@@ -22,6 +22,16 @@ BAND_FIELDS = ("delta", "theta", "alpha", "beta")
 HARMONIC_GROUP_FIELDS = BAND_FIELDS
 
 
+def single_dimension_baseline(frame, *, field, fixed):
+    """T09: expose one existing audible control, freezing every other value."""
+    from .protocol import ORGANISM_PARAMETER_ORDER
+    if field not in ("energy", *BAND_FIELDS):
+        raise ValueError("baseline field must already control the instrument")
+    baseline = OrganismControlFrame.from_values(fixed).as_mapping()
+    baseline[field] = frame.as_mapping()[field]
+    return OrganismControlFrame.from_values([baseline[name] for name in ORGANISM_PARAMETER_ORDER])
+
+
 @dataclass(frozen=True)
 class HarmonicInstrumentControls:
     """The only v2 values currently allowed to affect the instrument."""

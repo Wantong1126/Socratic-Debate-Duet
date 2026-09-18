@@ -1,0 +1,217 @@
+compiling class library...
+	Found 873 primitives.
+	Compiling directory 'D:\OpenBCI\supercollider\SCClassLibrary'
+	Compiling directory 'C:\ProgramData\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Vowel'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Dirt-Samples'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\SuperDirt'
+	numentries = 1309095 / 20349168 = 0.064
+	5964 method selectors, 3412 classes
+	method table size 21236200 bytes, big table size 162793344
+	Number of Symbols 15331
+	Byte Code Size 464146
+	compiled 570 files in 0.97 seconds
+
+Info: 2 methods are currently overwritten by extensions. To see which, execute:
+MethodOverride.printAll
+
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+Class tree inited in 0.61 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help press F1.
+sddRuntimeTest : setting clientID to 0.
+Booting server 'sddRuntimeTest' on address 127.0.0.1:57130.
+
+Device options:
+- MME : Microsoft 声音映射器 - Input
+  (2 ins, 0 outs)
+- MME : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- MME : Microsoft 声音映射器 - Output
+  (0 ins, 2 outs)
+- MME : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows DirectSound : 主声音捕获驱动程序
+  (2 ins, 0 outs)
+- Windows DirectSound : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows DirectSound : 主声音驱动程序
+  (0 ins, 2 outs)
+- Windows DirectSound : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Headphones 1 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Headphones 2 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio 2nd output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Speakers 1 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Speakers 2 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 1 ()
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 2 ()
+  (2 ins, 0 outs)
+
+Requested devices:
+  Out:
+  - (default)
+
+Selecting default system output device
+
+Booting with:
+  Out: Windows WASAPI : 本机扬声器 (Audio Device)
+  Sample rate: 48000.000
+  Latency (in/out): 0.000 / 0.022 sec
+SC_AudioDriver: sample rate = 48000.000000, driver's block size = 64
+SuperCollider 3 server ready.
+Requested notification messages from server 'sddRuntimeTest'
+sddRuntimeTest: server process's maxLogins (1) matches with my options.
+sddRuntimeTest: keeping clientID (0) as confirmed by server process.
+Shared memory server interface initialized
+The system cannot find the path specified.
+Could Not Find C:\Users\cc_10\AppData\Local\SuperCollider\synthdefs\eegOrganismV2HarmonicField.*meta
+ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120
+Stable tree: one dedicated Group + one persistent harmonic Synth.
+Node IDs: [1000, 1001]
+Waiting for /eeg/organism/v2/frame; silent until the first frame.
+Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).
+Centroid, mobility, spectral entropy, and novelty are storage/display only.
+Exact harmonic groups: [[1, 2, 3], [4, 5, 6], [7, 9, 12], [24, 36, 48]]
+Beta profile: softened (ceiling=2700.0 Hz, upper tilt=-3.5 dB, trim=0.9)
+Preparing recording on 'sddRuntimeTest'
+Recording channels [0, 1] ... 
+path: 'scripts/..\reports/sdd_v1/runtime.wav'
+SDD_RUNTIME_READY
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 voicing=1 bank=1 frequenciesHz=[98.0, 146.83238220215, 220.0, 65.410003662109, 65.410003662109, 65.410003662109] weights=[0.47999998927116, 0.31999999284744, 0.20000000298023, 0.0, 0.0, 0.0]
+Organism v2: synthetic input active.
+Organism v2 rx count=1 interval=0.0s effectiveHz=0.0 age=0.0s energy=0.2 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=6 interval=0.252s effectiveHz=4.01 age=0.0s energy=0.2 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=11 interval=0.253s effectiveHz=4.01 age=0.0s energy=0.2 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=15 interval=0.254s effectiveHz=3.99 age=0.0s energy=0.2 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+WARNING: Organism v2 WATCHDOG: no frame for 2.0 seconds; transport gain fading to silence.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2: synthetic input active.
+Organism v2 rx count=17 interval=4.266s effectiveHz=0.44 age=0.0s energy=0.8 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=22 interval=0.258s effectiveHz=4.02 age=0.0s energy=0.8 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=27 interval=0.257s effectiveHz=4.01 age=0.0s energy=0.8 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=31 interval=0.253s effectiveHz=4.0 age=0.0s energy=0.8 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Organism v2 graceful release started; server remains running.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 0, 2, 0, 1002, -1, temp__0]
+Organism v2: freeing the previous receiver before replacement.
+Organism v2: in-progress release freed for replacement.
+The system cannot find the path specified.
+Could Not Find C:\Users\cc_10\AppData\Local\SuperCollider\synthdefs\eegOrganismV2HarmonicField.*meta
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120
+Stable tree: one dedicated Group + one persistent harmonic Synth.
+Node IDs: [1003, 1004]
+Waiting for /eeg/organism/v2/frame; silent until the first frame.
+Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).
+Centroid, mobility, spectral entropy, and novelty are storage/display only.
+Exact harmonic groups: [[1, 2, 3], [4, 5, 6], [7, 9, 12], [24, 36, 48]]
+Beta profile: softened (ceiling=2700.0 Hz, upper tilt=-3.5 dB, trim=0.9)
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2: synthetic input active.
+Organism v2 rx count=1 interval=0.0s effectiveHz=0.0 age=0.0s energy=0.5 delta=0.5 theta=0.5 alpha=0.5 beta=0.5
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+WARNING: Organism v2 WATCHDOG: no frame for 2.0 seconds; transport gain fading to silence.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 graceful release started; server remains running.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1003, 1, 1004, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2: freeing the previous receiver before replacement.
+Organism v2: in-progress release freed for replacement.
+The system cannot find the path specified.
+Could Not Find C:\Users\cc_10\AppData\Local\SuperCollider\synthdefs\eegOrganismV2HarmonicField.*meta
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120
+Stable tree: one dedicated Group + one persistent harmonic Synth.
+Node IDs: [1005, 1006]
+Waiting for /eeg/organism/v2/frame; silent until the first frame.
+Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).
+Centroid, mobility, spectral entropy, and novelty are storage/display only.
+Exact harmonic groups: [[1, 2, 3], [4, 5, 6], [7, 9, 12], [24, 36, 48]]
+Beta profile: softened (ceiling=2700.0 Hz, upper tilt=-3.5 dB, trim=0.9)
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2: synthetic input active.
+Organism v2 rx count=1 interval=0.0s effectiveHz=0.0 age=0.0s energy=0.3 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Organism v2 voicing=1 bank=1 frequenciesHz=[92.498603820801, 146.83238220215, 220.0, 65.410003662109, 65.410003662109, 65.410003662109] weights=[0.37370100617409, 0.33023598790169, 0.29606300592422, 0.0, 0.0, 0.0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=5 interval=0.253s effectiveHz=4.0 age=0.0s energy=0.323 delta=0.717 theta=0.536 alpha=0.333 beta=0.171
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=9 interval=0.251s effectiveHz=3.98 age=0.0s energy=0.375 delta=0.49 theta=0.44 alpha=0.45 beta=0.37
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=14 interval=0.251s effectiveHz=4.03 age=0.0s energy=0.436 delta=0.221 theta=0.326 alpha=0.589 beta=0.606
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=18 interval=0.255s effectiveHz=3.97 age=0.0s energy=0.45 delta=0.162 theta=0.301 alpha=0.619 beta=0.659
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=22 interval=0.251s effectiveHz=3.98 age=0.0s energy=0.457 delta=0.192 theta=0.319 alpha=0.597 beta=0.637
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=27 interval=0.251s effectiveHz=4.03 age=0.0s energy=0.471 delta=0.256 theta=0.355 alpha=0.552 beta=0.592
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=31 interval=0.251s effectiveHz=3.98 age=0.001s energy=0.479 delta=0.294 theta=0.377 alpha=0.524 beta=0.564
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=35 interval=0.251s effectiveHz=3.98 age=0.0s energy=0.49 delta=0.303 theta=0.384 alpha=0.525 beta=0.557
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=40 interval=0.251s effectiveHz=4.04 age=0.001s energy=0.578 delta=0.333 theta=0.421 alpha=0.569 beta=0.536
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=44 interval=0.255s effectiveHz=3.97 age=0.0s energy=0.664 delta=0.361 theta=0.457 alpha=0.612 beta=0.514
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 voicing=2 bank=0 frequenciesHz=[92.498603820801, 195.99771118164, 220.0, 277.1826171875, 391.99542236328, 65.410003662109] weights=[0.19370900094509, 0.19826300442219, 0.20438599586487, 0.19569300115108, 0.20794899761677, 0.0]
+Organism v2 rx count=46 interval=0.99s effectiveHz=1.61 age=0.0s energy=0.72 delta=0.38 theta=0.48 alpha=0.64 beta=0.5
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=50 interval=0.251s effectiveHz=3.98 age=0.001s energy=0.654 delta=0.449 theta=0.496 alpha=0.584 beta=0.434
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=54 interval=0.251s effectiveHz=3.97 age=0.0s energy=0.51 delta=0.6 theta=0.53 alpha=0.46 beta=0.29
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 rx count=59 interval=0.251s effectiveHz=4.03 age=0.0s energy=0.339 delta=0.779 theta=0.571 alpha=0.313 beta=0.119
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+WARNING: Organism v2 WATCHDOG: no frame for 2.0 seconds; transport gain fading to silence.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 graceful release started; server remains running.
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 1, 1006, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1005, 0, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+RUNTIME_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+Recording Stopped: (runtime.wav)
+server 'sddRuntimeTest' disconnected shared memory interface
+'/quit' message sent to server 'sddRuntimeTest'.
+Server 'sddRuntimeTest' exited with exit code 0.
+SDD_RUNTIME_COMPLETE
+cleaning up OSC

@@ -1,0 +1,21 @@
+# T02-T09 synthetic control fixture; no EEG acquisition.
+[session]
+participant_id = "A"
+seed = 20260904
+duration = 12.0
+control_hz = 4.0
+max_age_seconds = 0.5
+
+[mapping]
+field = "energy"
+levels = [0.2, 0.5, 0.8]
+fixed = [0.5, 0.24, 0.1, 0.12, 0.04, 0.82, 0.58, 0.28, 0.08]
+# Existing SC energy range -40..-18 dB, energyLag 0.25 s; no new timbre.
+frequencies_hz = [98.0, 146.832384, 220.0]
+weights = [0.48, 0.32, 0.20]
+
+[transport]
+host = "127.0.0.1"
+port = 57120
+# Receiver config/eeg_organism_v2.scd remains authoritative:
+# watchdog timeout 2.0s, polling 0.25s, fade 0.5s, release 2.5s.

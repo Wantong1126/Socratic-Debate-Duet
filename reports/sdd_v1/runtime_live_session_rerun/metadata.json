@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "session_id": "runtime_live_session_rerun",
+  "config": {
+    "session": {
+      "participant_id": "A",
+      "seed": 20260904,
+      "duration": 12.0,
+      "control_hz": 4.0,
+      "max_age_seconds": 0.5
+    },
+    "mapping": {
+      "field": "energy",
+      "levels": [
+        0.2,
+        0.5,
+        0.8
+      ],
+      "fixed": [
+        0.5,
+        0.24,
+        0.1,
+        0.12,
+        0.04,
+        0.82,
+        0.58,
+        0.28,
+        0.08
+      ],
+      "frequencies_hz": [
+        98.0,
+        146.832384,
+        220.0
+      ],
+      "weights": [
+        0.48,
+        0.32,
+        0.2
+      ]
+    },
+    "transport": {
+      "host": "127.0.0.1",
+      "port": 57120
+    },
+    "snapshots": {
+      "config\\sdd_v1.toml": "# T02-T09 synthetic control fixture; no EEG acquisition.\n[session]\nparticipant_id = \"A\"\nseed = 20260904\nduration = 12.0\ncontrol_hz = 4.0\nmax_age_seconds = 0.5\n\n[mapping]\nfield = \"energy\"\nlevels = [0.2, 0.5, 0.8]\nfixed = [0.5, 0.24, 0.1, 0.12, 0.04, 0.82, 0.58, 0.28, 0.08]\n# Existing SC energy range -40..-18 dB, energyLag 0.25 s; no new timbre.\nfrequencies_hz = [98.0, 146.832384, 220.0]\nweights = [0.48, 0.32, 0.20]\n\n[transport]\nhost = \"127.0.0.1\"\nport = 57120\n# Receiver config/eeg_organism_v2.scd remains authoritative:\n# watchdog timeout 2.0s, polling 0.25s, fade 0.5s, release 2.5s.\n",
+      "config\\eeg_organism_v2.scd": "// Centralized overrides for the synthetic-only organism v2 receiver.\n// The fundamental remains the selected manual preset's fundamental. The upper\n// group uses higher exact members of that same harmonic series, not a new pitch.\n(\n    basePreset: \\warm_organic,\n    harmonicGroups: [\n        [1, 2, 3],\n        [4, 5, 6],\n        [7, 9, 12],\n        [24, 36, 48]\n    ],\n    // Beta palette profiles affect group 4 only. `original_24_36_48` is the\n    // exact pre-softening behavior: its ceiling is above every partial, its\n    // tilt is flat, and its trim is unity. `softened` is the conservative v2\n    // default. For human tuning, change only betaUpperPartialTiltDb: 0 is flat\n    // and increasingly negative values progressively soften partials 36/48.\n    betaProfile: \\softened,\n    betaProfiles: (\n        original_24_36_48: (\n            betaCeilingHz: 12000.0,\n            betaUpperPartialTiltDb: 0.0,\n            betaTrim: 1.0\n        ),\n        softened: (\n            betaCeilingHz: 2700.0,\n            betaUpperPartialTiltDb: -3.5,\n            betaTrim: 0.90\n        )\n    ),\n    // The voice bank is fixed-capacity and persistent. A voicing update may\n    // activate fewer than six slots by setting the remaining weights to zero.\n    voiceCapacity: 6,\n    synthOverrides: (\n        groupTrims: [1.00, 1.00, 1.00, 1.00],\n        groupLoudnessComp: [1.00, 1.00, 1.00, 1.00],\n        controlLag: 0.35,\n        energyLag: 0.25,\n        energyMinDb: -40.0,\n        energyMaxDb: -18.0,\n        voicingCrossfade: 1.35,\n        voiceFrequencyMinHz: 40.0,\n        voiceFrequencyMaxHz: 500.0,\n        polyphonySafetyTrim: 0.82,\n        saturationDrive: 1.25,\n        reverbMix: 0.18,\n        reverbTime: 3.00,\n        reverbDamping: 0.68,\n        outputTrim: 0.62,\n        limiterDb: -1.5,\n        attack: 0.50,\n        release: 2.50,\n        watchdogFade: 0.50\n    ),\n    watchdogTimeout: 2.0,\n    diagnosticInterval: 1.0\n)\n",
+      "sound\\eeg_harmonics_manual_config.scd": "// Centralized palette and audition configuration.\n//\n// Every audible parameter used by the harmonic field lives here. The core\n// contains only synthesis topology, safety bounds, and the A-weighting formula.\n// Presets remain manual choices; none is selected as \"best\" by the software.\n(\n    defaultPreset: \\warm_organic,\n\n    audition: (\n        baseSeconds: 4.0,\n        masterStageSeconds: 3.0,\n        masterReturnSeconds: 4.0,\n        spectrumStageSeconds: 4.0,\n        groupStageSeconds: 4.0,\n        finalBaseSeconds: 6.0,\n        renderTailSeconds: 8.0,\n        masterLow: 0.18,\n        masterHigh: 0.90,\n        warmGroups: [1.00, 0.34, 0.08, 0.02],\n        brightGroups: [0.02, 0.08, 0.34, 1.00]\n    ),\n\n    presets: (\n        warm_organic: (\n            label: \"Warm Organic\",\n            intent: \"Warm, deep and soft; a grounded debate background without a dull blanket.\",\n            fundamental: 65.41,\n            harmonicCount: 12,\n            baseGroups: [1.00, 0.72, 0.30, 0.10],\n            groupTrims: [1.00, 0.94, 0.80, 0.70],\n            groupLoudnessComp: [1.50, 0.73, 0.75, 0.60],\n            harmonicRollOff: 0.56,\n            panPositions: [-0.55, 0.42, -0.26, 0.60, -0.46, 0.22,\n                -0.62, 0.34, -0.16, 0.50, -0.36, 0.12],\n            masterEnergy: 0.66,\n            energyMinDb: -38.0, energyMaxDb: -17.0,\n            controlLag: 1.60, energyLag: 1.00,\n            stereoWidth: 0.58, saturationDrive: 1.35,\n            delayMix: 0.018, delayTimeLeft: 0.023, delayTimeRight: 0.031,\n            reverbMix: 0.30, reverbRoom: 42.0, reverbTime: 6.40,\n            reverbDamping: 0.72, reverbInputBw: 0.62, reverbSpread: 24.0,\n            reverbEarly: 0.20, reverbTail: 0.58,\n            outputTrim: 0.72, limiterDb: -1.5,\n            attack: 1.50, release: 4.00\n        ),\n\n        air_glass: (\n            label: \"Air Glass\",\n            intent: \"Bright and spacious with a glassy upper field, restrained before sharpness.\",\n            fundamental: 82.41,\n            harmonicCount: 12,\n            baseGroups: [0.82, 0.88, 0.60, 0.34],\n            groupTrims: [0.92, 1.00, 1.02, 0.94],\n            groupLoudnessComp: [0.85, 1.12, 0.74, 1.28],\n            harmonicRollOff: 0.38,\n            panPositions: [-0.88, 0.72, -0.44, 0.92, -0.66, 0.36,\n                -0.96, 0.58, -0.28, 0.82, -0.52, 0.20],\n            masterEnergy: 0.62,\n            energyMinDb: -39.0, energyMaxDb: -18.0,\n            controlLag: 1.40, energyLag: 0.90,\n            stereoWidth: 0.84, saturationDrive: 1.12,\n            delayMix: 0.040, delayTimeLeft: 0.023, delayTimeRight: 0.031,\n            reverbMix: 0.34, reverbRoom: 52.0, reverbTime: 7.20,\n            reverbDamping: 0.60, reverbInputBw: 0.78, reverbSpread: 32.0,\n            reverbEarly: 0.22, reverbTail: 0.62,\n            outputTrim: 0.68, limiterDb: -1.5,\n            attack: 1.35, release: 4.00\n        ),\n\n        dark_mineral: (\n            label: \"Dark Mineral\",\n            intent: \"Dark and weighty with a subtle dry metallic edge, without low-mid mud.\",\n            fundamental: 58.27,\n            harmonicCount: 12,\n            baseGroups: [1.00, 0.48, 0.32, 0.16],\n            groupTrims: [1.00, 0.82, 1.08, 0.96],\n            groupLoudnessComp: [1.72, 0.66, 0.81, 0.77],\n            harmonicRollOff: 0.50,\n            panPositions: [-0.62, 0.28, -0.18, 0.70, -0.48, 0.14,\n                -0.76, 0.46, -0.30, 0.58, -0.40, 0.08],\n            masterEnergy: 0.64,\n            energyMinDb: -38.0, energyMaxDb: -17.5,\n            controlLag: 1.55, energyLag: 1.00,\n            stereoWidth: 0.66, saturationDrive: 1.50,\n            delayMix: 0.085, delayTimeLeft: 0.023, delayTimeRight: 0.031,\n            reverbMix: 0.27, reverbRoom: 35.0, reverbTime: 5.70,\n            reverbDamping: 0.48, reverbInputBw: 0.68, reverbSpread: 20.0,\n            reverbEarly: 0.30, reverbTail: 0.50,\n            outputTrim: 0.68, limiterDb: -1.5,\n            attack: 1.45, release: 4.00\n        )\n    )\n)\n"
+    }
+  },
+  "code_version": {
+    "head": "54afe69bb252064b90f697a610acd11052839ea7",
+    "worktree": " M sound/eeg_organism_v2_receiver.scd\n M src/sonification/controls.py\n M src/sonification/protocol.py\n M traces/organism_v2_g_lydian/active-novel.json\n M traces/organism_v2_g_lydian/bright-stable.json\n M traces/organism_v2_g_lydian/calm-stable.json\n M traces/organism_v2_g_lydian/tense-stable.json\n?? config/sdd_v1.toml\n?? reports/sdd_v1/\n?? scripts/analyze_sdd_live.py\n?? scripts/prepare_sdd_baseline.py\n?? scripts/verify_sdd_evidence.py\n?? scripts/verify_sdd_runtime.py\n?? scripts/verify_sdd_runtime.scd\n?? scripts/verify_sdd_v2_live.scd\n?? sound/render_sdd_baseline.scd\n?? src/sdd/\n?? tests/test_sdd_session.py\n?? tests/test_synthetic_music.py\n",
+    "sha256": {
+      "src\\sdd\\demo.py": "192b3ff50fc48b1b1686f737e15c9b99ca9bb85aaefd5feb3f72b494fa4f97b3",
+      "src\\sdd\\fixture_source.py": "4e45eaca33144bd8d01d38887afa6d05acddf938f6ff4950aa67ff521c8daaea",
+      "src\\sdd\\replay_source.py": "89d1b44574909a035160c3a8b2a12cca466b9ef965caae61357805e63ee43173",
+      "src\\sdd\\session_recorder.py": "f6b8d2be7efb7a72139f4f97e385e7a2ec3cba8bf87dc6f189b352ac95052612",
+      "src\\sdd\\session_runtime.py": "f8952251213c68d1bffa1252cc16d0dbb8294cdef1bc2a652a41f5713172cbff",
+      "src\\sdd\\session_types.py": "e97492037d2b48bac8adf8a741efb5154bbd12cc7d2b398f0f6bf10a242e9cd7",
+      "src\\sdd\\__init__.py": "796543b33e5f75c17060501e782e5dd4884ead72091ac852b1a11343c602c276",
+      "src\\sonification\\controls.py": "6a4a59473363a252a16b97a8b51bbe511691bfb80e533cfad339ed55e4b1f500",
+      "src\\sonification\\features.py": "4de3e753a8ac4c8151b49aa3ff2baa63b63a262841c6a1d08ba8b10270ec8beb",
+      "src\\sonification\\harmonics_mapping.py": "c25df8ae2b1a413f698008883b8d1daaeabd58db0d28f4482e744fc7d94038c7",
+      "src\\sonification\\harmonics_protocol.py": "f20165d4a77d74ff068104c68c2b7b5628b7fd9e566a4c922b5a4c60d884fad5",
+      "src\\sonification\\harmonics_synthetic_demo.py": "d89a86759b67605a9ed157e31bcc649549d63764d5dbb2814e95cc039880d9ab",
+      "src\\sonification\\manual_voicing_demo.py": "3104bb6603ca8366cd3070027906eaf57ecb5e0f2dcc27047ecefe5b29078279",
+      "src\\sonification\\protocol.py": "4ff57d5fe7247701628c50f7b104741d9968ff99614588862de18ef7d40a873f",
+      "src\\sonification\\synthetic_demo.py": "c699cd4a1109f0bb30e4297f10301e09428b9bd856fe998ccf0173dad4a3323e",
+      "src\\sonification\\synthetic_music_demo.py": "bc9b3cbc88e12328192d41497917c107147ff8e25452ddb826070987d5efd209",
+      "src\\sonification\\voicing.py": "a9a98ca9934a3535efdfe51c6c9b476116870dc0434c8f167163f94b49655794",
+      "src\\sonification\\__init__.py": "8dbb988e43a2261471acfd3a9e0eee98ec24b3a99197ff8b2e8685ff25a735f2",
+      "sound\\biosignal_instrument.scd": "8313a0ea284b79e6732700777cca2682319f59e0a6d1c822ac4bec6c79104875",
+      "sound\\eeg_body_layer.scd": "af1e73425b49f16c76cb6dc8c4195f6450a78624d9bf8fea1a89e295bba8ef9a",
+      "sound\\eeg_harmonics_manual.scd": "39c88ac9efd80b87ff975a3d1c98545118f8fb5f728ad985e61a433297725805",
+      "sound\\eeg_harmonics_manual_config.scd": "a47e4b3f76b8783b4445d7536f685e706de273fe34a16048cc06bfd3de213040",
+      "sound\\eeg_harmonics_preset_support.scd": "b9beca21c1b835ff1dcd12e0ab5ed2f0162e3d4d60f768f97ba060503f23bbb8",
+      "sound\\eeg_harmonic_field_core.scd": "ed4ff451f4a8917af961937542ccb57b69c9666a067fa69872f264e26d70a325",
+      "sound\\eeg_harmonic_field_v2_core.scd": "30b276ef3d793d06590abd3b8a0706ef23e7f95e782b7fef088877089f9e9e68",
+      "sound\\eeg_organism_engine.scd": "36b08212a1ac56cd0bc3cc181f8db207a7debd7d22242de8183a82e77e1fa256",
+      "sound\\eeg_organism_v2_receiver.scd": "26069c9b187f79dc4099e6aea6f3608c1f1a9f863d731a53ea6523f797854f1e",
+      "sound\\render_eeg_harmonics_manual.scd": "498ee82874d81136403f0912e7214af28580d075490ebaff87997b7c1070b051",
+      "sound\\render_eeg_harmonic_presets.scd": "a69d2dae6c92173aaa162c0575dccb3d0dc038b79275db066b0b51554b8bd1dd",
+      "sound\\render_eeg_organism_v2_isolated.scd": "ca4d7ffc6edbec4ccb8e26517de5c9f010dc643c72aef77b3838b59d7b45771d",
+      "sound\\render_eeg_organism_v2_voicing_transition.scd": "d2436feaab46edfa4fcb420caa8b3ecbed3b369c15f3408d59f583d8aff44d8e",
+      "sound\\render_sdd_baseline.scd": "70f58fd03305617ec449d1d4ba794c047eb8cc8d6aed2f4d6b20b7fdd35fd748",
+      "sound\\stop_eeg_organism.scd": "e62daafe457e8b744b033a4089ad49b6f66b74dbf031c3943cbd4a8980775070",
+      "sound\\stop_eeg_organism_v2.scd": "bc88caba5e7a62f347382cc9b4d250b93be0b13864567a18fef12e8f1c667819"
+    }
+  },
+  "source": {
+    "mode": "fixture",
+    "kind": "control",
+    "real_eeg": false,
+    "replay_mode": null,
+    "original_metadata": null,
+    "dropout": [
+      4.0,
+      8.0
+    ]
+  },
+  "seed": 20260904,
+  "monotonic_origin": 357280.656,
+  "wall_origin": 1789690394.935036,
+  "clock": "seconds on shared monotonic timeline",
+  "simulated": true
+}

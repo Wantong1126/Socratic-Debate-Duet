@@ -1,0 +1,11 @@
+{
+  "control_replay_matches": true,
+  "frames": 48,
+  "dropout_frames": 32,
+  "steady_rms_dbfs": [
+    -48.14465175192034,
+    -41.01385384760263,
+    -34.57866312937973
+  ],
+  "listening": "PENDING HUMAN LISTENING"
+}
