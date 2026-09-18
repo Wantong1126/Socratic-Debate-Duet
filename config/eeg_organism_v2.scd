@@ -52,5 +52,6 @@
         watchdogFade: 0.50
     ),
     watchdogTimeout: 2.0,
+    invitationMessageMaxAge: 0.5,
     diagnosticInterval: 1.0
 )

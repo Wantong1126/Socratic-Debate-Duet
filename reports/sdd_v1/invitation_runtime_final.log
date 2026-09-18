@@ -1,0 +1,257 @@
+compiling class library...
+	Found 873 primitives.
+	Compiling directory 'D:\OpenBCI\supercollider\SCClassLibrary'
+	Compiling directory 'C:\ProgramData\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\Extensions'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Vowel'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\Dirt-Samples'
+	Compiling directory 'C:\Users\cc_10\AppData\Local\SuperCollider\downloaded-quarks\SuperDirt'
+	numentries = 1309095 / 20349168 = 0.064
+	5964 method selectors, 3412 classes
+	method table size 21236200 bytes, big table size 162793344
+	Number of Symbols 15331
+	Byte Code Size 464146
+	compiled 570 files in 0.71 seconds
+
+Info: 2 methods are currently overwritten by extensions. To see which, execute:
+MethodOverride.printAll
+
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+Class tree inited in 0.42 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help press F1.
+invitationValidation : setting clientID to 0.
+Booting server 'invitationValidation' on address 127.0.0.1:57130.
+
+Device options:
+- MME : Microsoft 声音映射器 - Input
+  (2 ins, 0 outs)
+- MME : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- MME : Microsoft 声音映射器 - Output
+  (0 ins, 2 outs)
+- MME : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows DirectSound : 主声音捕获驱动程序
+  (2 ins, 0 outs)
+- Windows DirectSound : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows DirectSound : 主声音驱动程序
+  (0 ins, 2 outs)
+- Windows DirectSound : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机扬声器 (Audio Device)
+  (0 ins, 2 outs)
+- Windows WASAPI : 本机麦克风 (适用于数字麦克风的英特尔® 智音技术)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Headphones 1 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Headphones 2 (Realtek HD Audio 2nd output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio 2nd output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : Speakers 1 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : Speakers 2 (Realtek HD Audio output with SST)
+  (0 ins, 2 outs)
+- Windows WDM-KS : 电脑扬声器 (Realtek HD Audio output with SST)
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 1 ()
+  (2 ins, 0 outs)
+- Windows WDM-KS : 麦克风阵列 2 ()
+  (2 ins, 0 outs)
+
+Requested devices:
+  Out:
+  - (default)
+
+Selecting default system output device
+
+Booting with:
+  Out: Windows WASAPI : 本机扬声器 (Audio Device)
+  Sample rate: 48000.000
+  Latency (in/out): 0.000 / 0.022 sec
+SC_AudioDriver: sample rate = 48000.000000, driver's block size = 64
+SuperCollider 3 server ready.
+Requested notification messages from server 'invitationValidation'
+invitationValidation: server process's maxLogins (1) matches with my options.
+invitationValidation: keeping clientID (0) as confirmed by server process.
+Shared memory server interface initialized
+The system cannot find the path specified.
+Could Not Find C:\Users\cc_10\AppData\Local\SuperCollider\synthdefs\eegOrganismV2HarmonicField.*meta
+ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120
+Stable tree: one dedicated Group + one persistent harmonic Synth.
+Node IDs: [1000, 1001]
+Waiting for /eeg/organism/v2/frame; silent until the first frame.
+Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).
+Invitation endpoint: /sdd/invitation/v1/control (participant A only).
+Centroid, mobility, spectral entropy, and novelty are storage/display only.
+Exact harmonic groups: [[1, 2, 3], [4, 5, 6], [7, 9, 12], [24, 36, 48]]
+Beta profile: softened (ceiling=2700.0 Hz, upper tilt=-3.5 dB, trim=0.9)
+Preparing recording on 'invitationValidation'
+Recording channels [0, 1] ...
+path: 'D:\sdd-sonification\reports\sdd_v1\invitation_runtime_final.wav'
+INVITATION_RUNTIME_READY
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2: synthetic input active.
+Organism v2 rx count=1 interval=0.0s effectiveHz=0.0 age=0.001s energy=0.5 delta=0.5 theta=0.5 alpha=0.5 beta=0.5
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=0 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=1 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=2 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=3 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=4 amount=0.5 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=5 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=6 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=7 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=8 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=9 amount=0.5 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=10 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=11 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=12 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=13 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=14 amount=0.5 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=15 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=16 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=17 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=18 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=19 amount=0.5 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=20 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=21 amount=0.5 age=0.0
+WARNING: Organism v2 WATCHDOG: no frame for 2.0 seconds; transport gain fading to silence.
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=22 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=23 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=24 amount=0.5 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=watchdog-proof seq=25 amount=0.5 age=0.0
+WARNING: Invitation control rejected target=1 session=invitation-live-A event=watchdog-proof seq=26 age=0.0 amount=0.5 classes[session=Symbol,event=Symbol] checks[numeric=true,identity=true,target=false,sequence=true]
+WARNING: Invitation control rejected target=0 session=invitation-live-A event=watchdog-proof seq=25 age=0.0 amount=0.5 classes[session=Symbol,event=Symbol] checks[numeric=true,identity=true,target=true,sequence=false]
+WARNING: Invitation control rejected target=0 session=invitation-live-A event=watchdog-proof seq=26 age=9.0 amount=0.5 classes[session=Symbol,event=Symbol] checks[numeric=false,identity=true,target=true,sequence=false]
+WARNING: Invitation control rejected: expected 6 values.
+WARNING: Invitation control rejected target=0 session=invitation-live-A event=watchdog-proof seq=26 age=0.0 amount=nan classes[session=Symbol,event=Symbol] checks[numeric=false,identity=true,target=true,sequence=false]
+WARNING: Invitation control rejected target=0 session=invitation-live-A event=watchdog-proof seq=26 age=0.0 amount=1.5 classes[session=Symbol,event=Symbol] checks[numeric=false,identity=true,target=true,sequence=false]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 voicing=1 bank=1 frequenciesHz=[98.0, 146.83238220215, 220.0, 65.410003662109, 65.410003662109, 65.410003662109] weights=[0.47999998927116, 0.31999999284744, 0.20000000298023, 0.0, 0.0, 0.0]
+Organism v2: synthetic input active.
+Organism v2 rx count=2 interval=3.117s effectiveHz=0.32 age=0.0s energy=0.5 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=100 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=101 amount=0.094 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=102 amount=0.218 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=103 amount=0.312 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=104 amount=0.406 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=105 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=106 amount=0.624 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=107 amount=0.718 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=108 amount=0.812 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=109 amount=0.906 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=110 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=111 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=112 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=113 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=114 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=115 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=116 amount=0.906 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=117 amount=0.812 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=118 amount=0.686 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=119 amount=0.594 age=0.0
+Organism v2 rx count=6 interval=0.254s effectiveHz=3.94 age=0.0s energy=0.5 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=120 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=121 amount=0.406 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=122 amount=0.312 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=123 amount=0.186 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=124 amount=0.094 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=125 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=126 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=127 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=128 amount=0.0 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=129 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=130 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=131 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=132 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=133 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=97b22216-5c8f-4913-9b9b-d902c9269c26 seq=134 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=135 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=136 amount=0.094 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=137 amount=0.218 age=0.0
+Organism v2 rx count=10 interval=0.254s effectiveHz=3.95 age=0.0s energy=0.5 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=138 amount=0.312 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=139 amount=0.406 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=140 amount=0.5 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=141 amount=0.624 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=142 amount=0.718 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=143 amount=0.812 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=144 amount=0.906 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=145 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=146 amount=1.0 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=147 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=148 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=149 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=150 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=151 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=152 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=153 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=154 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=155 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=156 amount=1.0 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=157 amount=1.0 age=0.0
+Organism v2 rx count=14 interval=0.253s effectiveHz=3.94 age=0.0s energy=0.5 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=158 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=159 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=160 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=161 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=162 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=163 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=164 amount=1.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=165 amount=0.97 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=166 amount=0.844 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=167 amount=0.75 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=168 amount=0.656 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=169 amount=0.564 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=170 amount=0.438 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=171 amount=0.344 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=172 amount=0.25 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=173 amount=0.156 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=174 amount=0.032 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=175 amount=0.0 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=176 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=177 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=178 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=179 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=180 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=181 amount=0.0 age=0.0
+Organism v2 rx count=19 interval=0.253s effectiveHz=4.11 age=0.0s energy=0.5 delta=0.82 theta=0.58 alpha=0.28 beta=0.08
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=182 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=183 amount=0.0 age=0.0
+Invitation control accepted target=A session=invitation-live-A event=bf0ba13b-2325-4c53-a893-9c91a743ec8f seq=184 amount=0.0 age=0.0
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+Organism v2 graceful release started; server remains running.
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 1, 1000, 1, 1001, -1, eegOrganismV2HarmonicField, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 3, 1, 0, 2, 0, 1002, -1, temp__0]
+Recording Stopped: (invitation_runtime_final.wav)
+INVITATION_TREE [/g_queryTree.reply, 0, 0, 2, 1, 0, 2, 0]
+server 'invitationValidation' disconnected shared memory interface
+'/quit' message sent to server 'invitationValidation'.
+Server 'invitationValidation' exited with exit code 0.
+INVITATION_RUNTIME_COMPLETE
+cleaning up OSC

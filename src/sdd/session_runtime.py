@@ -7,13 +7,15 @@ from .session_types import SessionEvent
 
 class SessionRuntime:
     def __init__(self, sender, *, session_id, participant_id='A', rate=4,
-                 max_age=0.5, clock=time.monotonic, recorder=None, mapping=None):
+                 max_age=0.5, clock=time.monotonic, recorder=None, mapping=None,
+                 invitation_controller=None):
         if not math.isfinite(rate) or not 0 < rate <= 20 or max_age <= 0:
             raise ValueError('invalid timing configuration')
         if participant_id not in ('A', 'B'):
             raise ValueError('anonymous identity required')
         self.sender, self.clock, self.recorder = sender, clock, recorder
         self.mapping = mapping or (lambda frame: frame)
+        self.invitation_controller = invitation_controller
         self.session_id, self.participant_id = session_id, participant_id
         self.period, self.max_age = 1/rate, max_age
         self.next_at = clock()
@@ -68,6 +70,8 @@ class SessionRuntime:
         if (self.last_sent_at is not None and now-self.last_sent_at > self.max_age
                 and not self.loss_reported):
             self.log('signal_loss', 'no_fresh_valid_frame; receiver_watchdog_will_fade')
+            if self.invitation_controller is not None:
+                self.invitation_controller.signal_loss(self.participant_id, now)
             self.loss_reported = True
         return False
 
@@ -76,4 +80,6 @@ class SessionRuntime:
             self.sender.send_stop()
             self.stopped = True
             self.latest = None
+            if self.invitation_controller is not None:
+                self.invitation_controller.stop(self.participant_id, self.clock())
             self.log('stop', reason)

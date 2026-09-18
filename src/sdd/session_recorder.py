@@ -45,6 +45,16 @@ class SessionRecorder:
             raise ValueError('session mismatch')
         self.write('event', event.at, asdict(event))
 
+    def invitation(self, event):
+        if event.session_id != self.session_id:
+            raise ValueError('session mismatch')
+        self.write('invitation_event', event.at, event.to_dict())
+
+    def invitation_termination(self, termination):
+        if termination.session_id != self.session_id:
+            raise ValueError('session mismatch')
+        self.write('invitation_termination', termination.at, asdict(termination))
+
     def raw(self, *, at, sampled_at, samples, sample_rate, channels, units,
             mode, participant_id='A'):
         if mode not in ('live', 'fixture') or participant_id not in ('A', 'B'):

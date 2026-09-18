@@ -17,3 +17,13 @@ Thumbs.db
 
 reports/eeg_audification/
 reports/eeg_control/
+
+# Known failed invitation-validation recordings retained locally for diagnosis.
+reports/sdd_v1/invitation_runtime.wav
+reports/sdd_v1/invitation_runtime_clean.wav
+reports/sdd_v1/invitation_runtime_probe.wav
+reports/sdd_v1/invitation_runtime_valid.wav
+reports/sdd_v1/invitation_runtime_pass.json
+reports/sdd_v1/invitation_runtime_pass.log
+reports/sdd_v1/invitation_runtime_pass.wav
+reports/sdd_v1/invitation_runtime_pass_manual.jsonl

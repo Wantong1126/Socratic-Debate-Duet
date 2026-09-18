@@ -19,3 +19,11 @@ host = "127.0.0.1"
 port = 57120
 # Receiver config/eeg_organism_v2.scd remains authoritative:
 # watchdog timeout 2.0s, polling 0.25s, fade 0.5s, release 2.5s.
+
+[invitation]
+attack_seconds = 0.5
+hold_seconds = 1.0
+release_seconds = 0.5
+cooldown_seconds = 0.5
+control_hz = 20.0
+max_message_age_seconds = 0.5

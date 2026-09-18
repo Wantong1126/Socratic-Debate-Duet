@@ -56,6 +56,11 @@ state[\activeVoicingBank] = 0;
 state[\voicingCount] = 0;
 state[\lastVoicing] = IdentityDictionary.new;
 state[\nextVoicingAt] = Main.elapsedTime;
+state[\invitationTarget] = 0; // This receiver currently owns participant A only.
+state[\invitationSession] = nil;
+state[\invitationLastSeq] = -1;
+state[\invitationAmount] = 0.0;
+state[\invitationCount] = 0;
 ~eegOrganismV2 = state;
 
 clampUnit = { |item|
@@ -95,6 +100,7 @@ stopReceiver = { |immediate = false|
         if(state[\stopping].not) {
             state[\stopping] = true;
             [\eegOrganismV2Frame, \eegOrganismV2Voicing,
+                \sddInvitationControlV1,
                 \eegOrganismV2Stop].do { |key|
                 OSCdef(key).tryPerform(\free)
             };
@@ -253,6 +259,79 @@ startReceiver = {
                 };
             }, '/eeg/organism/v2/voicing', recvPort: 57120);
 
+            OSCdef(\sddInvitationControlV1, { |message|
+                var target, sessionID, eventID, seq, age, amount;
+                var numericValid, identityValid, targetValid, sequenceValid;
+                if(message.size == 7 and: { state[\stopping].not }) {
+                    target = message[1];
+                    sessionID = message[2];
+                    eventID = message[3];
+                    seq = message[4];
+                    age = message[5];
+                    amount = message[6];
+                    numericValid = [target, seq, age, amount].every { |item|
+                        item.isNumber and: { item.isNaN.not }
+                    } and: {
+                        seq >= 0 and: { seq <= 2147483647 } and: {
+                            seq == seq.asInteger and: {
+                                age >= 0 and: {
+                                    age <= v2Config[\invitationMessageMaxAge] and: {
+                                        amount >= 0 and: { amount <= 1 }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    // SuperCollider decodes OSC string atoms as Symbols on this
+                    // runtime; accept either textual representation, never numbers.
+                    identityValid = ((sessionID.class == String) or: {
+                        sessionID.class == Symbol
+                    }) and: {
+                        sessionID.asString.size > 0 and: {
+                            ((eventID.class == String) or: {
+                                eventID.class == Symbol
+                            }) and: { eventID.asString.size > 0 }
+                        }
+                    };
+                    targetValid = target == state[\invitationTarget];
+                    sequenceValid = numericValid and: {
+                        seq > state[\invitationLastSeq]
+                    };
+                    if(numericValid and: { identityValid } and: { targetValid }
+                        and: { sequenceValid } and: {
+                            state[\invitationSession].isNil or: {
+                                state[\invitationSession] == sessionID
+                            }
+                        }) {
+                        state[\invitationSession] = sessionID;
+                        state[\invitationLastSeq] = seq.asInteger;
+                        state[\invitationAmount] = amount.asFloat;
+                        state[\invitationCount] = state[\invitationCount] + 1;
+                        // This is a neutral control on the existing participant-A
+                        // Synth. It creates no node and has no acoustic mapping yet.
+                        synth.set(\invitationAmount, amount);
+                        ("Invitation control accepted target=A session=" ++ sessionID
+                            ++ " event=" ++ eventID ++ " seq=" ++ seq
+                            ++ " amount=" ++ amount.round(0.001)
+                            ++ " age=" ++ age.round(0.001)).postln;
+                    } {
+                        ("Invitation control rejected target=" ++ target
+                            ++ " session=" ++ sessionID ++ " event=" ++ eventID
+                            ++ " seq=" ++ seq ++ " age=" ++ age
+                            ++ " amount=" ++ amount
+                            ++ " classes[session=" ++ sessionID.class
+                            ++ ",event=" ++ eventID.class ++ "]"
+                            ++ " checks[numeric=" ++ numericValid
+                            ++ ",identity=" ++ identityValid
+                            ++ ",target=" ++ targetValid
+                            ++ ",sequence=" ++ sequenceValid ++ "]").warn;
+                    };
+                } {
+                    "Invitation control rejected: expected 6 values.".warn;
+                };
+                // Deliberately do not update lastFrameAt or transportAlive here.
+            }, '/sdd/invitation/v1/control', recvPort: 57120);
+
             OSCdef(\eegOrganismV2Stop, {
                 state[\stop].value(false);
             }, '/eeg/organism/v2/stop', recvPort: 57120);
@@ -280,6 +359,7 @@ startReceiver = {
             ("Node IDs: " ++ state[\nodeIDs]).postln;
             "Waiting for /eeg/organism/v2/frame; silent until the first frame.".postln;
             "Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).".postln;
+            "Invitation endpoint: /sdd/invitation/v1/control (participant A only).".postln;
             "Centroid, mobility, spectral entropy, and novelty are storage/display only.".postln;
             ("Exact harmonic groups: " ++ v2Config[\harmonicGroups]).postln;
             ("Beta profile: " ++ v2Config[\betaProfile]

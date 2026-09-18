@@ -1,0 +1,25 @@
+{
+  "fixture_only": true,
+  "participant_voice": "A",
+  "accepted_messages": 111,
+  "rejected_messages": 6,
+  "watchdog_triggered_while_invitation_active": true,
+  "active_tree_queries": 22,
+  "final_voice_node_present": false,
+  "demo": {
+    "events": 2,
+    "terminations": [
+      "declined",
+      "completed"
+    ],
+    "frames": 19,
+    "invitation_messages": 85,
+    "sent": true,
+    "log": "reports\\sdd_v1\\invitation_runtime_final_manual.jsonl"
+  },
+  "audio_rate": 48000,
+  "audio_channels": 2,
+  "audio_finite": true,
+  "audio_peak": 0.03582035005092621,
+  "audition": "PENDING HUMAN LISTENING"
+}
