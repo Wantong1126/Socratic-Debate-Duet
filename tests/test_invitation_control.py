@@ -217,7 +217,8 @@ class InvitationControlTests(unittest.TestCase):
         self.assertEqual(receiver.count("Synth.tail("), 1)
         self.assertEqual(receiver.count("Group.tail("), 1)
         self.assertIn("NamedControl.kr(\\invitationAmount, 0)", core)
-        self.assertIn("Silent.ar(2) * invitationAmount", core)
+        self.assertIn("NamedControl.kr(\n            \\invitationDiagnosticDepth, 0", core)
+        self.assertIn("source = source * invitationDiagnosticGain", core)
 
     def test_manual_demo_logs_decline_completion_and_existing_voice_packets(self):
         config = tomllib.loads((ROOT/"config/sdd_v1.toml").read_text(encoding="utf-8"))

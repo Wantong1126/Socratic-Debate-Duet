@@ -99,6 +99,7 @@
     SynthDef(defName, {
         |out = 0, gate = 1|
         var controlLag, energyLag, groupControls, stereoWidth, invitationAmount;
+        var invitationDiagnosticDepth, invitationDiagnosticGain;
         var wavetableBuffers, groupNorm, makeBank;
         var sourceA, sourceB, bankPosition;
         var source, delayed, delayMix;
@@ -122,6 +123,12 @@
             \stereoWidth, preset[\stereoWidth]
         ).clip(0, 1);
         invitationAmount = NamedControl.kr(\invitationAmount, 0).clip(0, 1);
+        invitationDiagnosticDepth = NamedControl.kr(
+            \invitationDiagnosticDepth, 0
+        ).clip(0, 0.9);
+        invitationDiagnosticGain = 1 - (
+            invitationAmount * invitationDiagnosticDepth
+        );
         voiceFrequencyMinHz = NamedControl.kr(
             \voiceFrequencyMinHz, preset[\voiceFrequencyMinHz]
         ).clip(20, 200);
@@ -182,9 +189,9 @@
             warp: \sin
         ) * 2 - 1;
         source = XFade2.ar(sourceA, sourceB, bankPosition);
-        // T12 transport proof only: the control belongs to this persistent
-        // voice but has zero acoustic output until an intervention is auditioned.
-        source = source + (Silent.ar(2) * invitationAmount);
+        // Diagnostic-only audibility. Depth defaults to zero, so the normal
+        // runtime remains unchanged. The dedicated demo enables it explicitly.
+        source = source * invitationDiagnosticGain;
 
         // Fixed, feedback-free and unmodulated cross-channel delay.
         delayed = [
