@@ -1,7 +1,7 @@
 {
   "project": "SDD V1",
-  "date": "2026-09-17",
-  "status": "plan; not an implementation completion report",
+  "date": "2026-09-19",
+  "status": "Updated requirements, not a hardware completion report",
   "preferred_topological_order": [
     "T01",
     "T02",
@@ -15,12 +15,17 @@
     "T10",
     "T11",
     "T12",
-    "T13",
-    "T14",
-    "T15",
-    "T16",
-    "T17",
+    "H01",
+    "H02",
+    "H03",
+    "H04",
+    "H05",
+    "H06",
     "T18",
+    "B01",
+    "H07",
+    "H08",
+    "H09",
     "T19",
     "T20",
     "T21",
@@ -29,6 +34,22 @@
     "T24",
     "T25",
     "T26",
+    "V01",
+    "V02",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B09",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17",
+    "V03",
     "T27",
     "T28",
     "T29",
@@ -36,6 +57,7 @@
     "T31",
     "T32",
     "T33",
+    "H10",
     "T34",
     "T35",
     "T36",
@@ -52,49 +74,81 @@
       "T03",
       "T04",
       "T10",
-      "T18",
+      "H01",
       "T29"
     ],
     [
       "T05",
       "T06",
       "T11",
-      "T19"
+      "H02",
+      "H04"
     ],
     [
       "T07",
       "T12",
-      "T20"
+      "H03",
+      "H05"
     ],
     [
       "T08",
-      "T21",
-      "T22",
-      "T23"
+      "H06",
+      "T18",
+      "B01"
     ],
     [
       "T09",
-      "T24"
+      "H07",
+      "H09",
+      "B02",
+      "B03"
     ],
     [
+      "H08",
+      "T19",
       "T13",
-      "T14",
-      "T25"
+      "T14"
     ],
     [
-      "T15",
-      "T26"
+      "T20",
+      "T15"
     ],
     [
-      "T16",
+      "T21",
+      "T22",
+      "T23",
+      "B04",
+      "T16"
+    ],
+    [
+      "T24",
+      "B05",
+      "T17"
+    ],
+    [
+      "T25",
+      "B06"
+    ],
+    [
+      "T26",
+      "B07",
+      "B08"
+    ],
+    [
+      "V01"
+    ],
+    [
+      "V02",
+      "B09",
       "T27",
       "T31"
     ],
     [
-      "T17",
+      "V03",
       "T28",
       "T32",
-      "T33"
+      "T33",
+      "H10"
     ],
     [
       "T30"
@@ -113,17 +167,17 @@
   "tasks": [
     {
       "id": "T01",
-      "title": "确认能运行的 v2 起点",
+      "title": "确认当前单人声音与启动基线",
       "depends_on": [],
       "kind": "verification",
-      "current_status": "代码存在；Task 06 未验收",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sonification/synthetic_music_demo.py",
         "src/sonification/protocol.py",
         "sound/eeg_organism_v2_receiver.scd",
         "reports/overnight/20260904_014335/progress.md"
       ],
-      "acceptance": "记录本地提交或源码哈希、启动命令、配置和实际接收器；针对 Task 06 跑已有相关测试与一次音频检查。输出哪些已验证、哪些未验证；不把旧的 90 passed 当成本次验证。"
+      "acceptance": "核对当前实际提交、启动入口、协议及既有测试报告；仅回归相关更改。用户已报告该基线技术验证通过；不能把旧导出里的 protocol 缺陷重新当成当前必修项。听觉判断和本次实测分开。"
     },
     {
       "id": "T02",
@@ -132,7 +186,7 @@
         "T01"
       ],
       "kind": "code",
-      "current_status": "新增内部接口",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sdd/session_types.py（拟新增）"
       ],
@@ -145,7 +199,7 @@
         "T02"
       ],
       "kind": "code",
-      "current_status": "新增",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sdd/session_recorder.py（拟新增）"
       ],
@@ -158,7 +212,7 @@
         "T02"
       ],
       "kind": "code",
-      "current_status": "复用并封装",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sonification/synthetic_demo.py",
         "src/sonification/synthetic_music_demo.py",
@@ -174,7 +228,7 @@
         "T04"
       ],
       "kind": "code",
-      "current_status": "新增",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sdd/replay_source.py（拟新增）"
       ],
@@ -182,14 +236,14 @@
     },
     {
       "id": "T06",
-      "title": "发送有节奏的 v2 控制帧",
+      "title": "稳定发送当前九值控制帧",
       "depends_on": [
         "T01",
         "T02",
         "T04"
       ],
       "kind": "code",
-      "current_status": "已有机制；需统一入口",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sonification/protocol.py",
         "src/sonification/synthetic_music_demo.py"
@@ -203,7 +257,7 @@
         "T06"
       ],
       "kind": "code",
-      "current_status": "已有；需验收",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "sound/eeg_harmonic_field_v2_core.scd",
         "sound/eeg_organism_v2_receiver.scd",
@@ -218,7 +272,7 @@
         "T07"
       ],
       "kind": "code",
-      "current_status": "接收器已有；需接通",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "sound/eeg_organism_v2_receiver.scd",
         "src/sdd/session_runtime.py（拟新增）"
@@ -234,7 +288,7 @@
         "T08"
       ],
       "kind": "code",
-      "current_status": "从现有映射提取调试配置",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "config/sdd_v1.toml（拟新增）",
         "src/sonification/controls.py"
@@ -248,7 +302,7 @@
         "T02"
       ],
       "kind": "code",
-      "current_status": "上一包有初版",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "v1_start/controller_demo.py（上一交付包）",
         "src/sdd/invitation_input.py（拟新增）"
@@ -262,7 +316,7 @@
         "T10"
       ],
       "kind": "code",
-      "current_status": "上一包已有纯状态模块",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "v1_start/reflection_controller.py（上一交付包）",
         "src/sdd/reflection_controller.py（拟接入）"
@@ -277,12 +331,425 @@
         "T11"
       ],
       "kind": "code",
-      "current_status": "新增 OSC 接口",
+      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
       "files": [
         "src/sdd/invitation_osc.py（拟新增）",
         "sound/eeg_organism_v2_receiver.scd"
       ],
       "acceptance": "独立消息传变化量、目标及序号；不覆盖原九字段。receiver 只更新对应声部参数；重复/过期消息不会重触发。协议名称在实现时明确记录并两端一致。"
+    },
+    {
+      "id": "H01",
+      "title": "写入已确认的六 EEG＋EOG＋EMG 配置",
+      "depends_on": [
+        "T02"
+      ],
+      "kind": "implementation",
+      "current_status": "用户确认硬件早已就绪；2026-09-19 Hardware - Tech.md 已明确通道。配置入代码待本地核对。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "当前 Ch1–6=F3/F4/C3/C4/P3/P4，Ch7=垂直EOG，Ch8=咬肌EMG，SRB2参考、BIAS。写入配置并分配 A；不再询问是否买齐或重新选择布局。未知厂商/固件非接入阻塞；实际样本单位和流参数仍须正确。"
+    },
+    {
+      "id": "H02",
+      "title": "沿用现有接收器和 GUI，确认当前连接",
+      "depends_on": [
+        "H01"
+      ],
+      "kind": "hardware_preflight",
+      "current_status": "硬件由用户确认已搭好；只需本次连接检查，不重做采购/选型。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "用现有板、接收器、COM 和 GUI LIVE。核对哪个程序占串口；Python读LSL时不另抢COM。已有可用设置直接复用，不要求先收齐厂商/固件资料；遇到具体连接错误才排查。"
+    },
+    {
+      "id": "H03",
+      "title": "连接时核对数据单位、通道和上游滤波",
+      "depends_on": [
+        "H02"
+      ],
+      "kind": "hardware_preflight",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "从现有GUI/流元数据读取单位、实际频率、通道顺序及滤波；确保支持所需EEG/身体频段。只处理会导致读错或算错的缺口，不展开厂商调查；出口确实不适用才另选方案。"
+    },
+    {
+      "id": "H04",
+      "title": "列出并明确绑定正确 LSL 源",
+      "depends_on": [
+        "H01"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "优先复用已有LSL发现/接收功能，明确选当前板的流；多源时不盲取第一个。打印源、采样率、单位、八路对应和到达率。先只读，不强制新建独立检查框架。"
+    },
+    {
+      "id": "H05",
+      "title": "将采集块统一为带身份时间的样本",
+      "depends_on": [
+        "H04"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "复用旧采集及当前session接口，统一samples×channels、时间、单位、质量与来源；按已确认角色分流。只补缺失适配，不建立另一套平行runtime。未知单位/维度不进入有效计算。"
+    },
+    {
+      "id": "H06",
+      "title": "把真实原始数据接到已有会话记录器",
+      "depends_on": [
+        "H05",
+        "T03"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "显式 opt-in 后保存收到的处理前数据、配置、时间、可取得的包序号与 gap；不可取得字段明确 unavailable。异步有界队列、丢失日志、退出落盘；不自动公开真人数据。"
+    },
+    {
+      "id": "T18",
+      "title": "现在接入已有硬件的真实 LSL 数据",
+      "depends_on": [
+        "T02",
+        "H05"
+      ],
+      "kind": "code",
+      "current_status": "下一步立即联调；已有旧LSL代码可复用，当前声音是否已桥接以本地代码核实。",
+      "files": [
+        "src/lsl_probe.py",
+        "src/eeg_control_demo.py",
+        "src/sdd/lsl_source.py（拟新增）"
+      ],
+      "acceptance": "不等T13–T17声音设计完成。使用用户已就绪硬件的GUI LIVE/LSL，读到八路带时间样本并绑定A，确认单位、采样率与通道。T18只验收收到真数据；T19–T26负责真特征驱动当前声音。"
+    },
+    {
+      "id": "B01",
+      "title": "按配置分离 EEG、EOG、EMG",
+      "depends_on": [
+        "H01",
+        "H05"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "按已确认Ch1–6 EEG、Ch7 EOG、Ch8 EMG分流；眼/肌通道不进EEG平均或特征。禁用/无效不是有效零值。当前只需落实混合配置，不为尚未使用的8EEG配置另造框架。"
+    },
+    {
+      "id": "H07",
+      "title": "本次连接确认收到真硬件数据",
+      "depends_on": [
+        "H03",
+        "H06",
+        "T18"
+      ],
+      "kind": "human_hardware_gate",
+      "current_status": "硬件已就绪；当前程序真实连接待本地联调，并非待购硬件。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "用户按既有安全接线启动GUI LIVE，明确当前来源并观察带时间样本；停止采集后不再收新样本。实际无流则报告具体缺口，不说硬件尚未准备。synthetic不能代替通过。"
+    },
+    {
+      "id": "H08",
+      "title": "确认当前八路与已知电极对应",
+      "depends_on": [
+        "H07",
+        "B01"
+      ],
+      "kind": "human_hardware_gate",
+      "current_status": "接线方案已由用户确认；本次启用状态/信号质量待运行检查。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "采用用户的F3/F4/C3/C4/P3/P4、垂直EOG、咬肌EMG配置；核对当前启用/饱和/平线和信号对应。需要时以自然眨眼、温和肌肉动作确认身体通道，不要求重做装配。只验证一条EEG不算三模态全部通过。"
+    },
+    {
+      "id": "H09",
+      "title": "处理失联、积压和重连暖机",
+      "depends_on": [
+        "H05",
+        "T08"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "采集队列有界，实时只取最新；原始丢样留日志。超时/重连/源切换使滤波窗口和个人历史 reset/warmup；旧数据与邀请不能续命。单测加真实停流验证，不自动重开旧邀请。"
+    },
+    {
+      "id": "T19",
+      "title": "构建因果滤波和滑动窗口",
+      "depends_on": [
+        "T18",
+        "B01",
+        "H09"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/window_engine.py",
+        "src/eeg_preprocessing.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "在 B01 分出的 EEG 通道上实现因果连续滤波和窗口；原始采样时钟保留，窗口未满/缺样后重置时不输出有效特征。上游频带须满足下游需求，计算 delta 不能先 4 Hz 高通。单位、滤波带宽与窗长版本化。"
+    },
+    {
+      "id": "T20",
+      "title": "给每个窗口标记质量",
+      "depends_on": [
+        "T19"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "通道和窗口分层标记 missing/nonfinite/flatline/disabled/saturation/artifact_suspected/stale；阈值配置化，标记不等于自动去伪影。坏通道不能偷偷退出汇总而不记录/重校准。EOG/EMG 不参与 EEG 特征。"
+    },
+    {
+      "id": "T21",
+      "title": "从有效窗口计算 E/C/M 描述量",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "输出 energy、centroid、mobility 的物理定义、单位和所选通道；有独立已知信号验证。先选一个明确通道或一个明确的有效通道汇总策略，不混淆六通道与六个人。"
+    },
+    {
+      "id": "T22",
+      "title": "计算真实频带功率",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/eeg_features.py",
+        "src/sdd/live_features.py（拟新增）"
+      ],
+      "acceptance": "从真实功率谱得到 delta/theta/alpha/beta，明确频段端点与归一化分母；用已知频率输入验收。不能沿用 synthetic demo 的预设频带常量作为 live 输出。"
+    },
+    {
+      "id": "T23",
+      "title": "计算真实谱熵",
+      "depends_on": [
+        "T20"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/sonification/features.py"
+      ],
+      "acceptance": "调用已有谱熵函数并校验频段/窗口；无效窗口不因函数返回 0 就被当作低熵。输出值与 valid 标志分开。"
+    },
+    {
+      "id": "T24",
+      "title": "按个人基线缩放特征",
+      "depends_on": [
+        "T21",
+        "T22",
+        "T23"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/eeg_control_features.py",
+        "src/sdd/calibration.py（拟新增）"
+      ],
+      "acceptance": "只用有效样本形成个人范围；不足/范围退化时报告校准失败，不把噪声放大至全范围。一次比较中冻结缩放规则，记录限幅、平滑和实际敏感度。"
+    },
+    {
+      "id": "T25",
+      "title": "更新个人 novelty 历史",
+      "depends_on": [
+        "T24"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/sonification/features.py"
+      ],
+      "acceptance": "每个参与者/独立特征流一个 estimator；只输入有效、已归一化帧；首次启动/重校准记录 warmup 与 reset，A/B 不共用历史。"
+    },
+    {
+      "id": "T26",
+      "title": "把真实九值帧接入声音循环",
+      "depends_on": [
+        "T03",
+        "T06",
+        "T08",
+        "T09",
+        "T25",
+        "H06"
+      ],
+      "kind": "code",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "files": [
+        "src/sdd/session_runtime.py（拟新增）",
+        "src/sonification/protocol.py"
+      ],
+      "acceptance": "新鲜有效 EEG 经真实特征、个人缩放与 novelty 进入当前九值和 voicing。首个调试可只开放 energy，其余明确固定；完整验收再验证全部字段。live 不得藏 synthetic 指标。保持现有 receiver、声音和 invitation 合同；无效数据不能续 watchdog。"
+    },
+    {
+      "id": "V01",
+      "title": "验收真实 EEG 到当前 harmonic voice",
+      "depends_on": [
+        "H08",
+        "T26",
+        "H09"
+      ],
+      "kind": "human_hardware_gate",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "有明确 live 来源、实际信号/特征/控制帧/voicing/录音时间对应。先 energy-only 调试再完整真实九值验收；固定值须显式标识。受控停流后实际淡出；不把 OSC 接收成功当整链路完成。"
+    },
+    {
+      "id": "V02",
+      "title": "验收真实记录回放与故障恢复",
+      "depends_on": [
+        "V01",
+        "H06",
+        "T05"
+      ],
+      "kind": "integration_gate",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "同段 raw 记录重算特征/控制与当次输出按定义容差比较；冻结配置种子和调度规则，必要时离线回放原事件顺序。实际停流/进程退出/重连无积压补播；分段测窗口、计算、传输、音频平滑延迟。"
+    },
+    {
+      "id": "B02",
+      "title": "从肌电计算实时活动包络",
+      "depends_on": [
+        "B01"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "实现可配置有状态因果滤波、RMS/整流包络与平滑，记录频带/窗口/延迟。250 Hz 的 20–90 Hz 只是候选限带方案；依据真实上游带宽配置。已知信号、缺样和暖机测试；不输出心理标签。"
+    },
+    {
+      "id": "B03",
+      "title": "从眼电计算实时活动量",
+      "depends_on": [
+        "B01"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "独立因果低频处理和 RMS/幅度，记录窗口和延迟；旧 0.5–10 Hz /2秒可比较，不默认为最佳。测试静值/脉冲/缺样；初版不把 RMS 叫注视方向，也不自动叫 blink detector。"
+    },
+    {
+      "id": "B04",
+      "title": "分别校准身体信号并保留质量状态",
+      "depends_on": [
+        "B02",
+        "B03",
+        "T20"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "EOG/EMG 单独静息和温和动作范围；退化范围/饱和/伪影不放大成满量程。每路 valid/reason/freshness 独立，禁用或坏输入回中性，EEG 的个人归一化不受其污染。"
+    },
+    {
+      "id": "B05",
+      "title": "定义并发送独立身体控制消息",
+      "depends_on": [
+        "B04",
+        "T06"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "独立版本化 body 合同含目标、session、seq、时间/age、模态值及有效性；按现有网络时钟约定实现并留协议文档。九值和 invitation 不变；发送只取新鲜最新状态，测试过期/无效与乱序。"
+    },
+    {
+      "id": "B06",
+      "title": "让当前 receiver 验证并接收身体控制",
+      "depends_on": [
+        "B05",
+        "T07"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "对应两端合同；拒收错目标/旧session/乱序/非有限/超范围。更新既有声部控制，身体消息不刷新 EEG watchdog，单路超时平滑复位；不回退旧 body synth，不随每帧新增节点。"
+    },
+    {
+      "id": "B07",
+      "title": "把肌电包络映射到一个现有声音参数",
+      "depends_on": [
+        "B06"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "选择并记录一个可关闭、深度有界的候选：浅节律/音符包络或纹理密度。保持当前核心声部；基线与 invitation 更新仍生效。先独听、再叠加，不能以 EMG 高低解释价值判断。"
+    },
+    {
+      "id": "B08",
+      "title": "把眼电活动映射到一个现有声音参数",
+      "depends_on": [
+        "B06"
+      ],
+      "kind": "implementation",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "选择并记录一个可关闭、深度有界的候选：滑音时间或效果湿度。参数归属/组合与 EEG、EMG、invitation 明确；拒绝静默 last-message-wins。不会自动触发反思按钮。"
+    },
+    {
+      "id": "B09",
+      "title": "真人逐路试听身体调制及组合",
+      "depends_on": [
+        "B07",
+        "B08",
+        "H08",
+        "V01"
+      ],
+      "kind": "human_hardware_gate",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "仅混合接线已核实才验收：EEG-only/加EOG/加EMG/组合依次记录；未接模态保持 PENDING，不以 EEG 污染替代。测试单模态坏信号回中性、邀请恢复到当前基线；听觉好坏由本人记录。"
     },
     {
       "id": "T13",
@@ -292,7 +759,7 @@
         "T12"
       ],
       "kind": "code",
-      "current_status": "新增试听候选",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "sound/eeg_harmonic_field_v2_core.scd",
         "config/sdd_v1.toml（拟新增）"
@@ -301,18 +768,18 @@
     },
     {
       "id": "T14",
-      "title": "候选二：给原声部加入浅的节律起伏",
+      "title": "候选二：保留低声部，移动一个上声部音",
       "depends_on": [
         "T09",
         "T12"
       ],
       "kind": "code",
-      "current_status": "新增试听候选",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "sound/eeg_harmonic_field_v2_core.scd",
         "config/sdd_v1.toml（拟新增）"
       ],
-      "acceptance": "用连续包络调制已有声音的强弱，零变化量回基线；周期/深度可调、峰值受控。不是宣称与脑波或呼吸同步，也不是已批准的最终艺术选择。"
+      "acceptance": "在当前声部内连续改变一个上声部音，保留低音/共同音；幅度有界，变化结束回到当前基线选音。与泛音候选分别试听；这是待实现/核对的声音候选，不是已经完成。原浅节律候选留作后选，不擅自同时加入。"
     },
     {
       "id": "T15",
@@ -324,7 +791,7 @@
         "T14"
       ],
       "kind": "code",
-      "current_status": "状态已有；音频动作待接通",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/reflection_controller.py（拟接入）",
         "sound/eeg_organism_v2_receiver.scd"
@@ -341,12 +808,12 @@
         "T15"
       ],
       "kind": "code",
-      "current_status": "新增",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/render_comparison.py（拟新增）",
         "recordings/sdd_v1（拟新增）"
       ],
-      "acceptance": "输出基线/音色变化/节律变化三段，使用同一输入、事件时间和种子；保存配置与响度指标。随机试听顺序仅用于比较，不把合成输入称作 EEG 实测。"
+      "acceptance": "同一输入、事件时间和种子生成 baseline / 泛音变化 / 上声部变化；分别用固定输入与缓慢变化 fixture 比较，保存配置、响度指标、音频及人工判断。关闭诊断音量衰减；不能把合成比较叫真实 EEG 验证。"
     },
     {
       "id": "T17",
@@ -355,152 +822,36 @@
         "T16"
       ],
       "kind": "research_gate",
-      "current_status": "未做",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "docs/listening_checks.md（拟新增）"
       ],
       "acceptance": "作者先标记变化发生处、哪种版本像另一段提示音、哪种保留连续性；保存判断和反例。这是初筛，不是参与者自我归属的证据；不满意则创建新映射版本再走 T13–T17。"
     },
     {
-      "id": "T18",
-      "title": "接入一个人的真实 LSL 源",
+      "id": "V03",
+      "title": "验收单人完整生理输入与邀请链路",
       "depends_on": [
-        "T02"
+        "V02",
+        "B09",
+        "T15"
       ],
-      "kind": "code",
-      "current_status": "旧采集路径可复用",
+      "kind": "human_hardware_gate",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
       "files": [
-        "src/lsl_probe.py",
-        "src/eeg_control_demo.py",
-        "src/sdd/lsl_source.py（拟新增）"
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
-      "acceptance": "按 source_id 绑定到 A，读取实际采样率、通道与单位；保存源时间和到达时间及校时方式。断流显示失联，不用默认 250 Hz 或其他流冒充。"
-    },
-    {
-      "id": "T19",
-      "title": "构建因果滤波和滑动窗口",
-      "depends_on": [
-        "T18"
-      ],
-      "kind": "code",
-      "current_status": "复用并调整频段",
-      "files": [
-        "src/window_engine.py",
-        "src/eeg_preprocessing.py",
-        "src/sdd/live_features.py（拟新增）"
-      ],
-      "acceptance": "仅使用已到达样本，窗口满才产出；输出频段和窗口时长可追溯。计算 delta 时不能使用已经 4 Hz 高通过的窗口；工频、单位、采样率与实际设备配置相符。"
-    },
-    {
-      "id": "T20",
-      "title": "给每个窗口标记质量",
-      "depends_on": [
-        "T19"
-      ],
-      "kind": "code",
-      "current_status": "已有基础检查；需独立状态",
-      "files": [
-        "src/eeg_control_features.py",
-        "src/sdd/live_features.py（拟新增）"
-      ],
-      "acceptance": "标记缺样、非有限、平线、饱和/明显异常等及理由；阈值可配置。记录说话/动作测试条件。质量检查是基本筛查，不等于已经去除了全部肌电/眼动伪影。"
-    },
-    {
-      "id": "T21",
-      "title": "从有效窗口计算 E/C/M 描述量",
-      "depends_on": [
-        "T20"
-      ],
-      "kind": "code",
-      "current_status": "旧模块可复用",
-      "files": [
-        "src/eeg_control_features.py",
-        "src/sdd/live_features.py（拟新增）"
-      ],
-      "acceptance": "输出 energy、centroid、mobility 的物理定义、单位和所选通道；有独立已知信号验证。先选一个明确通道或一个明确的有效通道汇总策略，不混淆六通道与六个人。"
-    },
-    {
-      "id": "T22",
-      "title": "计算真实频带功率",
-      "depends_on": [
-        "T20"
-      ],
-      "kind": "code",
-      "current_status": "新旧实现需核对",
-      "files": [
-        "src/eeg_features.py",
-        "src/sdd/live_features.py（拟新增）"
-      ],
-      "acceptance": "从真实功率谱得到 delta/theta/alpha/beta，明确频段端点与归一化分母；用已知频率输入验收。不能沿用 synthetic demo 的预设频带常量作为 live 输出。"
-    },
-    {
-      "id": "T23",
-      "title": "计算真实谱熵",
-      "depends_on": [
-        "T20"
-      ],
-      "kind": "code",
-      "current_status": "纯函数已有",
-      "files": [
-        "src/sonification/features.py"
-      ],
-      "acceptance": "调用已有谱熵函数并校验频段/窗口；无效窗口不因函数返回 0 就被当作低熵。输出值与 valid 标志分开。"
-    },
-    {
-      "id": "T24",
-      "title": "按个人基线缩放特征",
-      "depends_on": [
-        "T21",
-        "T22",
-        "T23"
-      ],
-      "kind": "code",
-      "current_status": "旧 ECM 校准可复用扩展",
-      "files": [
-        "src/eeg_control_features.py",
-        "src/sdd/calibration.py（拟新增）"
-      ],
-      "acceptance": "只用有效样本形成个人范围；不足/范围退化时报告校准失败，不把噪声放大至全范围。一次比较中冻结缩放规则，记录限幅、平滑和实际敏感度。"
-    },
-    {
-      "id": "T25",
-      "title": "更新个人 novelty 历史",
-      "depends_on": [
-        "T24"
-      ],
-      "kind": "code",
-      "current_status": "纯类已有",
-      "files": [
-        "src/sonification/features.py"
-      ],
-      "acceptance": "每个参与者/独立特征流一个 estimator；只输入有效、已归一化帧；首次启动/重校准记录 warmup 与 reset，A/B 不共用历史。"
-    },
-    {
-      "id": "T26",
-      "title": "把真实九值帧接入声音循环",
-      "depends_on": [
-        "T03",
-        "T06",
-        "T08",
-        "T09",
-        "T25"
-      ],
-      "kind": "code",
-      "current_status": "新增桥接",
-      "files": [
-        "src/sdd/session_runtime.py（拟新增）",
-        "src/sonification/protocol.py"
-      ],
-      "acceptance": "同一封套把新鲜有效帧送音频、日志和 invitation controller；数据无效不续命。分开测窗口长度、计算/传输和听觉平滑造成的延迟，不能把 4 Hz 当 250 ms 全链延迟。"
+      "acceptance": "当前混合配置下 EEG/EMG/EOG 和邀请独立、可组合、可退出；整板掉线全声部淡出，身体输入或按钮不能续 EEG 命。保存真实会话证据。自我归属/反思仍由 T30/T36 研究，不自动判通过。"
     },
     {
       "id": "T27",
       "title": "提供单人熟悉声音的流程",
       "depends_on": [
-        "T26"
+        "T26",
+        "V01"
       ],
       "kind": "code",
-      "current_status": "新增",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/familiarisation.py（拟新增）"
       ],
@@ -514,7 +865,7 @@
         "T27"
       ],
       "kind": "code",
-      "current_status": "新增简短界面文案",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "docs/participant_brief.md（拟新增）",
         "src/sdd/session_ui.py（拟新增）"
@@ -528,7 +879,7 @@
         "T02"
       ],
       "kind": "research",
-      "current_status": "未做",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "docs/pilot_protocol.md（拟新增）"
       ],
@@ -541,10 +892,11 @@
         "T17",
         "T27",
         "T28",
-        "T29"
+        "T29",
+        "V03"
       ],
       "kind": "research_gate",
-      "current_status": "未做",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "docs/pilot_results.md（拟新增）"
       ],
@@ -555,10 +907,12 @@
       "title": "创建独立的 B 声部实例",
       "depends_on": [
         "T15",
-        "T26"
+        "T26",
+        "V01",
+        "H01"
       ],
       "kind": "code",
-      "current_status": "新增参与者隔离",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/session_runtime.py（拟新增）",
         "sound/eeg_organism_v2_receiver.scd"
@@ -572,7 +926,7 @@
         "T31"
       ],
       "kind": "code",
-      "current_status": "新增混音配置",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "config/sdd_v1.toml（拟新增）",
         "sound/eeg_harmonic_field_v2_core.scd"
@@ -588,11 +942,25 @@
         "T31"
       ],
       "kind": "code",
-      "current_status": "从初版 GUI 接入",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/session_ui.py（拟新增）"
       ],
       "acceptance": "audience/peer 的来源不丢失，可明确邀请 A 或 B；本人能拒绝自己的邀请并暂停。输入先用键盘/桌面按钮，物理按钮只需以后替换输入适配器。"
+    },
+    {
+      "id": "H10",
+      "title": "核实第二套硬件、身份隔离与时钟",
+      "depends_on": [
+        "H08",
+        "T31"
+      ],
+      "kind": "human_hardware_gate",
+      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "files": [
+        "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
+      ],
+      "acceptance": "一人一套独立设备与通道配置；A/B 源唯一、后端可同时采集、时钟转换可追踪。实测停 A 不影响 B。若 GUI 不能同时提供两源，明确阻塞并确认后端方案，不能仅克隆代码宣称双人硬件成功。"
     },
     {
       "id": "T34",
@@ -600,10 +968,12 @@
       "depends_on": [
         "T30",
         "T32",
-        "T33"
+        "T33",
+        "H10",
+        "V03"
       ],
       "kind": "code",
-      "current_status": "新增编排",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/session_runtime.py（拟新增）"
       ],
@@ -616,7 +986,7 @@
         "T34"
       ],
       "kind": "verification",
-      "current_status": "未做",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "tests/test_sdd_integration.py（拟新增）",
         "reports/sdd_v1（拟新增）"
@@ -631,7 +1001,7 @@
         "T34"
       ],
       "kind": "research_gate",
-      "current_status": "未做",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "docs/pilot_results.md（拟新增）"
       ],
@@ -644,14 +1014,37 @@
         "T03",
         "T16",
         "T35",
-        "T36"
+        "T36",
+        "V02"
       ],
       "kind": "code",
-      "current_status": "新增导出",
+      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
       "files": [
         "src/sdd/export_session.py（拟新增）"
       ],
       "acceptance": "打包配置/版本、事件时间线、精选音频视频索引、匿名化观察和限制说明；不自动公开原始脑电。提供 NIME 作品说明所需素材与 IPQ 可独立分析的记录，不自动生成已评估结论。"
     }
-  ]
+  ],
+  "evidence_scope": "Hardware readiness and montage confirmed by user and Hardware - Tech.md on 2026-09-19; current production live bridge still requires local code/runtime verification.",
+  "hardware_profile": {
+    "readiness": "user_confirmed_ready",
+    "source": "Hardware - Tech.md",
+    "eeg": {
+      "1": "F3",
+      "2": "F4",
+      "3": "C3",
+      "4": "C4",
+      "5": "P3",
+      "6": "P4"
+    },
+    "eog": {
+      "7": "vertical"
+    },
+    "emg": {
+      "8": "masseter"
+    },
+    "reference": "SRB2",
+    "bias": "BIAS",
+    "current_live_bridge_status": "not_verified_here"
+  }
 }

@@ -22,7 +22,7 @@ def control_names():
                  for channel in range(1, 7) for descriptor in DESCRIPTORS)
 
 
-def signal_quality(eeg):
+def signal_quality(eeg, saturation_abs=None):
     warnings = {}
     for index, name in enumerate(CHANNELS):
         signal = eeg[:, index]
@@ -32,6 +32,9 @@ def signal_quality(eeg):
         finite = signal[np.isfinite(signal)]
         if not finite.size or np.ptp(finite) <= 1e-9:
             items.append("flatline")
+        if (saturation_abs is not None and finite.size
+                and np.any(np.abs(finite) >= float(saturation_abs))):
+            items.append("saturation")
         warnings[name] = items
     return warnings
 
@@ -56,7 +59,8 @@ class EEGControlFeatureEngine:
 
     def __init__(self, sample_rate=250.0, update_rate=4.0, baseline_seconds=20.0,
                  analysis_low_hz=4.0, analysis_high_hz=40.0,
-                 smoothing_seconds=0.5, low_percentile=5.0, high_percentile=95.0):
+                 smoothing_seconds=0.5, low_percentile=5.0, high_percentile=95.0,
+                 required_quality_channels=(), saturation_abs=None):
         if min(sample_rate, update_rate, baseline_seconds) <= 0:
             raise ValueError("sample, update, and calibration durations must be positive")
         if not 0 < analysis_low_hz < analysis_high_hz < sample_rate / 2:
@@ -70,6 +74,10 @@ class EEGControlFeatureEngine:
         self.smoothed = {}
         self.alpha = 1.0 if smoothing_seconds <= 0 else 1.0 - np.exp(-1.0 / (update_rate * smoothing_seconds))
         self.frames_seen = 0
+        self.required_quality_channels = tuple(int(index) for index in required_quality_channels)
+        self.saturation_abs = saturation_abs
+        if any(index < 0 or index >= 6 for index in self.required_quality_channels):
+            raise ValueError("required quality channel indexes must be in [0, 5]")
 
     @property
     def ready(self):
@@ -97,6 +105,14 @@ class EEGControlFeatureEngine:
             for descriptor, value in zip(DESCRIPTORS, values):
                 raw[f"eeg{index + 1}_{descriptor}"] = float(value) if np.isfinite(value) else 0.0
 
+        quality = eeg if quality_window is None else np.asarray(quality_window, dtype=float)
+        warnings = signal_quality(quality, self.saturation_abs)
+        required_valid = all(
+            not warnings[CHANNELS[index]] for index in self.required_quality_channels
+        )
+        if not required_valid:
+            return ControlFrame(raw, {}, self.baseline_progress, warnings)
+
         if not self.ready:
             for name, value in raw.items():
                 self.calibration[name].append(value)
@@ -116,5 +132,4 @@ class EEGControlFeatureEngine:
                 self.smoothed[name] = mapped
                 normalized[name] = float(np.clip(mapped, 0.0, 1.0))
             self.frames_seen += 1
-        quality = eeg if quality_window is None else np.asarray(quality_window, dtype=float)
-        return ControlFrame(raw, normalized, self.baseline_progress, signal_quality(quality))
+        return ControlFrame(raw, normalized, self.baseline_progress, warnings)

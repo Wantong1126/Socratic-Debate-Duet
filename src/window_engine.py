@@ -3,6 +3,7 @@
 from collections import deque
 from dataclasses import dataclass
 import time
+import xml.etree.ElementTree as ET
 
 import numpy as np
 from pylsl import StreamInlet, resolve_streams
@@ -31,15 +32,75 @@ class LSLRecording:
     stream_name: str
 
 
-def connect_openbci_lsl(wait_time=5.0, expected_channels=EXPECTED_CHANNELS):
-    """Resolve exactly one matching EEG stream and return inlet, info, and rate."""
-    streams = [s for s in resolve_streams(wait_time=wait_time)
-               if s.type() == "EEG" and s.channel_count() == expected_channels]
+@dataclass(frozen=True)
+class LSLStreamMetadata:
+    name: str
+    stream_type: str
+    source_id: str
+    uid: str
+    hostname: str
+    channel_count: int
+    nominal_srate: float
+    channel_labels: tuple[str, ...]
+    channel_units: tuple[str, ...]
+    prefiltering: str
+
+
+def describe_lsl_stream(stream):
+    """Extract only transport and channel metadata reported by the LSL source."""
+    labels, units, prefiltering = [], [], "unknown"
+    try:
+        root = ET.fromstring(stream.as_xml())
+        channels = root.find("./desc/channels")
+        if channels is not None:
+            for channel in channels.findall("channel"):
+                labels.append((channel.findtext("label") or "unknown").strip())
+                units.append((channel.findtext("unit") or "unknown").strip())
+        prefiltering = (
+            root.findtext("./desc/acquisition/prefiltering")
+            or root.findtext("./desc/prefiltering")
+            or "unknown"
+        ).strip()
+    except (AttributeError, ET.ParseError, TypeError):
+        pass
+    count = int(stream.channel_count())
+    labels.extend("unknown" for _ in range(count-len(labels)))
+    units.extend("unknown" for _ in range(count-len(units)))
+    return LSLStreamMetadata(
+        name=stream.name(), stream_type=stream.type(),
+        source_id=stream.source_id(), uid=stream.uid(), hostname=stream.hostname(),
+        channel_count=count, nominal_srate=float(stream.nominal_srate()),
+        channel_labels=tuple(labels[:count]), channel_units=tuple(units[:count]),
+        prefiltering=prefiltering,
+    )
+
+
+def list_openbci_lsl(wait_time=5.0, expected_channels=EXPECTED_CHANNELS):
+    """Return every eight-channel EEG candidate; selection is a separate step."""
+    return [stream for stream in resolve_streams(wait_time=wait_time)
+            if stream.type().upper() == "EEG"
+            and stream.channel_count() == expected_channels]
+
+
+def connect_openbci_lsl(wait_time=5.0, expected_channels=EXPECTED_CHANNELS,
+                        stream_name=None, source_id=None):
+    """Resolve one explicitly selected eight-channel EEG stream."""
+    streams = list_openbci_lsl(wait_time, expected_channels)
+    if stream_name is not None:
+        streams = [stream for stream in streams if stream.name() == stream_name]
+    if source_id is not None:
+        streams = [stream for stream in streams if stream.source_id() == source_id]
     if not streams:
-        raise RuntimeError("No 8-channel EEG stream found. Start the LSL Time Series output in OpenBCI GUI.")
+        selectors = f" name={stream_name!r} source_id={source_id!r}" if stream_name or source_id else ""
+        raise RuntimeError("No matching 8-channel EEG stream found." + selectors
+                           + " Start OpenBCI GUI LIVE and enable Networking > LSL > Time Series.")
     if len(streams) > 1:
-        names = ", ".join(s.name() for s in streams)
-        raise RuntimeError(f"Multiple matching streams found ({names}). Leave exactly one OpenBCI EEG output running.")
+        choices = "; ".join(
+            f"name={s.name()!r}, source_id={s.source_id()!r}, uid={s.uid()!r}"
+            for s in streams
+        )
+        raise RuntimeError("Multiple matching streams found: " + choices
+                           + ". Select one with --stream-name or --source-id.")
     stream = streams[0]
     sample_rate = float(stream.nominal_srate())
     if sample_rate <= 0:

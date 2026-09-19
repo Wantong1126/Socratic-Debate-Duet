@@ -107,7 +107,9 @@ class ControlSession:
     def __init__(self, sample_rate, update_rate, baseline_seconds, sender,
                  window_seconds=2.0, analysis_low_hz=4.0, analysis_high_hz=40.0,
                  smoothing_seconds=0.5, diagnostics=True,
-                 control_hz=DEFAULT_CONTROL_HZ, clock=time.monotonic):
+                 control_hz=DEFAULT_CONTROL_HZ, clock=time.monotonic,
+                 frame_callback=None, transmit=True,
+                 required_quality_channels=(), saturation_abs=None):
         self.sample_rate, self.update_rate = float(sample_rate), float(update_rate)
         self.window_samples = int(round(window_seconds * sample_rate))
         self.update_samples = max(1, int(round(sample_rate / update_rate)))
@@ -120,7 +122,9 @@ class ControlSession:
         self.analysis_filter = StreamingEEGPreprocessor(sample_rate, analysis_config)
         self.engine = EEGControlFeatureEngine(sample_rate, update_rate, baseline_seconds,
                                               analysis_low_hz, analysis_high_hz,
-                                              smoothing_seconds)
+                                              smoothing_seconds,
+                                              required_quality_channels=required_quality_channels,
+                                              saturation_abs=saturation_abs)
         self.sender = sender
         self.transmitter = RateLimitedControlTransmitter(sender, control_hz, clock)
         self.frames, self.frame_times = [], []
@@ -129,6 +133,8 @@ class ControlSession:
         self._last_diagnostic_second = -1
         self.calibration_seconds = float(baseline_seconds)
         self._last_valid = np.zeros(6, dtype=float)
+        self.frame_callback = frame_callback
+        self.transmit = bool(transmit)
 
     def _print_status(self, frame):
         elapsed = min(self.calibration_seconds,
@@ -175,7 +181,7 @@ class ControlSession:
                 continue
             self.last_update_sample = self.total_samples
             frame = self.engine.update(np.asarray(self.feature_buffer), np.asarray(self.quality_buffer))
-            if frame.normalized:
+            if frame.normalized and self.transmit:
                 self.transmitter.offer(frame.normalized)
             self.frames.append(frame)
             last_frame = frame
@@ -183,9 +189,12 @@ class ControlSession:
                 self.frame_times.append(float(timestamps[row_index]))
             else:
                 self.frame_times.append(self.total_samples / self.sample_rate)
+            if self.frame_callback is not None:
+                self.frame_callback(frame, self.frame_times[-1])
         # One large LSL chunk may contain several descriptor frames. Only the
         # newest is retained, and at most one bounded transmission occurs here.
-        self.transmitter.maybe_send()
+        if self.transmit:
+            self.transmitter.maybe_send()
         if self.diagnostics and last_frame is not None:
             self._print_status(last_frame)
 
