@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "session_id": "obci_eeg1_20260919_194100",
+  "config": {
+    "source": {
+      "participant_id": "A",
+      "channel_roles": [
+        "F3",
+        "F4",
+        "C3",
+        "C4",
+        "P3",
+        "P4",
+        "vertical_EOG",
+        "jaw_EMG"
+      ],
+      "reference": "SRB2 ear clips",
+      "bias": "BIAS",
+      "sample_unit": "uV",
+      "lsl_data_type": "TimeSeriesRaw",
+      "upstream_filtering": "GUI TimeSeriesRaw; no GUI filtered-output stage"
+    },
+    "analysis": {
+      "energy_channel": "F3",
+      "window_seconds": 2.0,
+      "update_rate_hz": 4.0,
+      "baseline_seconds": 20.0,
+      "highpass_hz": 4.0,
+      "lowpass_hz": 40.0,
+      "smoothing_seconds": 0.5,
+      "flatline_peak_to_peak_min": 1e-09,
+      "arrival_rate_tolerance": 0.2,
+      "rail_limit_uv": 187500.0,
+      "saturation_fraction": 0.98
+    },
+    "session": {
+      "control_hz": 4.0,
+      "max_age_seconds": 0.5
+    },
+    "mapping": {
+      "fixed": [
+        0.5,
+        0.24,
+        0.1,
+        0.12,
+        0.04,
+        0.82,
+        0.58,
+        0.28,
+        0.08
+      ],
+      "frequencies_hz": [
+        98.0,
+        146.832384,
+        220.0
+      ],
+      "weights": [
+        0.48,
+        0.32,
+        0.2
+      ]
+    },
+    "transport": {
+      "host": "127.0.0.1",
+      "port": 57120
+    },
+    "recording": {
+      "target_samples": 30000,
+      "target_duration_seconds": 120.0,
+      "raw_chunk_max_samples": 128,
+      "raw_timestamp_field": "sampled_at",
+      "raw_timestamp_clock": "unaltered LSL timestamps",
+      "no_supercollider": true,
+      "transport": "captured_dry_client",
+      "config_snapshot_toml": "# Confirmed physical montage. Runtime LSL metadata remains authoritative for\n# sample rate, units, channel labels and upstream filtering.\n[source]\nparticipant_id = \"A\"\nchannel_roles = [\"F3\", \"F4\", \"C3\", \"C4\", \"P3\", \"P4\", \"vertical_EOG\", \"jaw_EMG\"]\nreference = \"SRB2 ear clips\"\nbias = \"BIAS\"\nsample_unit = \"uV\"\nlsl_data_type = \"TimeSeriesRaw\"\nupstream_filtering = \"GUI TimeSeriesRaw; no GUI filtered-output stage\"\n\n[analysis]\nenergy_channel = \"F3\"\nwindow_seconds = 2.0\nupdate_rate_hz = 4.0\nbaseline_seconds = 20.0\nhighpass_hz = 4.0\nlowpass_hz = 40.0\nsmoothing_seconds = 0.5\nflatline_peak_to_peak_min = 1.0e-9\narrival_rate_tolerance = 0.20\nrail_limit_uv = 187500.0\nsaturation_fraction = 0.98\n\n[session]\ncontrol_hz = 4.0\nmax_age_seconds = 0.5\n\n[mapping]\n# Only energy is live in this diagnostic. These remaining values are explicit fixtures.\nfixed = [0.5, 0.24, 0.1, 0.12, 0.04, 0.82, 0.58, 0.28, 0.08]\nfrequencies_hz = [98.0, 146.832384, 220.0]\nweights = [0.48, 0.32, 0.20]\n\n[transport]\nhost = \"127.0.0.1\"\nport = 57120\n"
+    }
+  },
+  "code_version": {
+    "head": "19ee68a3a85c49eaa3d0e44cdb884b7f2d1f2a9c",
+    "worktree": "",
+    "sha256": {
+      "src/sdd/demo.py": "192b3ff50fc48b1b1686f737e15c9b99ca9bb85aaefd5feb3f72b494fa4f97b3",
+      "src/sdd/fixture_source.py": "4e45eaca33144bd8d01d38887afa6d05acddf938f6ff4950aa67ff521c8daaea",
+      "src/sdd/invitation_demo.py": "3e21c092667ca33eec5a90d3268e081cc10126532cbebc8920f3e062f920ad82",
+      "src/sdd/invitation_input.py": "c583d4018c0da91ec00ab85f21ecee54fa3fbd6f967b6d17c6b595fd870780ff",
+      "src/sdd/invitation_osc.py": "8c2fee8ef6f060cae7371ba2f430c8e40a63f4f63f2a0a84568f03e674750f55",
+      "src/sdd/live_eeg.py": "9983886a3319baf2f0a1e00b98211ced594e9dfce83e042db64a709b2787702f",
+      "src/sdd/reflection_controller.py": "953905cee688f98bb23630b1a7ba46bcf96b045d50c3cb62f37b3cfef1e16827",
+      "src/sdd/replay_source.py": "89d1b44574909a035160c3a8b2a12cca466b9ef965caae61357805e63ee43173",
+      "src/sdd/session_recorder.py": "99a8bece7f046a0febb43d591d9974b309c4e390803b61f0fc67b835b1384deb",
+      "src/sdd/session_runtime.py": "bcc5416aabccef70ce821d396b50e325cb1ea7a4071b40117612293c3ec91401",
+      "src/sdd/session_types.py": "e97492037d2b48bac8adf8a741efb5154bbd12cc7d2b398f0f6bf10a242e9cd7",
+      "src/sdd/__init__.py": "796543b33e5f75c17060501e782e5dd4884ead72091ac852b1a11343c602c276",
+      "src/sonification/controls.py": "6a4a59473363a252a16b97a8b51bbe511691bfb80e533cfad339ed55e4b1f500",
+      "src/sonification/features.py": "4de3e753a8ac4c8151b49aa3ff2baa63b63a262841c6a1d08ba8b10270ec8beb",
+      "src/sonification/harmonics_mapping.py": "c25df8ae2b1a413f698008883b8d1daaeabd58db0d28f4482e744fc7d94038c7",
+      "src/sonification/harmonics_protocol.py": "f20165d4a77d74ff068104c68c2b7b5628b7fd9e566a4c922b5a4c60d884fad5",
+      "src/sonification/harmonics_synthetic_demo.py": "d89a86759b67605a9ed157e31bcc649549d63764d5dbb2814e95cc039880d9ab",
+      "src/sonification/manual_voicing_demo.py": "3104bb6603ca8366cd3070027906eaf57ecb5e0f2dcc27047ecefe5b29078279",
+      "src/sonification/protocol.py": "4ff57d5fe7247701628c50f7b104741d9968ff99614588862de18ef7d40a873f",
+      "src/sonification/synthetic_demo.py": "c699cd4a1109f0bb30e4297f10301e09428b9bd856fe998ccf0173dad4a3323e",
+      "src/sonification/synthetic_music_demo.py": "bc9b3cbc88e12328192d41497917c107147ff8e25452ddb826070987d5efd209",
+      "src/sonification/voicing.py": "a9a98ca9934a3535efdfe51c6c9b476116870dc0434c8f167163f94b49655794",
+      "src/sonification/__init__.py": "8dbb988e43a2261471acfd3a9e0eee98ec24b3a99197ff8b2e8685ff25a735f2",
+      "sound/biosignal_instrument.scd": "8313a0ea284b79e6732700777cca2682319f59e0a6d1c822ac4bec6c79104875",
+      "sound/eeg_body_layer.scd": "af1e73425b49f16c76cb6dc8c4195f6450a78624d9bf8fea1a89e295bba8ef9a",
+      "sound/eeg_harmonics_manual.scd": "39c88ac9efd80b87ff975a3d1c98545118f8fb5f728ad985e61a433297725805",
+      "sound/eeg_harmonics_manual_config.scd": "a47e4b3f76b8783b4445d7536f685e706de273fe34a16048cc06bfd3de213040",
+      "sound/eeg_harmonics_preset_support.scd": "b9beca21c1b835ff1dcd12e0ab5ed2f0162e3d4d60f768f97ba060503f23bbb8",
+      "sound/eeg_harmonic_field_core.scd": "ed4ff451f4a8917af961937542ccb57b69c9666a067fa69872f264e26d70a325",
+      "sound/eeg_harmonic_field_v2_core.scd": "cf8b9e352a71a211ad78c8a23881ef8b9fcb6b33f53bd16152853533a7f556e3",
+      "sound/eeg_organism_engine.scd": "36b08212a1ac56cd0bc3cc181f8db207a7debd7d22242de8183a82e77e1fa256",
+      "sound/eeg_organism_v2_receiver.scd": "d1ba85868fac2ac7dc5ab41c7f97cd051c1b0c5c28a590c63b5ab7b0e8426841",
+      "sound/render_eeg_harmonics_manual.scd": "498ee82874d81136403f0912e7214af28580d075490ebaff87997b7c1070b051",
+      "sound/render_eeg_harmonic_presets.scd": "a69d2dae6c92173aaa162c0575dccb3d0dc038b79275db066b0b51554b8bd1dd",
+      "sound/render_eeg_organism_v2_isolated.scd": "ca4d7ffc6edbec4ccb8e26517de5c9f010dc643c72aef77b3838b59d7b45771d",
+      "sound/render_eeg_organism_v2_voicing_transition.scd": "d2436feaab46edfa4fcb420caa8b3ecbed3b369c15f3408d59f583d8aff44d8e",
+      "sound/render_sdd_baseline.scd": "70f58fd03305617ec449d1d4ba794c047eb8cc8d6aed2f4d6b20b7fdd35fd748",
+      "sound/stop_eeg_organism.scd": "e62daafe457e8b744b033a4089ad49b6f66b74dbf031c3943cbd4a8980775070",
+      "sound/stop_eeg_organism_v2.scd": "bc88caba5e7a62f347382cc9b4d250b93be0b13864567a18fef12e8f1c667819"
+    }
+  },
+  "source": {
+    "mode": "live",
+    "real_eeg": true,
+    "kind": "OpenBCI_GUI_LSL_TimeSeriesRaw",
+    "stream": {
+      "name": "obci_eeg1",
+      "stream_type": "EEG",
+      "source_id": "openbcigui",
+      "uid": "98bafe02-6dc0-4a36-be94-d9f9c1400ca4",
+      "hostname": "LAPTOP-N4D4EDI8",
+      "channel_count": 8,
+      "nominal_srate": 250.0,
+      "channel_labels": [
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown"
+      ],
+      "channel_units": [
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown"
+      ],
+      "prefiltering": "unknown"
+    },
+    "lsl_time_correction_seconds": -1.2349977623671293e-05,
+    "operator_confirmed": {
+      "unit": "uV",
+      "channel_roles": [
+        "F3",
+        "F4",
+        "C3",
+        "C4",
+        "P3",
+        "P4",
+        "vertical_EOG",
+        "jaw_EMG"
+      ],
+      "data_type": "TimeSeriesRaw"
+    },
+    "raw_storage": {
+      "samples": "verbatim 8-column LSL chunks",
+      "timestamps": "per-sample unaltered LSL timestamps aligned by index"
+    }
+  },
+  "seed": null,
+  "monotonic_origin": 485120.453,
+  "wall_origin": 1789818234.746805,
+  "clock": "seconds on shared monotonic timeline",
+  "simulated": false
+}
