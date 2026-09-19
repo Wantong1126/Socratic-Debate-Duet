@@ -1,7 +1,7 @@
 {
   "project": "SDD V1",
   "date": "2026-09-19",
-  "status": "Updated requirements, not a hardware completion report",
+  "status": "Live F3 energy confirmed by user report; prioritize raw recording/replay, signal checks and musical baseline.",
   "preferred_topological_order": [
     "T01",
     "T02",
@@ -199,11 +199,11 @@
         "T02"
       ],
       "kind": "code",
-      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
+      "current_status": "既有会话记录已报告实现；真人八路原始文件的保存/导入待核对，不能由无 WAV 推断未保存 EEG。",
       "files": [
         "src/sdd/session_recorder.py（拟新增）"
       ],
-      "acceptance": "保存配置快照、代码版本、源元数据、种子、原始信号块及帧/按钮/质量事件；用同一单调时间轴并记录与墙钟的对应。只在明确开启采集记录时保存真人数据；模拟记录明确标记。"
+      "acceptance": "保存配置快照、代码版本、源元数据、种子、原始信号块及帧/按钮/质量事件；用同一单调时间轴并记录与墙钟的对应。只在明确开启采集记录时保存真人数据；模拟记录明确标记。 真人记录须保留全部八路处理前样本及条件标签；GUI 自动保存或 XDF 可作原始来源，先验证文件真实存在。"
     },
     {
       "id": "T04",
@@ -228,11 +228,11 @@
         "T04"
       ],
       "kind": "code",
-      "current_status": "用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。",
+      "current_status": "既有模拟输入回放已报告实现；本轮优先补真人原始文件回放，须与 control replay 区分。",
       "files": [
         "src/sdd/replay_source.py（拟新增）"
       ],
-      "acceptance": "同一记录经两种映射时读取相同输入、事件和种子；记录使用 raw replay 还是 control replay，不能把两者混用。暂停/恢复不产生补发洪峰。"
+      "acceptance": "同一记录经两种映射时读取相同输入、事件和种子；记录使用 raw replay 还是 control replay，不能把两者混用。暂停/恢复不产生补发洪峰。 真人原始回放与 live 共用处理逻辑，保留采样间隔、gap 和元数据；音频发送使用当前回放时钟。记录 origin=recorded_human。"
     },
     {
       "id": "T06",
@@ -371,7 +371,7 @@
         "H02"
       ],
       "kind": "hardware_preflight",
-      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "current_status": "用户报告 obci_eeg1、8 路、约 250 Hz、TimeSeriesRaw，单位由操作员确认为 uV；具体下游滤波仍需查当前代码。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -384,7 +384,7 @@
         "H01"
       ],
       "kind": "implementation",
-      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "current_status": "用户本地报告已绑定真实 obci_eeg1 并收到样本；本次未复跑 Windows 仓库。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -411,21 +411,21 @@
         "T03"
       ],
       "kind": "implementation",
-      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "current_status": "真人八路原始录制/文件导入为当前优先项；先找 GUI 自动记录，复用现有记录器。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
-      "acceptance": "显式 opt-in 后保存收到的处理前数据、配置、时间、可取得的包序号与 gap；不可取得字段明确 unavailable。异步有界队列、丢失日志、退出落盘；不自动公开真人数据。"
+      "acceptance": "显式 opt-in 后保存收到的处理前数据、配置、时间、可取得的包序号与 gap；不可取得字段明确 unavailable。异步有界队列、丢失日志、退出落盘；不自动公开真人数据。 优先复用本次 GUI 已保存的原始文件，或按实际拿到的 XDF 导入，不强制同时实现两种格式。"
     },
     {
       "id": "T18",
-      "title": "现在接入已有硬件的真实 LSL 数据",
+      "title": "接入已有硬件的真实 LSL 数据",
       "depends_on": [
         "T02",
         "H05"
       ],
       "kind": "code",
-      "current_status": "下一步立即联调；已有旧LSL代码可复用，当前声音是否已桥接以本地代码核实。",
+      "current_status": "用户最新本地报告真实八路 LSL 接入通过；F3 校准后驱动声音，收到 371 个控制帧。无需重做接入。",
       "files": [
         "src/lsl_probe.py",
         "src/eeg_control_demo.py",
@@ -456,7 +456,7 @@
         "T18"
       ],
       "kind": "human_hardware_gate",
-      "current_status": "硬件已就绪；当前程序真实连接待本地联调，并非待购硬件。",
+      "current_status": "用户确认本次为真人信号；无声诊断已确认 GUI 停流后停止收样。带声音停流验收及原始记录完整性仍待补。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -470,7 +470,7 @@
         "B01"
       ],
       "kind": "human_hardware_gate",
-      "current_status": "接线方案已由用户确认；本次启用状态/信号质量待运行检查。",
+      "current_status": "F3 已用于声音；Ch7/EOG 被标近饱和，须核实并修复重测。不能宣称八路质量全部通过。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -484,7 +484,7 @@
         "T08"
       ],
       "kind": "implementation",
-      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "current_status": "应用 stop/节点释放已报告通过；带声音 GUI 停流未在时限内实际操作，故该项待补，并非已证实失败。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -528,7 +528,7 @@
         "T20"
       ],
       "kind": "code",
-      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "current_status": "F3 energy 已报告实时计算并驱动声音；centroid/mobility 等完整范围未获最新验收证据。",
       "files": [
         "src/eeg_control_features.py",
         "src/sdd/live_features.py（拟新增）"
@@ -571,7 +571,7 @@
         "T23"
       ],
       "kind": "code",
-      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "current_status": "F3 energy 个人基线已报告完成；其他真实特征缩放仍需分别核对。",
       "files": [
         "src/eeg_control_features.py",
         "src/sdd/calibration.py（拟新增）"
@@ -603,7 +603,7 @@
         "H06"
       ],
       "kind": "code",
-      "current_status": "计划项；部分旧代码可复用，最新本地完成情况待核对，不能默认已验收。",
+      "current_status": "部分完成：F3 energy 真人输入已驱动当前声部，其余八字段固定；完整九值及 voicing 待验收。",
       "files": [
         "src/sdd/session_runtime.py（拟新增）",
         "src/sonification/protocol.py"
@@ -619,7 +619,7 @@
         "H09"
       ],
       "kind": "human_hardware_gate",
-      "current_status": "新增需求；未宣称实现或真实硬件验收通过。",
+      "current_status": "energy 分支用户已听到变化；未录 WAV，完整九值/voicing 和带声音 GUI 停流仍待验收。120 tests 为用户报告。",
       "files": [
         "实际仓库对应模块：由本地 Codex 审计后选择，不另建重复运行框架"
       ],
@@ -1025,7 +1025,7 @@
       "acceptance": "打包配置/版本、事件时间线、精选音频视频索引、匿名化观察和限制说明；不自动公开原始脑电。提供 NIME 作品说明所需素材与 IPQ 可独立分析的记录，不自动生成已评估结论。"
     }
   ],
-  "evidence_scope": "Hardware readiness and montage confirmed by user and Hardware - Tech.md on 2026-09-19; current production live bridge still requires local code/runtime verification.",
+  "evidence_scope": "Latest user-supplied local report: 8-channel obci_eeg1 at about 250 Hz, operator-confirmed uV, F3 calibrated energy drove the harmonic voice; 120 tests reported. Latest Windows runtime not re-run here. Other eight fields fixed; audible GUI-stop gate pending; Ch7 near saturation.",
   "hardware_profile": {
     "readiness": "user_confirmed_ready",
     "source": "Hardware - Tech.md",
@@ -1045,6 +1045,82 @@
     },
     "reference": "SRB2",
     "bias": "BIAS",
-    "current_live_bridge_status": "not_verified_here"
-  }
+    "current_live_bridge_status": "user_reported_pass_F3_energy_only",
+    "live_source": {
+      "name": "obci_eeg1",
+      "channels": 8,
+      "nominal_srate_hz": 250,
+      "mode": "TimeSeriesRaw",
+      "unit": "uV",
+      "unit_evidence": "operator_confirmed"
+    }
+  },
+  "execution_priorities": [
+    {
+      "priority": "P0",
+      "scope": "Find/preserve existing raw human session; support replay without hardware",
+      "tasks": [
+        "H06",
+        "T03",
+        "T05"
+      ]
+    },
+    {
+      "priority": "P0_next_live",
+      "scope": "Complete audible GUI-stop check; resolve Ch7 quality before EOG use",
+      "tasks": [
+        "H08",
+        "H09",
+        "V01"
+      ]
+    },
+    {
+      "priority": "P1_signal",
+      "scope": "Audit preprocessing/quality; posterior alpha sanity check; repeated labeled conditions",
+      "tasks": [
+        "T19",
+        "T20",
+        "T22"
+      ]
+    },
+    {
+      "priority": "P1_sound",
+      "scope": "Audit current G Lydian routing and build listenable baseline using fixed/replayed input",
+      "tasks": [
+        "T09"
+      ]
+    },
+    {
+      "priority": "P2",
+      "scope": "Validate one EEG feature and compare invitation candidates; full descriptors can follow",
+      "tasks": [
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17",
+        "T23",
+        "T24",
+        "T25",
+        "T26"
+      ]
+    },
+    {
+      "priority": "P3",
+      "scope": "Qualified body signals, two participants and free discussion",
+      "tasks": [
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08",
+        "B09",
+        "T31",
+        "T32",
+        "T33"
+      ]
+    }
+  ]
 }

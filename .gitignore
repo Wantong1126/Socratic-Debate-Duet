@@ -28,3 +28,8 @@ reports/sdd_v1/invitation_runtime_pass.log
 reports/sdd_v1/invitation_runtime_pass.wav
 reports/sdd_v1/invitation_runtime_pass_manual.jsonl
 reports/sdd_v1/invitation_audible_demo.log
+
+# Raw/private EEG data
+recordings/
+data/raw/
+*.xdf
