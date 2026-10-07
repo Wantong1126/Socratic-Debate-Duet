@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "invalid_packets_rejected": 10,
+  "watchdog_not_refreshed": true,
+  "persistent_voice_synths": 1,
+  "stop_released": true,
+  "audio_output": "muted; no listening claim"
+}

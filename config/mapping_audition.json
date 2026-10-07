@@ -1,0 +1,110 @@
+{
+  "session": "reports/sdd_v1/live_sessions/obci_eeg1_20260919_194100",
+  "fragment_start_seconds": 60.0,
+  "fragment_seconds": 24.0,
+  "control_hz": 4.0,
+  "output_directory": "reports/sdd_v1/mapping_audition/20261007",
+  "smooth_seconds": 0.9,
+  "hysteresis": 0.06,
+  "minimum_hold_seconds": 1.5,
+  "tempo_bpm": 90.0,
+  "fixed_frame": [
+    0.68,
+    0.24,
+    0.1,
+    0.12,
+    0.04,
+    1.0,
+    0.72,
+    0.3,
+    0.1
+  ],
+  "groups_low": [
+    0.9,
+    0.24,
+    0.07,
+    0.015
+  ],
+  "groups_high": [
+    0.42,
+    0.65,
+    0.55,
+    0.23
+  ],
+  "level_db": [
+    -12.0,
+    0.0
+  ],
+  "base_midi": [
+    44,
+    51,
+    55,
+    60,
+    63
+  ],
+  "pitch_midi": [
+    63,
+    65,
+    67
+  ],
+  "harmony_names": [
+    "Abmaj7",
+    "Cmaj7(#11)/G",
+    "Dbmaj9",
+    "Bb13sus4"
+  ],
+  "harmony_midi": [
+    [
+      44,
+      51,
+      55,
+      60,
+      63
+    ],
+    [
+      43,
+      48,
+      52,
+      59,
+      66
+    ],
+    [
+      49,
+      53,
+      56,
+      60,
+      63
+    ],
+    [
+      46,
+      51,
+      56,
+      60,
+      67
+    ]
+  ],
+  "voice_weights": [
+    0.26,
+    0.16,
+    0.18,
+    0.22,
+    0.18
+  ],
+  "colour_names": [
+    "rounded_wood",
+    "hollow_reed",
+    "glass_organ"
+  ],
+  "reimagination_semitones": 2.0,
+  "reimagination": {
+    "attack_seconds": 2.0,
+    "hold_seconds": 3.0,
+    "release_seconds": 2.0,
+    "cooldown_seconds": 1.0
+  },
+  "reserved_for_reimagination": [
+    "pitch",
+    "harmony"
+  ],
+  "evidence": "2026-10-07: five active candidates; prior human feedback archived. New sounds awaiting audition; real resting replay available; no new live behavioral validation."
+}

@@ -8,10 +8,15 @@
 // delta, theta, alpha, beta.
 
 (
-var here, library, v2Config, preset, betaProfile, frameOrder, oldState, state;
+var here, library, v2Config, preset, betaProfile, frameOrder, oldState, state, receivePort;
 var clampUnit, clampFrequency, stopReceiver, startReceiver;
 
 here = PathName(thisProcess.nowExecutingPath).pathOnly;
+receivePort = "SDD_AUDITION_OSC_PORT".getenv;
+receivePort = if(receivePort.isNil) { 57120 } { receivePort.asInteger };
+if((receivePort < 1) or: { receivePort > 65535 }) {
+    Error("SDD_AUDITION_OSC_PORT must be a UDP port").throw;
+};
 thisProcess.interpreter.executeFile(here +/+ "eeg_harmonic_field_v2_core.scd");
 thisProcess.interpreter.executeFile(here +/+ "eeg_harmonics_preset_support.scd");
 library = thisProcess.interpreter.executeFile(here +/+ "eeg_harmonics_manual_config.scd");
@@ -22,6 +27,7 @@ preset = library[\presets][v2Config[\basePreset]].copy;
 v2Config[\synthOverrides].keysValuesDo { |key, value| preset[key] = value };
 preset[\harmonicGroups] = v2Config[\harmonicGroups];
 preset[\voiceCapacity] = v2Config[\voiceCapacity];
+preset[\auditionColours] = ~sddAuditionColours ? false;
 betaProfile = v2Config[\betaProfiles][v2Config[\betaProfile]];
 if(betaProfile.isNil) {
     Error("Unknown organism v2 beta profile: " ++ v2Config[\betaProfile]).throw
@@ -100,7 +106,7 @@ stopReceiver = { |immediate = false|
         if(state[\stopping].not) {
             state[\stopping] = true;
             [\eegOrganismV2Frame, \eegOrganismV2Voicing,
-                \sddInvitationControlV1,
+                \sddInvitationControlV1, \sddReimaginationControlV1,
                 \eegOrganismV2Stop].do { |key|
                 OSCdef(key).tryPerform(\free)
             };
@@ -188,7 +194,7 @@ startReceiver = {
                     state[\frameCount] = state[\frameCount] + 1;
                     if(state[\timedOut]) {
                         state[\timedOut] = false;
-                        "Organism v2: synthetic input active.".postln;
+                        "Participant-A sound frames active; source provenance is recorded by Python.".postln;
                     };
                     displayElapsed = now - state[\lastDisplayAt];
                     if(displayElapsed >= v2Config[\diagnosticInterval]) {
@@ -218,7 +224,7 @@ startReceiver = {
                     "Organism v2: rejected frame (expected exactly 9 values).".warn;
                     "Frame values must be finite numbers in [0,1]; watchdog not refreshed.".warn;
                 };
-            }, '/eeg/organism/v2/frame', recvPort: 57120);
+            }, '/eeg/organism/v2/frame', recvPort: receivePort);
 
             OSCdef(\eegOrganismV2Voicing, { |message|
                 var frequencies, weights, nextBank, now;
@@ -257,7 +263,7 @@ startReceiver = {
                 } {
                     "Organism v2: rejected voicing (expected 6 frequencies + 6 weights).".warn;
                 };
-            }, '/eeg/organism/v2/voicing', recvPort: 57120);
+            }, '/eeg/organism/v2/voicing', recvPort: receivePort);
 
             OSCdef(\sddInvitationControlV1, { |message|
                 var target, sessionID, eventID, seq, age, amount;
@@ -310,12 +316,12 @@ startReceiver = {
                         // This is a neutral control on the existing participant-A
                         // Synth. It creates no node and has no acoustic mapping yet.
                         synth.set(\invitationAmount, amount);
-                        ("Invitation control accepted target=A session=" ++ sessionID
+                        ("Reimagination control accepted target=A session=" ++ sessionID
                             ++ " event=" ++ eventID ++ " seq=" ++ seq
                             ++ " amount=" ++ amount.round(0.001)
                             ++ " age=" ++ age.round(0.001)).postln;
                     } {
-                        ("Invitation control rejected target=" ++ target
+                        ("Reimagination control rejected target=" ++ target
                             ++ " session=" ++ sessionID ++ " event=" ++ eventID
                             ++ " seq=" ++ seq ++ " age=" ++ age
                             ++ " amount=" ++ amount
@@ -327,14 +333,18 @@ startReceiver = {
                             ++ ",sequence=" ++ sequenceValid ++ "]").warn;
                     };
                 } {
-                    "Invitation control rejected: expected 6 values.".warn;
+                    "Reimagination control rejected: expected 6 values.".warn;
                 };
                 // Deliberately do not update lastFrameAt or transportAlive here.
-            }, '/sdd/invitation/v1/control', recvPort: 57120);
+            }, '/sdd/invitation/v1/control', recvPort: receivePort);
+
+            // Same validation and sequence state on the renamed event endpoint.
+            OSCdef(\sddReimaginationControlV1, OSCdef(\sddInvitationControlV1).func,
+                '/sdd/reimagination/v1/control', recvPort: receivePort);
 
             OSCdef(\eegOrganismV2Stop, {
                 state[\stop].value(false);
-            }, '/eeg/organism/v2/stop', recvPort: 57120);
+            }, '/eeg/organism/v2/stop', recvPort: receivePort);
 
             state[\watchdog] = Routine({
                 loop {
@@ -354,12 +364,12 @@ startReceiver = {
                 };
             }).play(AppClock);
 
-            "ORGANISM V2 SYNTHETIC RECEIVER READY on UDP 57120".postln;
+            ("PARTICIPANT-A RECEIVER READY on UDP " ++ receivePort).postln;
             "Stable tree: one dedicated Group + one persistent harmonic Synth.".postln;
             ("Node IDs: " ++ state[\nodeIDs]).postln;
             "Waiting for /eeg/organism/v2/frame; silent until the first frame.".postln;
             "Voicing endpoint: /eeg/organism/v2/voicing (6 frequencies + 6 weights).".postln;
-            "Invitation endpoint: /sdd/invitation/v1/control (participant A only).".postln;
+            "Reimagination endpoint: /sdd/reimagination/v1/control (participant A only).".postln;
             "Centroid, mobility, spectral entropy, and novelty are storage/display only.".postln;
             ("Exact harmonic groups: " ++ v2Config[\harmonicGroups]).postln;
             ("Beta profile: " ++ v2Config[\betaProfile]

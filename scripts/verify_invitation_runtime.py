@@ -95,10 +95,10 @@ def main(argv=None):
         raise AssertionError("SuperCollider reported an error; inspect invitation_runtime.log")
     if "WATCHDOG:" not in text:
         raise AssertionError("invitation messages incorrectly refreshed the sound watchdog")
-    accepted = text.count("Invitation control accepted")
+    accepted = text.count("Reimagination control accepted")
     if accepted < 26 + 2:
         raise AssertionError("valid invitation messages were not accepted")
-    if text.count("Invitation control rejected") < len(bad_messages):
+    if text.count("Reimagination control rejected") < len(bad_messages):
         raise AssertionError("not every invalid invitation message was rejected")
     if "target=1" not in text:
         raise AssertionError("wrong-target rejection is not visible")
@@ -117,7 +117,7 @@ def main(argv=None):
         "fixture_only": True,
         "participant_voice": "A",
         "accepted_messages": accepted,
-        "rejected_messages": text.count("Invitation control rejected"),
+        "rejected_messages": text.count("Reimagination control rejected"),
         "watchdog_triggered_while_invitation_active": True,
         "active_tree_queries": len(active_trees),
         "final_voice_node_present": False,

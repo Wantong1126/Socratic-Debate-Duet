@@ -60,7 +60,7 @@ class EEGControlFeatureEngine:
     def __init__(self, sample_rate=250.0, update_rate=4.0, baseline_seconds=20.0,
                  analysis_low_hz=4.0, analysis_high_hz=40.0,
                  smoothing_seconds=0.5, low_percentile=5.0, high_percentile=95.0,
-                 required_quality_channels=(), saturation_abs=None):
+                 required_quality_channels=(), saturation_abs=None, energy_log_scale=False):
         if min(sample_rate, update_rate, baseline_seconds) <= 0:
             raise ValueError("sample, update, and calibration durations must be positive")
         if not 0 < analysis_low_hz < analysis_high_hz < sample_rate / 2:
@@ -76,6 +76,7 @@ class EEGControlFeatureEngine:
         self.frames_seen = 0
         self.required_quality_channels = tuple(int(index) for index in required_quality_channels)
         self.saturation_abs = saturation_abs
+        self.energy_log_scale = energy_log_scale
         if any(index < 0 or index >= 6 for index in self.required_quality_channels):
             raise ValueError("required quality channel indexes must be in [0, 5]")
 
@@ -124,6 +125,8 @@ class EEGControlFeatureEngine:
             normalized = {}
             for name, value in raw.items():
                 low, high = self.bounds[name]
+                if self.energy_log_scale and name.endswith('_energy'):
+                    low, high, value = np.log10(np.maximum([low, high, value], 1e-12))
                 scale = max(abs(low), abs(high), 1.0)
                 mapped = 0.0 if high - low <= np.finfo(float).eps * scale * 32 else (value - low) / (high - low)
                 mapped = float(np.clip(mapped, 0.0, 1.0)) if np.isfinite(mapped) else 0.0

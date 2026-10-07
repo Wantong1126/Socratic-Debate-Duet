@@ -1,0 +1,76 @@
+{
+  "samples": 30000,
+  "channels": [
+    "F3",
+    "F4",
+    "C3",
+    "C4",
+    "P3",
+    "P4",
+    "vertical_EOG",
+    "jaw_EMG"
+  ],
+  "unit": "uV",
+  "nominal_rate_hz": 250.0,
+  "sample_span_seconds": 120.04103150014998,
+  "observed_rate_hz": 249.90621644202147,
+  "backwards_timestamp_steps": 1563,
+  "minimum_step_seconds": -0.01525800017407164,
+  "maximum_step_seconds": 0.096985999844037,
+  "gaps_over_100ms": 0,
+  "nonfinite_by_channel": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "saturated_fraction_by_channel": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.10586666666666666,
+    0.0
+  ],
+  "flat_by_channel": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "timing_policy": "raw LSL preserved; causal running maximum for playback; writer time unused",
+  "records_sha256": "7a57d11317ce5b7664008dc483ffc54b12ca29e688414a9f30ebf051d4e66ba7",
+  "metadata_sha256": "91402025d293f2ed4f703035934e8c87313797de2f9757555267f8f52ebb52a0",
+  "valid_feature_windows": 275,
+  "first_valid_seconds": 51.82170290016802,
+  "calibration_interval_seconds": [
+    32.00432430015644,
+    51.59312380012125
+  ],
+  "energy_bounds_uv2": [
+    35.04134331483078,
+    230.8823546262732
+  ],
+  "normalized_percentiles": [
+    0.009266013671932008,
+    0.0902833518782132,
+    0.3726489759812715,
+    0.8186168024219581,
+    0.9170549220705907
+  ],
+  "near_endpoint_fraction": 0.007272727272727273,
+  "filter": "causal HP .5 Hz order4 -> LP45 order4 -> notch50 Q30 -> HP4 order4 -> LP40 order4; first 30s settling excluded",
+  "scaling": "log10(power uV^2), personal 5th\u201395th percentiles, clamp then 0.5s EMA; no online range stretching",
+  "source": "replay of operator-confirmed live scalp recording; resting, no condition labels",
+  "feature": "F3 Welch PSD integral 4\u201340 Hz, uV^2; no full delta measurement"
+}

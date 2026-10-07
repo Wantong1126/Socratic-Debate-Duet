@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-07",
+  "unit_tests": {
+    "command": "python -m unittest discover -s tests -q",
+    "tests": 131,
+    "result": "passed",
+    "seconds": 67.222
+  },
+  "rendered_wavs": 13,
+  "runtime_validation": "protocol_runtime.json",
+  "scripted_raw_replay": "session_20261007_153158",
+  "human_feedback_on_previous_menu": "../../listening_revision_20261007.md",
+  "new_sound_audition": "pending",
+  "new_live_behavioral_validation": "pending"
+}

@@ -13,6 +13,7 @@
     var voiceCapacity, defaultVoiceFrequencies, defaultVoiceWeights;
     var weightedShapes, groupWavetables, groupEnergyScales, groupPanPositions;
     var wavetableSignalSize, maximumHarmonic;
+    var colourWavetables, colourEnergyScales;
     if(preset.isNil) { Error("A centralized v2 harmonic preset is required.").throw };
     harmonicGroups = preset[\harmonicGroups];
     if(harmonicGroups.isNil or: { harmonicGroups.size != 4 }) {
@@ -96,10 +97,40 @@
         }.sum / weightSum
     };
 
+    // Optional audition palettes use the same notes, oscillator field and
+    // persistent Synth. The legacy factory path retains its original graph.
+    if(preset[\auditionColours] ? false) {
+        var shapes;
+        shapes = [1, 2].collect { |palette|
+            harmonicNumbers.collect { |harmonic, index|
+                var multiplier;
+                multiplier = if(palette == 1) {
+                    if(harmonic.odd) { 1.0 } { 0.015 }
+                } {
+                    if([2, 6, 12].includes(harmonic)) { 3.0 } { 0.12 }
+                };
+                weightedShapes[index] * multiplier * preset[\baseGroups][groupIndexes[index]];
+            }
+        };
+        colourWavetables = shapes.collect { |shape|
+            var amplitudes, signal;
+            amplitudes = Array.fill(maximumHarmonic, 0.0);
+            harmonicNumbers.do { |harmonic, index| amplitudes[harmonic-1] = shape[index] };
+            signal = Signal.newClear(wavetableSignalSize);
+            signal.sineFill(amplitudes);
+            signal.asWavetable;
+        };
+        colourEnergyScales = shapes.collect { |shape|
+            (shape.collect(_.squared).sum + 1e-9).sqrt
+        };
+    };
+
     SynthDef(defName, {
         |out = 0, gate = 1|
         var controlLag, energyLag, groupControls, stereoWidth, invitationAmount;
         var invitationDiagnosticDepth, invitationDiagnosticGain;
+        var musicEnabled, musicGroups, musicEcho, musicPattern, musicPulse, rhythmBlend, invitationShift;
+        var colourBuffers, colourPosition, colourWeights;
         var wavetableBuffers, groupNorm, makeBank;
         var sourceA, sourceB, bankPosition;
         var source, delayed, delayMix;
@@ -114,15 +145,20 @@
         energyLag = NamedControl.kr(
             \energyLag, preset[\energyLag]
         ).clip(0.02, 8);
+        musicEnabled = NamedControl.kr(\musicEnabled, 0).clip(0, 1);
+        musicGroups = NamedControl.kr(\musicGroups, preset[\baseGroups]);
         groupControls = NamedControl.kr(
             \groupAmplitudes, preset[\baseGroups]
-        ).collect { |value|
-            VarLag.kr(value.clip(0, 1), controlLag, warp: -4)
+        ).collect { |value, index|
+            (VarLag.kr(value.clip(0, 1), controlLag, warp: -4) * (1-musicEnabled))
+                + (Lag.kr(musicGroups[index].clip(0, 1), controlLag) * musicEnabled)
         };
         stereoWidth = NamedControl.kr(
             \stereoWidth, preset[\stereoWidth]
         ).clip(0, 1);
         invitationAmount = NamedControl.kr(\invitationAmount, 0).clip(0, 1);
+        invitationShift = (Lag.kr(invitationAmount, 0.05)
+            * NamedControl.kr(\invitationHarmonyDepth, 0).clip(0, 2)).midiratio;
         invitationDiagnosticDepth = NamedControl.kr(
             \invitationDiagnosticDepth, 0
         ).clip(0, 0.9);
@@ -140,10 +176,14 @@
         ).clip(0.5, 1.0);
         voiceFrequenciesA = NamedControl.kr(
             \voiceFrequenciesA, defaultVoiceFrequencies
-        ).collect { |value| value.clip(voiceFrequencyMinHz, voiceFrequencyMaxHz) };
+        ).collect { |value, index|
+            (value * if(index >= 2) { invitationShift } { 1 }).clip(voiceFrequencyMinHz, voiceFrequencyMaxHz)
+        };
         voiceFrequenciesB = NamedControl.kr(
             \voiceFrequenciesB, defaultVoiceFrequencies
-        ).collect { |value| value.clip(voiceFrequencyMinHz, voiceFrequencyMaxHz) };
+        ).collect { |value, index|
+            (value * if(index >= 2) { invitationShift } { 1 }).clip(voiceFrequencyMinHz, voiceFrequencyMaxHz)
+        };
         voiceWeightsA = NamedControl.kr(
             \voiceWeightsA, defaultVoiceWeights
         ).collect { |value| value.clip(0, 1) };
@@ -153,11 +193,20 @@
         wavetableBuffers = groupWavetables.collect { |wavetable|
             LocalBuf.newFrom(wavetable)
         };
+        if(colourWavetables.notNil) {
+            colourBuffers = colourWavetables.collect { |wavetable| LocalBuf.newFrom(wavetable) };
+            colourPosition = Lag.kr(NamedControl.kr(\musicColour, 0).clip(0,2), 0.9);
+            colourWeights = [
+                (1-colourPosition).clip(0,1),
+                (1-(colourPosition-1).abs).clip(0,1),
+                (colourPosition-1).clip(0,1)
+            ];
+        };
         groupNorm = (groupControls.collect { |value, index|
             (value * groupEnergyScales[index]).squared
         }.sum + 1e-9).sqrt;
         makeBank = { |frequencies, weights|
-            var weightNorm, groups;
+            var weightNorm, groups, colourSources;
             // L2 normalization holds aggregate signal energy approximately
             // steady as weighted polyphony changes. The fixed safety trim and
             // final limiter cover correlated worst cases.
@@ -177,7 +226,17 @@
                     groupPanPositions[index].clip(-1, 1) * stereoWidth
                 )
             };
-            LeakDC.ar(Mix(groups)) * polyphonySafetyTrim;
+            if(colourBuffers.notNil) {
+                colourSources = colourBuffers.collect { |buffer, palette|
+                    var voiceMix;
+                    voiceMix = Mix(Osc.ar(buffer, frequencies, 0, weights/weightNorm));
+                    Pan2.ar(voiceMix / colourEnergyScales[palette], 0)
+                        * colourWeights[palette+1];
+                };
+                LeakDC.ar((Mix(groups) * colourWeights[0]) + Mix(colourSources)) * polyphonySafetyTrim;
+            } {
+                LeakDC.ar(Mix(groups)) * polyphonySafetyTrim;
+            };
         };
         sourceA = makeBank.value(voiceFrequenciesA, voiceWeightsA);
         sourceB = makeBank.value(voiceFrequenciesB, voiceWeightsB);
@@ -191,7 +250,14 @@
         source = XFade2.ar(sourceA, sourceB, bankPosition);
         // Diagnostic-only audibility. Depth defaults to zero, so the normal
         // runtime remains unchanged. The dedicated demo enables it explicitly.
+        source = source.sanitize;
         source = source * invitationDiagnosticGain;
+        // Optional audition rhythm: deterministic host beat grid, smoothed
+        // attacks on this same oscillator field, never per-onset Synth nodes.
+        musicPattern = NamedControl.kr(\musicRhythmPattern, 0).clip(0, 4);
+        musicPulse = LagUD.kr(NamedControl.kr(\musicPulse, 1).clip(0, 1), 0.015, 0.10);
+        rhythmBlend = Lag.kr(musicPattern > 0, 0.1);
+        source = source * ((1-rhythmBlend) + (rhythmBlend * (0.12 + (0.88 * musicPulse)) * 2.25));
 
         // Fixed, feedback-free and unmodulated cross-channel delay.
         delayed = [
@@ -223,19 +289,25 @@
             NamedControl.kr(\energyMaxDb, preset[\energyMaxDb])
         ).dbamp;
         source = source * energyAmp;
+        source = source * Lag.kr(NamedControl.kr(\auditionLevelDb, 0).clip(-18, 0), 0.1).dbamp;
+        // Two finite feed-forward repeats. No feedback path can self-excite.
+        musicEcho = Lag.kr(NamedControl.kr(\musicEchoMix, 0).clip(0, 0.35), 0.2);
+        source = (source + (DelayC.ar(source, 0.7, 1/3) * musicEcho)
+            + (DelayC.ar(source, 0.7, 2/3) * musicEcho * 0.55))
+            / (1 + musicEcho.squared + (musicEcho * 0.55).squared).sqrt;
 
         saturationDrive = NamedControl.kr(
             \saturationDrive, preset[\saturationDrive]
         ).clip(1, 2);
-        saturated = (source * saturationDrive).tanh / saturationDrive;
+        saturated = ((source.sanitize * saturationDrive).tanh / saturationDrive).sanitize;
         wet = GVerb.ar(
             saturated.sum * 0.5,
             roomsize: NamedControl.kr(
                 \reverbRoom, preset[\reverbRoom]
             ).clip(8, 80),
-            revtime: NamedControl.kr(
+            revtime: Lag.kr(NamedControl.kr(
                 \reverbTime, preset[\reverbTime]
-            ).clip(0.5, 12),
+            ).clip(0.5, 12), 0.2),
             damping: NamedControl.kr(
                 \reverbDamping, preset[\reverbDamping]
             ).clip(0, 1),
@@ -257,9 +329,9 @@
         signal = XFade2.ar(
             saturated,
             wet,
-            (NamedControl.kr(
+            (Lag.kr(NamedControl.kr(
                 \reverbMix, preset[\reverbMix]
-            ).clip(0, 1) * 2) - 1
+            ).clip(0, 1), 0.2) * 2) - 1
         );
 
         life = EnvGen.kr(

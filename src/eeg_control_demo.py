@@ -109,7 +109,8 @@ class ControlSession:
                  smoothing_seconds=0.5, diagnostics=True,
                  control_hz=DEFAULT_CONTROL_HZ, clock=time.monotonic,
                  frame_callback=None, transmit=True,
-                 required_quality_channels=(), saturation_abs=None):
+                 required_quality_channels=(), saturation_abs=None,
+                 warmup_seconds=0, energy_log_scale=False):
         self.sample_rate, self.update_rate = float(sample_rate), float(update_rate)
         self.window_samples = int(round(window_seconds * sample_rate))
         self.update_samples = max(1, int(round(sample_rate / update_rate)))
@@ -124,7 +125,9 @@ class ControlSession:
                                               analysis_low_hz, analysis_high_hz,
                                               smoothing_seconds,
                                               required_quality_channels=required_quality_channels,
-                                              saturation_abs=saturation_abs)
+                                              saturation_abs=saturation_abs,
+                                              energy_log_scale=energy_log_scale)
+        self.warmup_samples = int(round(warmup_seconds * sample_rate))
         self.sender = sender
         self.transmitter = RateLimitedControlTransmitter(sender, control_hz, clock)
         self.frames, self.frame_times = [], []
@@ -172,6 +175,9 @@ class ControlSession:
         feature_signal = self.analysis_filter.process(cleaned)
         last_frame = None
         for row_index, (raw_row, feature_row) in enumerate(zip(eeg, feature_signal)):
+            if self.total_samples < self.warmup_samples:
+                self.total_samples += 1
+                continue
             self.quality_buffer.append(raw_row)
             self.feature_buffer.append(feature_row)
             self.total_samples += 1
