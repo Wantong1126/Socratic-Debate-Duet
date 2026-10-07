@@ -34,3 +34,20 @@ recordings/
 data/raw/
 *.xdf
 reports/sdd_v1/live.wav
+
+# Local audition outputs. Curated evidence is small and reproducible.
+reports/sdd_v1/mapping_audition/**/*.wav
+reports/sdd_v1/mapping_audition/**/*.osc
+reports/sdd_v1/mapping_audition/**/*.zip
+reports/sdd_v1/mapping_audition/**/*.log
+reports/sdd_v1/mapping_audition/**/render_batch.scd
+reports/sdd_v1/mapping_audition/**/session_*/
+reports/sdd_v1/mapping_audition/**/*.json
+!reports/sdd_v1/mapping_audition/**/manifest.json
+!reports/sdd_v1/mapping_audition/**/raw_audit.json
+!reports/sdd_v1/mapping_audition/**/protocol_runtime.json
+!reports/sdd_v1/mapping_audition/**/validation.json
+
+# Preserve previous audition assets on disk without adding them as new Git data.
+reports/archive/listening/previous_menu/*
+!reports/archive/listening/previous_menu/README.md

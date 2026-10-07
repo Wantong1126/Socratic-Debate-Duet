@@ -26,7 +26,7 @@ let eeg1Energy   = cF 0.5 "eeg1_energy"
 
 -- 2. EDITABLE MAPPING RANGES AND FIXED PITCH SCAFFOLD ----------------------
 -- C-major-sixth scaffold: edit these six pitches in one place.
--- Other synths noted in soundSample.tidal: "superhammond", "supervibe",
+-- Other synths noted in experiments/soundSample.tidal: "superhammond", "supervibe",
 -- "superfork", and "superpwm". Change voiceSound once to change all voices.
 let voiceSound = "supermandolin"
     f3Pitch = "c3"

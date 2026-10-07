@@ -1,3 +1,5 @@
+> Historical 2026-09-20 menu. Current guide: ../../LISTENING_GUIDE.md. Commands below describe the earlier menu.
+
 # 单人音乐映射：启动与试听
 
 在 `D:\sdd-sonification` 的 PowerShell 执行：
@@ -38,7 +40,7 @@
 
 ## 不启动 Python/SC，直接听 WAV
 
-`../mapping_audition_19_wavs_20260920.zip` **只含 19 个 WAV**，无真人原始样本、配置、日志或额外参考曲：
+`../../../reports/archive/listening/previous_menu/mapping_audition_19_wavs_20260920.zip` **只含 19 个 WAV**，无真人原始样本、配置、日志或额外参考曲：
 
 - `01_manual/`：8 个同轨迹的手动对照。
 - `02_human_replay/`：8 个同一真人片段的回放对照。

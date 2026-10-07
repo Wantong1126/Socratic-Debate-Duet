@@ -175,7 +175,7 @@
         "src/sonification/synthetic_music_demo.py",
         "src/sonification/protocol.py",
         "sound/eeg_organism_v2_receiver.scd",
-        "reports/overnight/20260904_014335/progress.md"
+        "reports/archive/overnight/20260904_014335/progress.md"
       ],
       "acceptance": "核对当前实际提交、启动入口、协议及既有测试报告；仅回归相关更改。用户已报告该基线技术验证通过；不能把旧导出里的 protocol 缺陷重新当成当前必修项。听觉判断和本次实测分开。"
     },

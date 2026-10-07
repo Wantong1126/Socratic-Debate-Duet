@@ -1,3 +1,5 @@
+> Historical September report. Current sounds: docs/LISTENING_GUIDE.md. Cleanup was completed on 2026-10-07; see repository_cleanup_20261007.json. Old audition assets are preserved at reports/archive/listening/previous_menu/.
+
 # M01–M06：单人音乐映射试听，2026-09-20
 
 本轮交付可运行的原始真人记录回放、八个独立菜单项（六类音乐变化）、19 段短对照，以及现有参与者 A 声部上的邀请变换。人工可辨性、好听程度、疲劳、声音归属感和行为对应均未验收。没有开始双人系统，也没有删除历史文件、提交或推送。

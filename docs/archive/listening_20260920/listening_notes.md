@@ -1,3 +1,5 @@
+> Historical 2026-09-20 menu. Current guide: ../../LISTENING_GUIDE.md. Commands below describe the earlier menu.
+
 # 人工试听记录：等待填写
 
 尚无人报告本套音频的听感；测试通过不填写听觉结论。

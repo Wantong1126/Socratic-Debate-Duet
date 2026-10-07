@@ -1,3 +1,5 @@
+> Historical September report. Current sounds: docs/LISTENING_GUIDE.md. Cleanup was completed on 2026-10-07; see repository_cleanup_20261007.json. Old audition assets are preserved at reports/archive/listening/previous_menu/.
+
 # 本轮清理清单：仅调查，不移动或删除
 
 实际逐文件路径、大小和 Git 状态见 `mapping_audition/cleanup_inventory.json`。

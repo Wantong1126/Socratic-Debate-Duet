@@ -1,0 +1,43 @@
+{
+    "recordings_deleted":  0,
+    "tracked_moves":  [
+                          {
+                              "destination":  "docs\\archive\\overnight_tasks",
+                              "source":  "overnight files\\codex_tasks\\overnight"
+                          },
+                          {
+                              "destination":  "reports\\archive\\overnight\\20260904_014335",
+                              "source":  "reports\\overnight\\20260904_014335"
+                          },
+                          {
+                              "destination":  "docs\\archive\\repository_snapshot\\repogrok-output.xml",
+                              "source":  "repogrok-output.xml"
+                          },
+                          {
+                              "destination":  "tidal\\experiments\\soundSample.tidal",
+                              "source":  "soundSample.tidal"
+                          },
+                          {
+                              "destination":  "tidal\\experiments\\test.tidal",
+                              "source":  "test.tidal"
+                          },
+                          {
+                              "destination":  "docs\\archive\\listening_20260920\\START_HERE.md",
+                              "source":  "reports\\sdd_v1\\mapping_audition\\START_HERE.md"
+                          },
+                          {
+                              "destination":  "docs\\archive\\listening_20260920\\MAPPING_TABLE.md",
+                              "source":  "reports\\sdd_v1\\mapping_audition\\MAPPING_TABLE.md"
+                          },
+                          {
+                              "destination":  "docs\\archive\\listening_20260920\\listening_notes.md",
+                              "source":  "reports\\sdd_v1\\mapping_audition\\listening_notes.md"
+                          }
+                      ],
+    "previous_menu_files_archived":  71,
+    "protected_files":  36,
+    "old_zip_hash_unchanged":  true,
+    "unknown_user_session_directories_left_in_place":  true,
+    "protected_paths_and_hashes_unchanged":  true,
+    "date":  "2026-10-07"
+}

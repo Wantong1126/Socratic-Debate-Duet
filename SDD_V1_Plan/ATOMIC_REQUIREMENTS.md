@@ -31,7 +31,7 @@ T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → 
 - 状态：用户本地报告已实现；本次未在最新仓库复跑。保留并在本地核对，不重做。
 - 类型：verification
 - 验收：核对当前实际提交、启动入口、协议及既有测试报告；仅回归相关更改。用户已报告该基线技术验证通过；不能把旧导出里的 protocol 缺陷重新当成当前必修项。听觉判断和本次实测分开。
-- 代码落点：src/sonification/synthetic_music_demo.py；src/sonification/protocol.py；sound/eeg_organism_v2_receiver.scd；reports/overnight/20260904_014335/progress.md
+- 代码落点：src/sonification/synthetic_music_demo.py；src/sonification/protocol.py；sound/eeg_organism_v2_receiver.scd；reports/archive/overnight/20260904_014335/progress.md
 
 ### T02 · 定义带身份和时间的数据封套
 
