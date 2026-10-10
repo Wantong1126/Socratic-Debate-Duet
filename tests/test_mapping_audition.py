@@ -8,7 +8,7 @@ from unittest.mock import patch
 import numpy as np
 
 from src.sdd.audition_features import EnergyProcessor, recompute
-from src.sdd.mapping_audition import prepare_replay, receiver_port_candidates
+from src.sdd.mapping_audition import EyesOpenClosedCheck, prepare_replay, receiver_port_candidates
 from src.sdd.mapping_render import make_trace, score_for
 from src.sdd.music_mapping import CANDIDATES, MusicMapping, load_config, music_packet, validate_packet
 from src.sdd.replay_source import RawSampleReplay
@@ -155,6 +155,47 @@ class MappingTests(unittest.TestCase):
         self.assertIsNot(previous,p.session)
         self.assertIsNone(p.session.engine.bounds)
         self.assertFalse(any(r['valid'] for r in p.rows))
+
+    def test_known_10hz_posterior_alpha_drives_existing_brightness_only(self):
+        import tomllib
+        c=tomllib.loads((ROOT/'config/live_eeg.toml').read_text())
+        c['analysis'].update(warmup_seconds=0, baseline_seconds=1, smoothing_seconds=0)
+        p=EnergyProcessor(c, input_name='posterior_alpha')
+        rate=250; t=np.arange(rate*7)/rate
+        samples=np.zeros((len(t),8))
+        # A changing 10 Hz calibration section prevents a degenerate range;
+        # the final, stronger 10 Hz section must produce a higher alpha amount.
+        amplitude=np.where(t < 4, 3+2*np.sin(2*np.pi*.5*t), 18.)
+        samples[:,4]=amplitude*np.sin(2*np.pi*10*t)
+        samples[:,5]=amplitude*np.sin(2*np.pi*10*t+.2)
+        p.add(samples,t)
+        valid=[row for row in p.rows if row['valid']]
+        self.assertTrue(valid)
+        self.assertEqual(valid[-1]['input'], 'posterior_alpha')
+        self.assertGreater(valid[-1]['raw_posterior_alpha_uv2'], 20)
+        self.assertGreater(valid[-1]['amount'], .9)
+        mapping=MusicMapping('brightness', self.config)
+        low=mapping.update(0,0)['controls']
+        high=mapping.update(valid[-1]['amount'],10)['controls']
+        self.assertNotEqual([low[f'musicGroup{i}'] for i in range(1,5)],
+                            [high[f'musicGroup{i}'] for i in range(1,5)])
+        self.assertEqual(low['musicColour'], high['musicColour'])
+
+    def test_bad_posterior_input_and_condition_markers_do_not_create_control(self):
+        import tomllib
+        c=tomllib.loads((ROOT/'config/live_eeg.toml').read_text())
+        c['analysis'].update(warmup_seconds=0, baseline_seconds=1, smoothing_seconds=0)
+        p=EnergyProcessor(c, input_name='posterior_alpha')
+        t=np.arange(250*4)/250
+        samples=np.zeros((len(t),8)); samples[:,4]=np.nan; samples[:,5]=np.nan
+        p.add(samples,t)
+        self.assertFalse(any(row['valid'] for row in p.rows))
+        check=EyesOpenClosedCheck(seconds=20)
+        self.assertEqual(check.advance(0, False), [])
+        self.assertEqual(check.advance(1, True), [('eyes_open', 1)])
+        mapping=MusicMapping('brightness', self.config)
+        self.assertEqual(mapping.update(.42,0)['controls'], mapping.update(.42,0)['controls'])
+        self.assertEqual(check.advance(21, True), [('eyes_closed', 21)])
 
     @unittest.skipUnless(RECORDING.exists(), 'private human recording absent; no fixture substitution')
     def test_real_raw_recompute_is_repeatable_and_rejects_bad_eog(self):

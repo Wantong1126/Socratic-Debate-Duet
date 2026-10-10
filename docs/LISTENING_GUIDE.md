@@ -18,6 +18,11 @@ Default input: raw recomputation of the operator-confirmed human resting recordi
 
 The colour labels describe spectral palettes within the existing harmonic voice, not recorded acoustic instruments. Brightness controls the balance between harmonic groups; colour changes the harmonic pattern within those groups. A reed palette strongly suppresses even harmonics; the glass palette favours harmonics 2, 6 and 12. All use the same continuing participant-A Synth.
 
+Terminology correction: the earlier mapping-table label `timbre` referred to
+the **relative weights of notes inside a chord**, not the timbre of one note.
+That note-weight experiment is retired and remains distinct from both the
+current brightness control and the already-existing sound-colour candidate.
+
 R restarts the same raw fragment and processing state. Space pauses/resumes. Q or Ctrl+C stops and releases the receiver. Candidate keys switch and repeat the same fragment. The player prints exact note frequencies, weights, applied voicing times and the current mapped parameter. There is a keyboard trigger, no graphical button.
 
 V enables/disables **reimagination**. I creates one external event; E ends it and D declines it. `--reimagination-source peer_B` attributes the explicit button event to debater B, targeting A. Reimagination means a request to reconsider the metric used to weigh arguments; it does not score argument quality or report successful reflection. It moves the current upper voices by up to two semitones and returns, while physiological colour/brightness/level continue. Melody and harmony are refused while reimagination owns the upper voices. A voice for B is not implemented.
@@ -26,6 +31,38 @@ V enables/disables **reimagination**. I creates one external event; E ends it an
 python -m src.sdd.mapping_audition --mode manual --candidate harmony
 python -m src.sdd.mapping_audition --candidate colour --reimagination --reimagination-source peer_B
 python -m src.sdd.mapping_audition --render-all
+```
+
+## Posterior alpha → brightness check
+
+The existing F3-energy default remains available.  For the approved P3/P4
+alpha check, `posterior_alpha` is a distinct input: the mean of the absolute
+8–13 Hz Welch power of P3 and P4, measured in uV². Both posterior channels
+must pass the existing finite/flatline/saturation checks. It has its own 5th–95th
+percentile calibration range after the existing 30 s settling period and 20 s
+calibration; it does not use F3's range or the old six-channel relative-band
+summary. A degenerate range or invalid window produces no valid control value.
+
+Start the real, explicitly recorded three-round check only after OpenBCI GUI is
+LIVE, Raw/uV, and LSL is streaming:
+
+```powershell
+& "C:\Users\cc_10\anaconda3\python.exe" -m src.sdd.mapping_audition --mode live --stream-name obci_eeg1 --confirm-live-hardware --input posterior_alpha --candidate brightness --alpha-check-output reports/sdd_v1/live_sessions/alpha_open_closed_YYYYMMDD
+```
+
+After a valid calibrated alpha window appears, follow the printed six prompts:
+eyes open for 20 seconds, eyes closed for 20 seconds, repeated three times.
+The opt-in output contains the verbatim eight-channel raw chunks, task markers,
+P3/P4 alpha powers and qualities, amount, and the brightness group parameters.
+Markers label the requested condition only; they never trigger sound. The 2 s
+causal analysis window, 4 Hz updates, and 0.5 s alpha smoothing are recorded
+as processing support/timing, not described as EOG/EMG removal.
+
+Replay can test the same calculation and brightness transport without making a
+claim about open/closed eyes:
+
+```powershell
+& "C:\Users\cc_10\anaconda3\python.exe" -m src.sdd.mapping_audition --mode replay --input posterior_alpha --candidate brightness --once
 ```
 
 Manual uses the same low→middle→high→low trajectory; +/- sets a manual amount and T restores the trajectory. Replay and manual are distinct source labels. Live remains opt-in through `--mode live --stream-name obci_eeg1 --confirm-live-hardware`; the new palettes/progression still need live behavioral validation.
