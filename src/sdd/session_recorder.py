@@ -6,7 +6,8 @@ from pathlib import Path
 
 class SessionRecorder:
     def __init__(self, directory, *, session_id, config, code_version, source,
-                 seed, monotonic_origin, wall_origin, allow_live_recording=False):
+                 seed, monotonic_origin, wall_origin, allow_live_recording=False,
+                 extra_metadata=None):
         if (source.get('mode') == 'live' or source.get('real_eeg')) and not allow_live_recording:
             raise PermissionError('live acquisition recording must be explicitly enabled')
         self.allow_live = allow_live_recording
@@ -20,6 +21,10 @@ class SessionRecorder:
                         monotonic_origin=monotonic_origin, wall_origin=wall_origin,
                         clock='seconds on shared monotonic timeline',
                         simulated=source.get('mode') == 'fixture')
+        if extra_metadata:
+            if 'config' in extra_metadata:
+                raise ValueError('extra metadata cannot replace the processing config')
+            metadata.update(extra_metadata)
         (directory / 'metadata.json').write_text(
             json.dumps(metadata, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
         self.stream = (directory / 'records.jsonl').open('x', encoding='utf-8')

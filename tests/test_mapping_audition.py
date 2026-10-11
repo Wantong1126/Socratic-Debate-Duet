@@ -12,6 +12,7 @@ from src.sdd.mapping_audition import EyesOpenClosedCheck, prepare_replay, receiv
 from src.sdd.mapping_render import make_trace, score_for
 from src.sdd.music_mapping import CANDIDATES, MusicMapping, load_config, music_packet, validate_packet
 from src.sdd.replay_source import RawSampleReplay
+from src.sdd.session_recorder import SessionRecorder
 
 ROOT = Path(__file__).resolve().parents[1]
 RECORDING = ROOT/'reports/sdd_v1/live_sessions/obci_eeg1_20260919_194100'
@@ -180,6 +181,46 @@ class MappingTests(unittest.TestCase):
         self.assertNotEqual([low[f'musicGroup{i}'] for i in range(1,5)],
                             [high[f'musicGroup{i}'] for i in range(1,5)])
         self.assertEqual(low['musicColour'], high['musicColour'])
+
+    def test_alpha_check_recording_replays_with_its_own_processor_config(self):
+        """A new alpha-check recording is self-contained for RawSampleReplay."""
+        import tomllib
+        processor_config=tomllib.loads((ROOT/'config/live_eeg.toml').read_text())
+        processor_config['analysis'].update(warmup_seconds=0, baseline_seconds=1,
+                                            smoothing_seconds=0)
+        rate=250; t=np.arange(rate*7)/rate
+        samples=np.zeros((len(t),8))
+        amplitude=np.where(t < 4, 3+2*np.sin(2*np.pi*.5*t), 18.)
+        samples[:,4]=amplitude*np.sin(2*np.pi*10*t)
+        samples[:,5]=amplitude*np.sin(2*np.pi*10*t+.2)
+        live=EnergyProcessor(processor_config, rate, 'posterior_alpha')
+        live.add(samples,t)
+        audition_config={'candidate':'brightness','input':'posterior_alpha',
+                         'receiver_transport':{'osc_port':57120}}
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'alpha_check'
+            with SessionRecorder(path, session_id='alpha-check-test', config=processor_config,
+                code_version={'entry':'test'}, source={'mode':'live','real_eeg':True}, seed=None,
+                monotonic_origin=0, wall_origin=0, allow_live_recording=True,
+                extra_metadata={'audition_session_config':audition_config}) as recorder:
+                recorder.raw(at=0, sampled_at=t.tolist(), samples=samples.tolist(), sample_rate=rate,
+                    channels=['F3','F4','C3','C4','P3','P4','vertical_EOG','jaw_EMG'],
+                    units=['uV']*8, mode='live', participant_id='A')
+            source=RawSampleReplay(path)
+            self.assertEqual(source.metadata['config'], processor_config)
+            self.assertEqual(source.metadata['audition_session_config'], audition_config)
+            replay=EnergyProcessor(source.metadata['config'], source.sample_rate, 'posterior_alpha')
+            replay.add(source.samples, source.relative)
+        self.assertEqual(len(live.rows), len(replay.rows))
+        for expected, actual in zip(live.rows, replay.rows):
+            self.assertEqual(expected['input'], actual['input'])
+            self.assertEqual(expected['valid'], actual['valid'])
+            self.assertEqual(expected['quality'], actual['quality'])
+            for key in ('raw_posterior_alpha_uv2', 'alpha_p3_uv2', 'alpha_p4_uv2', 'amount'):
+                if expected[key] is None or actual[key] is None:
+                    self.assertEqual(expected[key], actual[key])
+                else:
+                    self.assertAlmostEqual(expected[key], actual[key], places=12)
 
     def test_bad_posterior_input_and_condition_markers_do_not_create_control(self):
         import tomllib

@@ -205,10 +205,14 @@ def run(args, config):
     recorder = None
     alpha_check_alpha_rows, alpha_check_music_rows = [], []
     if alpha_check:
-        recorder = SessionRecorder(args.alpha_check_output, session_id=sid, config=session_config,
+        # RawSampleReplay reconstructs its processor from metadata.config. Keep
+        # the actual live processor configuration there; audition-only state is
+        # a separately named record and cannot overwrite acquisition settings.
+        recorder = SessionRecorder(args.alpha_check_output, session_id=sid, config=processor.config,
             code_version={'entry': 'src.sdd.mapping_audition', 'input': 'posterior_alpha'},
             source={'mode': 'live', 'real_eeg': True, 'stream_name': args.stream_name}, seed=None,
-            monotonic_origin=time.monotonic(), wall_origin=time.time(), allow_live_recording=True)
+            monotonic_origin=time.monotonic(), wall_origin=time.time(), allow_live_recording=True,
+            extra_metadata={'audition_session_config': session_config})
         print('ALPHA CHECK: after calibration, follow each prompt for 20 seconds: OPEN, CLOSED, repeated three times. Markers only label conditions; they do not control sound.', flush=True)
     controller = InvitationEnvelopeController(InvitationEnvelopeConfig(**config['reimagination']))
     runtime = SessionRuntime(sender, session_id=sid, invitation_controller=controller,
