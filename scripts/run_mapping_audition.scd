@@ -11,6 +11,12 @@ root = PathName(thisProcess.nowExecutingPath).pathOnly +/+ "..";
     if((serverPort < 1) or: { serverPort > 65535 }) {
         Error("SDD_AUDITION_SERVER_PORT must be a UDP port").throw;
     };
+    ("MAPPING_AUDITION_LANG_PORT actual=" ++ NetAddr.langPort
+        ++ " expected=" ++ controlPort).postln;
+    if(NetAddr.langPort != controlPort) {
+        Error("MAPPING_AUDITION_LANG_PORT_MISMATCH actual=" ++ NetAddr.langPort
+            ++ " expected=" ++ controlPort).throw;
+    };
 Server.default = s = Server(\mappingAudition, NetAddr("127.0.0.1", serverPort));
 s.options.numInputBusChannels = 0;
 s.options.numOutputBusChannels = 2;

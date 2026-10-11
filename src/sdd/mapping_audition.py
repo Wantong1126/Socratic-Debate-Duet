@@ -97,7 +97,9 @@ def start_receiver(log_path):
         log.flush()
         environment = dict(os.environ, SDD_AUDITION_OSC_PORT=str(osc_port),
             SDD_AUDITION_SERVER_PORT=str(server_port))
-        process = subprocess.Popen([find_sclang(), '-D', 'scripts/run_mapping_audition.scd'],
+        # sclang's language UDP socket receives the OSCdefs. It must bind the
+        # same selected control port, independently of scsynth's server port.
+        process = subprocess.Popen([find_sclang(), '-u', str(osc_port), '-D', 'scripts/run_mapping_audition.scd'],
             cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=environment,
             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         deadline = time.monotonic()+40
@@ -109,7 +111,8 @@ def start_receiver(log_path):
             # availability check.  Retry on a fresh pair instead of making the
             # operator find and kill an unrelated receiver.
             port_conflict = ('Could not open UDP port' in output
-                or 'Could not bind to requested port' in output)
+                or 'Could not bind to requested port' in output
+                or 'No networking: unable to bind udp socket' in output)
             if port_conflict:
                 _terminate_receiver(process)
                 log.close()

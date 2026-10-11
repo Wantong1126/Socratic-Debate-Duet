@@ -8,7 +8,7 @@ from unittest.mock import patch
 import numpy as np
 
 from src.sdd.audition_features import EnergyProcessor, recompute
-from src.sdd.mapping_audition import EyesOpenClosedCheck, prepare_replay, receiver_port_candidates
+from src.sdd.mapping_audition import EyesOpenClosedCheck, prepare_replay, receiver_port_candidates, start_receiver
 from src.sdd.mapping_render import make_trace, score_for
 from src.sdd.music_mapping import CANDIDATES, MusicMapping, load_config, music_packet, validate_packet
 from src.sdd.replay_source import RawSampleReplay
@@ -143,6 +143,25 @@ class MappingTests(unittest.TestCase):
         with patch('src.sdd.mapping_audition._udp_port_available',
                    side_effect=[False, True, True]):
             self.assertEqual(next(receiver_port_candidates()), (57140, 57150))
+
+    def test_receiver_binds_sclang_language_port_to_selected_control_port(self):
+        calls = []
+        class Process:
+            def poll(self): return None
+        def popen(argv, **kwargs):
+            calls.append(argv)
+            kwargs['stdout'].write('MAPPING_AUDITION_READY control_udp=57360 server_udp=57370\n')
+            kwargs['stdout'].flush()
+            return Process()
+        with tempfile.TemporaryDirectory() as directory:
+            log_path=Path(directory)/'receiver.log'
+            with patch('src.sdd.mapping_audition.receiver_port_candidates', return_value=iter([(57360,57370)])), \
+                 patch('src.sdd.mapping_audition.find_sclang', return_value='sclang.exe'), \
+                 patch('src.sdd.mapping_audition.subprocess.Popen', side_effect=popen):
+                _, log, osc_port, server_port=start_receiver(log_path)
+                log.close()
+        self.assertEqual((osc_port,server_port),(57360,57370))
+        self.assertEqual(calls, [['sclang.exe','-u','57360','-D','scripts/run_mapping_audition.scd']])
 
     def test_gap_resets_feature_and_scaling_state(self):
         import tomllib
