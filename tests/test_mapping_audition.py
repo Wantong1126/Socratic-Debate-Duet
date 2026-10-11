@@ -1,3 +1,4 @@
+import base64
 import copy
 import json
 from pathlib import Path
@@ -8,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 
 from src.sdd.audition_features import EnergyProcessor, recompute
-from src.sdd.mapping_audition import EyesOpenClosedCheck, prepare_replay, receiver_port_candidates, start_receiver
+from src.sdd.mapping_audition import CheckVoice, EyesOpenClosedCheck, covered_seconds, prepare_replay, receiver_port_candidates, start_receiver
 from src.sdd.mapping_render import make_trace, score_for
 from src.sdd.music_mapping import CANDIDATES, MusicMapping, load_config, music_packet, validate_packet
 from src.sdd.replay_source import RawSampleReplay
@@ -255,7 +256,59 @@ class MappingTests(unittest.TestCase):
         self.assertEqual(check.advance(1, True), [('eyes_open', 1)])
         mapping=MusicMapping('brightness', self.config)
         self.assertEqual(mapping.update(.42,0)['controls'], mapping.update(.42,0)['controls'])
+        for tick in np.arange(1.25, 21, .25):
+            check.advance(float(tick), True)
         self.assertEqual(check.advance(21, True), [('eyes_closed', 21)])
+
+    def test_alpha_check_voice_uses_independent_ordered_speech(self):
+        with patch('src.sdd.mapping_audition.subprocess.run') as speak:
+            voice = CheckVoice()
+            prompts = ['\u7b2c1\u8f6e, \u7741\u773c', '\u7b2c1\u8f6e, \u95ed\u773c', '\u7ed3\u675f']
+            for prompt in prompts:
+                voice.say(prompt)
+            voice.close()
+        self.assertEqual(speak.call_count, 3)
+        for call, prompt in zip(speak.call_args_list, prompts):
+            script = base64.b64decode(call.args[0][-1]).decode('utf-16-le')
+            self.assertIn(prompt, script)
+            self.assertIn('System.Speech', script)
+
+    def test_alpha_check_midstream_outage_never_reports_complete(self):
+        check = EyesOpenClosedCheck(seconds=2, outage_seconds=1)
+        check.advance(0, True)
+        for tick in np.arange(.25, 6, .25):
+            check.advance(float(tick), True)
+        phase = check.index
+        check.advance(6, False)
+        check.advance(6.75, False)
+        self.assertEqual(check.status, 'INCOMPLETE')
+        self.assertEqual(check.failure_reason, 'sustained_data_outage')
+        self.assertEqual(check.index, phase)
+        self.assertEqual(check.advance(120, True), [])
+        self.assertFalse(check.complete)
+
+    def test_alpha_check_reset_and_delayed_timer_cannot_complete(self):
+        check = EyesOpenClosedCheck(seconds=2)
+        check.advance(0, True)
+        check.abort('timestamp_gap_processor_reset', 1)
+        check.advance(120, True)
+        self.assertEqual(check.status, 'INCOMPLETE')
+        delayed = EyesOpenClosedCheck(seconds=2)
+        delayed.advance(0, True)
+        delayed.advance(120, True)
+        self.assertEqual(delayed.status, 'INCOMPLETE')
+
+    def test_alpha_check_complete_requires_continuous_healthy_data(self):
+        check = EyesOpenClosedCheck(seconds=2)
+        markers = []
+        for tick in np.arange(0, 12.25, .25):
+            markers.extend(check.advance(float(tick), True))
+        self.assertEqual(check.status, 'COMPLETE')
+        self.assertEqual([condition for condition, _ in markers], list(check.phases))
+
+    def test_alpha_check_coverage_is_clipped_union_with_gaps(self):
+        self.assertAlmostEqual(covered_seconds([(-1, 1), (.5, 2), (3, 5)], 0, 4), 3)
+        self.assertEqual(covered_seconds([], 0, 20), 0)
 
     @unittest.skipUnless(RECORDING.exists(), 'private human recording absent; no fixture substitution')
     def test_real_raw_recompute_is_repeatable_and_rejects_bad_eog(self):

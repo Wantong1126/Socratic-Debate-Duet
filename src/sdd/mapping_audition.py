@@ -10,6 +10,9 @@ import subprocess
 import time
 import tomllib
 import uuid
+import base64
+import queue
+import threading
 
 import numpy as np
 
@@ -136,8 +139,25 @@ class EyesOpenClosedCheck:
     """Condition markers only; they never change a feature or music value."""
     phases = ('eyes_open', 'eyes_closed') * 3
 
-    def __init__(self, seconds=20.0):
+    def __init__(self, seconds=20.0, outage_seconds=1.0):
         self.seconds, self.index, self.started = float(seconds), -1, None
+        self.outage_seconds = outage_seconds
+        self.last_healthy = None
+        self.failure_reason = None
+        self.finished_at = None
+
+    def abort(self, reason, now):
+        if not self.complete and self.failure_reason is None:
+            self.failure_reason, self.finished_at = reason, now
+
+    @property
+    def status(self):
+        return 'INCOMPLETE' if self.failure_reason else ('COMPLETE' if self.complete else 'RUNNING')
+
+    def phase_at(self, at):
+        if self.started is None or at < self.started:
+            return -1
+        return min(len(self.phases)-1, int((at-self.started)/self.seconds))
 
     @property
     def current(self):
@@ -145,22 +165,77 @@ class EyesOpenClosedCheck:
 
     @property
     def complete(self):
-        return self.index >= len(self.phases)
+        return self.failure_reason is None and self.index >= len(self.phases)
 
     def advance(self, now, ready):
         """Return newly entered markers. Start only after valid alpha exists."""
         markers = []
+        if self.failure_reason or self.complete:
+            return markers
+        if self.started is not None and now-self.last_healthy >= self.outage_seconds:
+            self.abort('sustained_data_outage', now)
+            return markers
+        if ready:
+            self.last_healthy = now
         if self.started is None:
             if not ready:
                 return markers
             self.started, self.index = now, 0
             return [(self.current, now)]
+        if not ready:
+            return markers
         while not self.complete and now - self.started >= (self.index + 1) * self.seconds:
             self.index += 1
-            if not self.complete:
+            if self.complete:
+                self.finished_at = now
+            else:
                 markers.append((self.current, self.started + self.index * self.seconds))
         return markers
 
+
+
+class CheckVoice:
+    """Independent queued speech; never blocks acquisition or changes music."""
+    def __init__(self):
+        self.messages = queue.Queue()
+        self.worker = threading.Thread(target=self._run, daemon=True)
+        self.worker.start()
+
+    def say(self, text):
+        self.messages.put(text)
+
+    def _run(self):
+        while True:
+            text = self.messages.get()
+            if text is None:
+                return
+            script = ("Add-Type -AssemblyName System.Speech; "
+                "$voice = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+                "$chinese = $voice.GetInstalledVoices() | Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -like 'zh*' } | Select-Object -First 1; "
+                "if ($chinese) { $voice.SelectVoice($chinese.VoiceInfo.Name) }; "
+                "$voice.Speak('" + text.replace("'", "''") + "'); $voice.Dispose()")
+            try:
+                subprocess.run(['powershell', '-NoProfile', '-EncodedCommand',
+                    base64.b64encode(script.encode('utf-16-le')).decode('ascii')],
+                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=True, timeout=15)
+            except (OSError, subprocess.SubprocessError) as exc:
+                print(f'ALPHA CHECK VOICE unavailable: {exc}', flush=True)
+
+    def close(self):
+        self.messages.put(None)
+        self.worker.join(timeout=20)
+
+
+def covered_seconds(intervals, start, end):
+    """Union of observed intervals, clipped to the requested condition."""
+    total, cursor = 0.0, start
+    for left, right in sorted(intervals):
+        left, right = max(start, left), min(end, right)
+        if right > max(cursor, left):
+            total += right-max(cursor, left)
+            cursor = right
+    return total
 
 def run(args, config):
     # Validate ownership and raw data before opening any sound device.
@@ -205,6 +280,9 @@ def run(args, config):
     sender = OrganismControlSender(port=osc_port)
     sid = 'audition-'+uuid.uuid4().hex[:12]
     alpha_check = EyesOpenClosedCheck() if args.alpha_check_output else None
+    voice = CheckVoice() if alpha_check else None
+    raw_intervals = []
+    valid_intervals = []
     recorder = None
     alpha_check_alpha_rows, alpha_check_music_rows = [], []
     if alpha_check:
@@ -250,9 +328,14 @@ def run(args, config):
             for key, value in list(data.items()):
                 if isinstance(value, float) and not np.isfinite(value):
                     data[key] = None
-            data['condition'] = alpha_check.current
+            at = time.monotonic()-max(0, local_clock()-(row['t']+correction))
+            phase = alpha_check.phase_at(at)
+            condition = alpha_check.phases[phase] if phase >= 0 else None
+            data['condition'] = condition
+            if row['valid']:
+                valid_intervals.append((at-1/processor.config['analysis']['update_rate_hz'], at))
             recorder.write('posterior_alpha', time.monotonic(), data, live=True)
-            alpha_check_alpha_rows.append((alpha_check.index, alpha_check.current, data))
+            alpha_check_alpha_rows.append((phase, condition, data))
         recorded_feature_count = len(processor.rows)
 
     def save_alpha_check_summary():
@@ -267,17 +350,31 @@ def run(args, config):
             powers = [row['raw_posterior_alpha_uv2'] for row in valid]
             groups = {f'musicGroup{i}': [row['controls'][f'musicGroup{i}'] for row in music] for i in range(1, 5)}
             span = lambda values: None if not values else [float(min(values)), float(np.median(values)), float(max(values))]
-            rounds.append({'round': index // 2 + 1, 'condition': condition,
+            begin = (alpha_check.started or 0)+index*alpha_check.seconds
+            end = begin+alpha_check.seconds
+            raw_coverage = covered_seconds(raw_intervals, begin, end) if alpha_check.started is not None else 0
+            valid_coverage = covered_seconds(valid_intervals, begin, end) if alpha_check.started is not None else 0
+            rounds.append({'raw_data_coverage_seconds': raw_coverage,
+                'valid_control_coverage_seconds': valid_coverage,
+                'missing_raw_seconds': max(0, alpha_check.seconds-raw_coverage),
+                'missing_valid_seconds': max(0, alpha_check.seconds-valid_coverage),
+                'windows_invalid': len(alpha)-len(valid),
+                'windows_missing': max(0, round(alpha_check.seconds*processor.config['analysis']['update_rate_hz'])-len(alpha)),
+                'expected_windows': round(alpha_check.seconds*processor.config['analysis']['update_rate_hz']),
+                'control_top_fraction': None if not music else float(np.mean([row['amount'] >= .98 for row in music])),
+                'alpha_amount_top_fraction': None if not amounts else float(np.mean(np.asarray(amounts) >= .98)),
+                'round': index // 2 + 1, 'condition': condition,
                 'windows_total': len(alpha), 'windows_valid': len(valid),
                 'posterior_alpha_uv2_min_median_max': span(powers),
                 'amount_min_median_max': span(amounts),
                 'brightness_groups_min_max': {name: None if not values else [float(min(values)), float(max(values))] for name, values in groups.items()}})
         output = Path(args.alpha_check_output)/'alpha_check_summary.json'
-        output.write_text(json.dumps({'input': 'posterior_alpha', 'unit': 'uV^2',
+        output.write_text(json.dumps({'status': alpha_check.status, 'failure_reason': alpha_check.failure_reason,
+            'control_top_threshold': .98, 'control_top_definition': 'brightness smoothed control amount >= 0.98; fraction of transmitted controls', 'input': 'posterior_alpha', 'unit': 'uV^2',
             'protocol': 'eyes_open_20s, eyes_closed_20s, repeated three times; markers do not control sound',
             'rounds': rounds}, indent=2), encoding='utf-8')
         for row in rounds:
-            print('ALPHA SUMMARY round={round} condition={condition} valid={windows_valid}/{windows_total} alpha={posterior_alpha_uv2_min_median_max} amount={amount_min_median_max} brightness={brightness_groups_min_max}'.format(**row), flush=True)
+            print('ALPHA SUMMARY round={round} condition={condition} valid={windows_valid}/{windows_total} coverage={raw_data_coverage_seconds:.2f}s valid_coverage={valid_control_coverage_seconds:.2f}s missing={missing_raw_seconds:.2f}s top={control_top_fraction} alpha={posterior_alpha_uv2_min_median_max} amount={amount_min_median_max} brightness={brightness_groups_min_max}'.format(**row), flush=True)
     print('KEYS 1 level | 2 melody | 3 brightness | 4 sound colour | 5 harmony', flush=True)
     print('SPACE pause/resume | R repeat/reset | V enable/disable reimagination | I reimagine | E end | D decline | Q stop | +/- manual amount | T trajectory', flush=True)
     print('Reimagination '+('enabled' if args.invitation else 'disabled; restart with --reimagination on a compatible candidate or press V'), flush=True)
@@ -295,6 +392,9 @@ def run(args, config):
                     key = actions[action_index]['key']
                     print('SCRIPTED_KEY '+repr(key), flush=True)
                     action_index += 1
+                if alpha_check and key in ('r', ' ', '1', '2', '3', '4', '5'):
+                    alpha_check.abort('operator_pause_or_processor_reset', now)
+                    break
                 if key == 'q':
                     break
                 if key == 'v':
@@ -387,6 +487,9 @@ def run(args, config):
                         if samples:
                             age = local_clock()-(float(stamps[-1])+correction)
                             if not np.isfinite(age) or not 0 <= age <= .5:
+                                if alpha_check:
+                                    alpha_check.abort('stale_or_invalid_timestamp_processor_reset', now)
+                                    break
                                 processor = EnergyProcessor(processor.config, processor.sample_rate, args.input)
                                 last_row_count = 0
                                 recorded_feature_count = 0
@@ -397,8 +500,13 @@ def run(args, config):
                                     recorder.raw(at=now, sampled_at=stamp.tolist(), samples=data.tolist(), sample_rate=rate,
                                         channels=['F3','F4','C3','C4','P3','P4','vertical_EOG','jaw_EMG'], units=['uV']*8,
                                         mode='live', participant_id='A')
+                                raw_intervals.extend((now-age+float(t-stamp[-1]), now-age+float(t-stamp[-1])+1/rate) for t in stamp)
+                                previous_session = processor.session
                                 processor.add(data, stamp)
                                 record_feature_rows()
+                                if alpha_check and processor.session is not previous_session:
+                                    alpha_check.abort('timestamp_gap_processor_reset', now)
+                                    break
                                 if len(processor.rows) > last_row_count:
                                     last_feature = processor.rows[-1]
                                     last_feature_at = now-max(0, local_clock()-(last_feature['t']+correction))
@@ -427,7 +535,7 @@ def run(args, config):
                                 'processing_support_seconds': last_feature.get('processing_support_seconds'),
                             }, live=True)
                             alpha_check_music_rows.append((alpha_check.index, alpha_check.current, dict(
-                                controls=result['controls'])))
+                                controls=result['controls'], amount=result['smoothed_amount'])))
                         music_seq += 1
                         voicing = (tuple(result['frequencies_hz']), tuple(result['note_weights']))
                         if voicing != previous_voicing and now-voicing_at >= 1.5:
@@ -435,12 +543,16 @@ def run(args, config):
                             previous_voicing, voicing_at = voicing, now
                             write('voicing_applied', dict(at=elapsed, frequencies_hz=voicing[0], weights=voicing[1]))
                             print(f'VOICING applied_at={elapsed:.2f}s Hz={voicing[0]} note_weights={voicing[1]} crossfade_s=1.35', flush=True)
-                        if now-last_print >= .5:
+                        if now-last_print >= (5.0 if alpha_check else .5):
                             write('music', dict(result, source=args.mode, raw_feature=last_feature,
                                 sampled_at_playback=last_feature_at, sent_at=now))
                             feature_text = ''
+                            if alpha_check:
+                                phase = alpha_check.phase_at(now)
+                                remaining = max(0, (phase+1)*alpha_check.seconds-(now-alpha_check.started)) if phase >= 0 else 0
+                                feature_text = f' round={phase//2+1} condition={alpha_check.phases[phase] if phase >= 0 else 'calibration'} remaining={remaining:.1f}s'
                             if args.input == 'posterior_alpha':
-                                feature_text = (f" posterior_alpha_uv2={last_feature.get('raw_posterior_alpha_uv2')}"
+                                feature_text += (f" posterior_alpha_uv2={last_feature.get('raw_posterior_alpha_uv2')}"
                                     f" P3={last_feature.get('alpha_p3_uv2')} P4={last_feature.get('alpha_p4_uv2')}"
                                     f" quality={last_feature.get('quality')}")
                             print(f'{args.mode} {mapping.candidate} input={args.input} amount={result["amount"]:.3f} state={result["state"]} t={elapsed:.2f}s parameters={display_parameters(result)}{feature_text}', flush=True)
@@ -450,7 +562,10 @@ def run(args, config):
                     if alpha_check:
                         for condition, marker_at in alpha_check.advance(now, healthy):
                             recorder.write('task_marker', now, {'condition': condition, 'scheduled_at_monotonic': marker_at}, live=True)
-                            print('ALPHA CHECK MARKER '+condition.upper()+'; keep this condition for 20 seconds.', flush=True)
+                            print(f'ALPHA CHECK \u7b2c{alpha_check.index//2+1}\u8f6e '+('\u7741\u773c' if condition == 'eyes_open' else '\u95ed\u773c')+'; 20s', flush=True)
+                            voice.say(f'\u7b2c{alpha_check.index//2+1}\u8f6e, '+('\u7741\u773c' if condition == 'eyes_open' else '\u95ed\u773c'))
+                        if alpha_check.failure_reason:
+                            break
                         if alpha_check.complete:
                             print('ALPHA CHECK COMPLETE; stopping after six recorded conditions.', flush=True)
                             break
@@ -476,12 +591,18 @@ def run(args, config):
                 term_index = len(controller.terminations)
                 time.sleep(.05)
     finally:
+        if alpha_check:
+            if not alpha_check.complete:
+                alpha_check.abort('stopped_before_protocol_end', time.monotonic())
+            print(f'ALPHA CHECK {alpha_check.status}; reason={alpha_check.failure_reason}', flush=True)
+            voice.say('\u7ed3\u675f, \u68c0\u67e5\u5b8c\u6210' if alpha_check.complete else '\u7ed3\u675f, \u68c0\u67e5\u672a\u5b8c\u6210')
         runtime.stop('stopped')
         if inlet:
             inlet.close_stream()
         if recorder:
             save_alpha_check_summary()
             recorder.close()
+            voice.close()
         sender.close()
         try:
             process.wait(timeout=12)

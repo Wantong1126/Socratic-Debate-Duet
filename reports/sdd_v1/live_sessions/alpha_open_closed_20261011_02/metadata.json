@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "session_id": "audition-7078a99fd61a",
+  "config": {
+    "source": {
+      "participant_id": "A",
+      "channel_roles": [
+        "F3",
+        "F4",
+        "C3",
+        "C4",
+        "P3",
+        "P4",
+        "vertical_EOG",
+        "jaw_EMG"
+      ],
+      "reference": "SRB2 ear clips",
+      "bias": "BIAS",
+      "sample_unit": "uV",
+      "lsl_data_type": "TimeSeriesRaw",
+      "upstream_filtering": "GUI TimeSeriesRaw; no GUI filtered-output stage"
+    },
+    "analysis": {
+      "energy_channel": "F3",
+      "window_seconds": 2.0,
+      "update_rate_hz": 4.0,
+      "baseline_seconds": 20.0,
+      "highpass_hz": 4.0,
+      "lowpass_hz": 40.0,
+      "smoothing_seconds": 0.5,
+      "warmup_seconds": 30.0,
+      "posterior_alpha_low_hz": 8.0,
+      "posterior_alpha_high_hz": 13.0,
+      "alpha_calibration_low_percentile": 5.0,
+      "alpha_calibration_high_percentile": 95.0,
+      "flatline_peak_to_peak_min": 1e-09,
+      "arrival_rate_tolerance": 0.2,
+      "rail_limit_uv": 187500.0,
+      "saturation_fraction": 0.98
+    },
+    "session": {
+      "control_hz": 4.0,
+      "max_age_seconds": 0.5
+    },
+    "mapping": {
+      "fixed": [
+        0.5,
+        0.24,
+        0.1,
+        0.12,
+        0.04,
+        0.82,
+        0.58,
+        0.28,
+        0.08
+      ],
+      "frequencies_hz": [
+        98.0,
+        146.832384,
+        220.0
+      ],
+      "weights": [
+        0.48,
+        0.32,
+        0.2
+      ]
+    },
+    "transport": {
+      "host": "127.0.0.1",
+      "port": 57120
+    }
+  },
+  "code_version": {
+    "entry": "src.sdd.mapping_audition",
+    "input": "posterior_alpha"
+  },
+  "source": {
+    "mode": "live",
+    "real_eeg": true,
+    "stream_name": "obci_eeg1"
+  },
+  "seed": null,
+  "monotonic_origin": 1666460.022218,
+  "wall_origin": 1791690462.2569704,
+  "clock": "seconds on shared monotonic timeline",
+  "simulated": false,
+  "audition_session_config": {
+    "session": "reports\\sdd_v1\\live_sessions\\obci_eeg1_20260919_194100",
+    "fragment_start_seconds": 60.0,
+    "fragment_seconds": 24.0,
+    "control_hz": 4.0,
+    "output_directory": "reports/sdd_v1/mapping_audition/20261007",
+    "smooth_seconds": 0.9,
+    "hysteresis": 0.06,
+    "minimum_hold_seconds": 1.5,
+    "tempo_bpm": 90.0,
+    "fixed_frame": [
+      0.68,
+      0.24,
+      0.1,
+      0.12,
+      0.04,
+      1.0,
+      0.72,
+      0.3,
+      0.1
+    ],
+    "groups_low": [
+      0.9,
+      0.24,
+      0.07,
+      0.015
+    ],
+    "groups_high": [
+      0.42,
+      0.65,
+      0.55,
+      0.23
+    ],
+    "level_db": [
+      -12.0,
+      0.0
+    ],
+    "base_midi": [
+      44,
+      51,
+      55,
+      60,
+      63
+    ],
+    "pitch_midi": [
+      63,
+      65,
+      67
+    ],
+    "harmony_names": [
+      "Abmaj7",
+      "Cmaj7(#11)/G",
+      "Dbmaj9",
+      "Bb13sus4"
+    ],
+    "harmony_midi": [
+      [
+        44,
+        51,
+        55,
+        60,
+        63
+      ],
+      [
+        43,
+        48,
+        52,
+        59,
+        66
+      ],
+      [
+        49,
+        53,
+        56,
+        60,
+        63
+      ],
+      [
+        46,
+        51,
+        56,
+        60,
+        67
+      ]
+    ],
+    "voice_weights": [
+      0.26,
+      0.16,
+      0.18,
+      0.22,
+      0.18
+    ],
+    "colour_names": [
+      "rounded_wood",
+      "hollow_reed",
+      "glass_organ"
+    ],
+    "reimagination_semitones": 2.0,
+    "reimagination": false,
+    "reserved_for_reimagination": [
+      "pitch",
+      "harmony"
+    ],
+    "evidence": "2026-10-07: five active candidates; prior human feedback archived. New sounds awaiting audition; real resting replay available; no new live behavioral validation.",
+    "mode": "live",
+    "candidate": "brightness",
+    "input": "posterior_alpha",
+    "input_session": "reports\\sdd_v1\\live_sessions\\obci_eeg1_20260919_194100",
+    "fragment_start": 60.0,
+    "receiver_transport": {
+      "host": "127.0.0.1",
+      "osc_port": 57360,
+      "server_port": 57370
+    }
+  }
+}

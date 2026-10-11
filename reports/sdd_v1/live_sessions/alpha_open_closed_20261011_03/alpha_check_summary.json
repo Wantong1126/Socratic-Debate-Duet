@@ -1,0 +1,171 @@
+{
+  "input": "posterior_alpha",
+  "unit": "uV^2",
+  "protocol": "eyes_open_20s, eyes_closed_20s, repeated three times; markers do not control sound",
+  "rounds": [
+    {
+      "round": 1,
+      "condition": "eyes_open",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        4.328531006320557,
+        13.613844186792027,
+        58.736672501444914
+      ],
+      "amount_min_median_max": [
+        0.022683576643071433,
+        0.3234673651650548,
+        0.9715538894534314
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.47573771940747506,
+          0.877229675033394
+        ],
+        "musicGroup2": [
+          0.2594496525756426,
+          0.6023906980061151
+        ],
+        "musicGroup3": [
+          0.09277032496660598,
+          0.49426228059252497
+        ],
+        "musicGroup4": [
+          0.025199208057958927,
+          0.2050341465154018
+        ]
+      }
+    },
+    {
+      "round": 1,
+      "condition": "eyes_closed",
+      "windows_total": 80,
+      "windows_valid": 80,
+      "posterior_alpha_uv2_min_median_max": [
+        9.776297411224169,
+        40.615135944619,
+        104.61954020623243
+      ],
+      "amount_min_median_max": [
+        0.23730004526486168,
+        0.9604028280235242,
+        0.9999761601095273
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.4211268883313252,
+          0.7482192323049324
+        ],
+        "musicGroup2": [
+          0.3696460724062036,
+          0.6490374495503264
+        ],
+        "musicGroup3": [
+          0.22178076769506763,
+          0.5488731116686748
+        ],
+        "musicGroup4": [
+          0.08298513553008238,
+          0.22949524793492726
+        ]
+      }
+    },
+    {
+      "round": 2,
+      "condition": "eyes_open",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        32.30050709422123,
+        62.77477356616657,
+        121.96658416803496
+      ],
+      "amount_min_median_max": [
+        0.941008486281669,
+        0.999993567794845,
+        0.9999999999996986
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.4200000259451282,
+          0.44146934569836666
+        ],
+        "musicGroup2": [
+          0.6316616005493119,
+          0.6499999778385364
+        ],
+        "musicGroup3": [
+          0.5285306543016334,
+          0.5499999740548718
+        ],
+        "musicGroup4": [
+          0.22038352223927327,
+          0.2299999883787447
+        ]
+      }
+    },
+    {
+      "round": 2,
+      "condition": "eyes_closed",
+      "windows_total": 17,
+      "windows_valid": 17,
+      "posterior_alpha_uv2_min_median_max": [
+        10.035377926617002,
+        26.155514545817283,
+        66.18653285546965
+      ],
+      "amount_min_median_max": [
+        0.23567430877717638,
+        0.7782878334215396,
+        0.9999999999999752
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.420000005461909,
+          0.7306346081578543
+        ],
+        "musicGroup2": [
+          0.3846662721984994,
+          0.6499999953346194
+        ],
+        "musicGroup3": [
+          0.2393653918421457,
+          0.549999994538091
+        ],
+        "musicGroup4": [
+          0.09086158176262775,
+          0.2299999975535199
+        ]
+      }
+    },
+    {
+      "round": 3,
+      "condition": "eyes_open",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "round": 3,
+      "condition": "eyes_closed",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    }
+  ]
+}
