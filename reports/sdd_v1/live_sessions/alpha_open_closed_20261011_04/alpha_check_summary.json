@@ -1,0 +1,149 @@
+{
+  "status": "INCOMPLETE",
+  "failure_reason": "timestamp_gap_processor_reset",
+  "control_top_threshold": 0.98,
+  "control_top_definition": "brightness smoothed control amount >= 0.98; fraction of transmitted controls",
+  "input": "posterior_alpha",
+  "unit": "uV^2",
+  "protocol": "eyes_open_20s, eyes_closed_20s, repeated three times; markers do not control sound",
+  "rounds": [
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 1,
+      "condition": "eyes_open",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 1,
+      "condition": "eyes_closed",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 2,
+      "condition": "eyes_open",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 2,
+      "condition": "eyes_closed",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 3,
+      "condition": "eyes_open",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 0,
+      "valid_control_coverage_seconds": 0,
+      "missing_raw_seconds": 20.0,
+      "missing_valid_seconds": 20.0,
+      "windows_invalid": 0,
+      "windows_missing": 80,
+      "expected_windows": 80,
+      "control_top_fraction": null,
+      "alpha_amount_top_fraction": null,
+      "round": 3,
+      "condition": "eyes_closed",
+      "windows_total": 0,
+      "windows_valid": 0,
+      "posterior_alpha_uv2_min_median_max": null,
+      "amount_min_median_max": null,
+      "brightness_groups_min_max": {
+        "musicGroup1": null,
+        "musicGroup2": null,
+        "musicGroup3": null,
+        "musicGroup4": null
+      }
+    }
+  ]
+}

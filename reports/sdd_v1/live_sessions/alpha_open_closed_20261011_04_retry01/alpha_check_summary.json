@@ -1,0 +1,269 @@
+{
+  "status": "COMPLETE",
+  "failure_reason": null,
+  "control_top_threshold": 0.98,
+  "control_top_definition": "brightness smoothed control amount >= 0.98; fraction of transmitted controls",
+  "input": "posterior_alpha",
+  "unit": "uV^2",
+  "protocol": "eyes_open_20s, eyes_closed_20s, repeated three times; markers do not control sound",
+  "rounds": [
+    {
+      "raw_data_coverage_seconds": 17.647419101613195,
+      "valid_control_coverage_seconds": 19.598653799985186,
+      "missing_raw_seconds": 2.3525808983868046,
+      "missing_valid_seconds": 0.4013462000148138,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.0,
+      "alpha_amount_top_fraction": 0.0125,
+      "round": 1,
+      "condition": "eyes_open",
+      "windows_total": 80,
+      "windows_valid": 80,
+      "posterior_alpha_uv2_min_median_max": [
+        12.856560927182539,
+        23.36083721236151,
+        36.33613665136518
+      ],
+      "amount_min_median_max": [
+        0.300473602689831,
+        0.6564156413924103,
+        0.9878507442062884
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.46178393215323005,
+          0.7968857703535864
+        ],
+        "musicGroup2": [
+          0.32807673782297825,
+          0.6143095579524493
+        ],
+        "musicGroup3": [
+          0.17311422964641354,
+          0.50821606784677
+        ],
+        "musicGroup4": [
+          0.06118658202912274,
+          0.21128428038969904
+        ]
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 17.792307901694585,
+      "valid_control_coverage_seconds": 19.60500879999745,
+      "missing_raw_seconds": 2.207692098305415,
+      "missing_valid_seconds": 0.3949912000025506,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.7100271002710027,
+      "alpha_amount_top_fraction": 0.7901234567901234,
+      "round": 1,
+      "condition": "eyes_closed",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        18.956546264188056,
+        163.4292831783461,
+        257.25734733909644
+      ],
+      "amount_min_median_max": [
+        0.4757338252284837,
+        0.9999998521185377,
+        0.9999999999999998
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.4200000015545718,
+          0.681134495344617
+        ],
+        "musicGroup2": [
+          0.42694761855980623,
+          0.6499999986721366
+        ],
+        "musicGroup3": [
+          0.28886550465538297,
+          0.5499999984454282
+        ],
+        "musicGroup4": [
+          0.11303350729355695,
+          0.22999999930368142
+        ]
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 17.627510201680707,
+      "valid_control_coverage_seconds": 19.628786499986745,
+      "missing_raw_seconds": 2.372489798319293,
+      "missing_valid_seconds": 0.3712135000132548,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.25205479452054796,
+      "alpha_amount_top_fraction": 0.2222222222222222,
+      "round": 2,
+      "condition": "eyes_open",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        11.595854191669263,
+        27.55047213391839,
+        249.32510124947106
+      ],
+      "amount_min_median_max": [
+        0.2928064702766292,
+        0.8535333842341972,
+        0.9999999999999999
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.420000000009992,
+          0.7010986594767774
+        ],
+        "musicGroup2": [
+          0.40989489503025256,
+          0.6499999999914652
+        ],
+        "musicGroup3": [
+          0.26890134052322257,
+          0.549999999990008
+        ],
+        "musicGroup4": [
+          0.10409122544269343,
+          0.22999999999552445
+        ]
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 17.69385610167592,
+      "valid_control_coverage_seconds": 19.669493500008684,
+      "missing_raw_seconds": 2.3061438983240805,
+      "missing_valid_seconds": 0.33050649999131565,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.7445652173913043,
+      "alpha_amount_top_fraction": 0.8375,
+      "round": 2,
+      "condition": "eyes_closed",
+      "windows_total": 80,
+      "windows_valid": 80,
+      "posterior_alpha_uv2_min_median_max": [
+        22.07686049303444,
+        152.74915978565784,
+        259.59744033464807
+      ],
+      "amount_min_median_max": [
+        0.7236458423600364,
+        0.9999999700062414,
+        0.9999999999999999
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.4200000006192875,
+          0.5212699650351706
+        ],
+        "musicGroup2": [
+          0.5634985715324584,
+          0.6499999994710253
+        ],
+        "musicGroup3": [
+          0.4487300349648294,
+          0.5499999993807125
+        ],
+        "musicGroup4": [
+          0.18463949482799652,
+          0.22999999972261082
+        ]
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 17.633148001546942,
+      "valid_control_coverage_seconds": 19.566580299990164,
+      "missing_raw_seconds": 2.3668519984530576,
+      "missing_valid_seconds": 0.43341970000983565,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.43478260869565216,
+      "alpha_amount_top_fraction": 0.49382716049382713,
+      "round": 3,
+      "condition": "eyes_open",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        10.563617988626554,
+        34.68826242951852,
+        256.4232560571347
+      ],
+      "amount_min_median_max": [
+        0.24428847912496726,
+        0.9735128039152757,
+        0.9999999999999999
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.4200000000071563,
+          0.6910468452231202
+        ],
+        "musicGroup2": [
+          0.4184808197052515,
+          0.6499999999938872
+        ],
+        "musicGroup3": [
+          0.2789531547768799,
+          0.5499999999928438
+        ],
+        "musicGroup4": [
+          0.10859360057714411,
+          0.22999999999679455
+        ]
+      }
+    },
+    {
+      "raw_data_coverage_seconds": 17.6135153016985,
+      "valid_control_coverage_seconds": 19.5177388000302,
+      "missing_raw_seconds": 2.3864846983015013,
+      "missing_valid_seconds": 0.4822611999697983,
+      "windows_invalid": 0,
+      "windows_missing": 0,
+      "expected_windows": 80,
+      "control_top_fraction": 0.644808743169399,
+      "alpha_amount_top_fraction": 0.7530864197530864,
+      "round": 3,
+      "condition": "eyes_closed",
+      "windows_total": 81,
+      "windows_valid": 81,
+      "posterior_alpha_uv2_min_median_max": [
+        7.475087478370175,
+        194.25055978169374,
+        392.4252733623721
+      ],
+      "amount_min_median_max": [
+        0.08405813290416303,
+        0.9999992841767668,
+        0.9999999999999986
+      ],
+      "brightness_groups_min_max": {
+        "musicGroup1": [
+          0.42000000604542614,
+          0.8091376749186708
+        ],
+        "musicGroup2": [
+          0.317611569340302,
+          0.6499999948361985
+        ],
+        "musicGroup3": [
+          0.1608623250813292,
+          0.5499999939545739
+        ],
+        "musicGroup4": [
+          0.05569874977601204,
+          0.22999999729215292
+        ]
+      }
+    }
+  ]
+}

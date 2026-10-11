@@ -150,6 +150,13 @@ class EyesOpenClosedCheck:
         if not self.complete and self.failure_reason is None:
             self.failure_reason, self.finished_at = reason, now
 
+    def processor_reset(self, reason, now):
+        """Recover during calibration; preserve a failed trial once markers start."""
+        if self.started is None:
+            return False
+        self.abort(reason, now)
+        return True
+
     @property
     def status(self):
         return 'INCOMPLETE' if self.failure_reason else ('COMPLETE' if self.complete else 'RUNNING')
@@ -237,12 +244,28 @@ def covered_seconds(intervals, start, end):
             cursor = right
     return total
 
+def fresh_alpha_check_output(requested):
+    """Keep previous recordings and choose a new sibling for a repeated run."""
+    requested = Path(requested)
+    candidate, retry = requested, 0
+    while candidate.exists():
+        retry += 1
+        candidate = requested.with_name(f'{requested.name}_retry{retry:02d}')
+    return candidate
+
+
 def run(args, config):
     # Validate ownership and raw data before opening any sound device.
     if args.input == 'posterior_alpha' and (args.candidate != 'brightness' or args.mode == 'manual'):
         raise ValueError('posterior_alpha is available only for replay/live and routes only to the approved brightness candidate')
     if args.alpha_check_output and (args.mode != 'live' or args.input != 'posterior_alpha' or args.candidate != 'brightness'):
         raise ValueError('--alpha-check-output requires --mode live --input posterior_alpha --candidate brightness')
+    if args.alpha_check_output:
+        requested = args.alpha_check_output
+        args.alpha_check_output = fresh_alpha_check_output(requested)
+        if args.alpha_check_output != requested:
+            print(f'ALPHA CHECK previous output preserved: {requested}', flush=True)
+        print(f'ALPHA CHECK output: {args.alpha_check_output}', flush=True)
     mapping = MusicMapping(args.candidate, config, invitation=args.invitation, diagnostic=args.diagnostic)
     source = processor = inlet = None
     if args.mode == 'replay':
@@ -295,6 +318,10 @@ def run(args, config):
             monotonic_origin=time.monotonic(), wall_origin=time.time(), allow_live_recording=True,
             extra_metadata={'audition_session_config': session_config})
         print('ALPHA CHECK: after calibration, follow each prompt for 20 seconds: OPEN, CLOSED, repeated three times. Markers only label conditions; they do not control sound.', flush=True)
+        print('ALPHA CHECK 正在校准，无需按键。保持睁眼，等待约52秒连续有效数据；听到第1轮提示后再按提示操作。', flush=True)
+        voice.say('正在校准，请保持睁眼，等待第一轮提示，无需按键')
+        # Discard samples queued while SuperCollider was starting.
+        inlet.flush()
     controller = InvitationEnvelopeController(InvitationEnvelopeConfig(**config['reimagination']))
     runtime = SessionRuntime(sender, session_id=sid, invitation_controller=controller,
         rate=config['control_hz'])
@@ -317,6 +344,8 @@ def run(args, config):
     last_print, next_manual, last_event, term_index = -1e9, started, None, 0
     pending_candidate = None
     recorded_feature_count = 0
+    next_calibration_status = started
+    last_raw_at = None
 
     def record_feature_rows():
         """Persist each alpha result, including invalid windows, only when opted in."""
@@ -375,9 +404,12 @@ def run(args, config):
             'rounds': rounds}, indent=2), encoding='utf-8')
         for row in rounds:
             print('ALPHA SUMMARY round={round} condition={condition} valid={windows_valid}/{windows_total} coverage={raw_data_coverage_seconds:.2f}s valid_coverage={valid_control_coverage_seconds:.2f}s missing={missing_raw_seconds:.2f}s top={control_top_fraction} alpha={posterior_alpha_uv2_min_median_max} amount={amount_min_median_max} brightness={brightness_groups_min_max}'.format(**row), flush=True)
-    print('KEYS 1 level | 2 melody | 3 brightness | 4 sound colour | 5 harmony', flush=True)
-    print('SPACE pause/resume | R repeat/reset | V enable/disable reimagination | I reimagine | E end | D decline | Q stop | +/- manual amount | T trajectory', flush=True)
-    print('Reimagination '+('enabled' if args.invitation else 'disabled; restart with --reimagination on a compatible candidate or press V'), flush=True)
+    if alpha_check:
+        print('ALPHA CHECK 自动运行：Q停止；空格、R或数字切换键会中止本次检查。', flush=True)
+    else:
+        print('KEYS 1 level | 2 melody | 3 brightness | 4 sound colour | 5 harmony', flush=True)
+        print('SPACE pause/resume | R repeat/reset | V enable/disable reimagination | I reimagine | E end | D decline | Q stop | +/- manual amount | T trajectory', flush=True)
+        print('Reimagination '+('enabled' if args.invitation else 'disabled; restart with --reimagination on a compatible candidate or press V'), flush=True)
     try:
         with (directory/'controls.jsonl').open('w', encoding='utf-8') as log:
             def write(kind, data):
@@ -487,14 +519,19 @@ def run(args, config):
                         if samples:
                             age = local_clock()-(float(stamps[-1])+correction)
                             if not np.isfinite(age) or not 0 <= age <= .5:
-                                if alpha_check:
-                                    alpha_check.abort('stale_or_invalid_timestamp_processor_reset', now)
+                                if alpha_check and alpha_check.processor_reset('stale_or_invalid_timestamp_processor_reset', now):
                                     break
+                                if alpha_check:
+                                    if now >= next_calibration_status:
+                                        print('ALPHA CHECK 校准等待：时间戳过期，清空积压并重新校准。', flush=True)
+                                        next_calibration_status = now+5
+                                    inlet.flush()
                                 processor = EnergyProcessor(processor.config, processor.sample_rate, args.input)
                                 last_row_count = 0
                                 recorded_feature_count = 0
                                 last_feature = last_feature_at = None
                             else:
+                                last_raw_at = now
                                 data, stamp = np.asarray(samples), np.asarray(stamps)
                                 if recorder:
                                     recorder.raw(at=now, sampled_at=stamp.tolist(), samples=data.tolist(), sample_rate=rate,
@@ -505,8 +542,12 @@ def run(args, config):
                                 processor.add(data, stamp)
                                 record_feature_rows()
                                 if alpha_check and processor.session is not previous_session:
-                                    alpha_check.abort('timestamp_gap_processor_reset', now)
-                                    break
+                                    if alpha_check.processor_reset('timestamp_gap_processor_reset', now):
+                                        break
+                                    last_feature = last_feature_at = None
+                                    if now >= next_calibration_status:
+                                        print('ALPHA CHECK 校准重启：EEG时间戳断档，等待连续有效数据；三轮检查尚未开始。', flush=True)
+                                        next_calibration_status = now+5
                                 if len(processor.rows) > last_row_count:
                                     last_feature = processor.rows[-1]
                                     last_feature_at = now-max(0, local_clock()-(last_feature['t']+correction))
@@ -560,6 +601,14 @@ def run(args, config):
                     else:
                         runtime.latest = None
                     if alpha_check:
+                        if alpha_check.started is None and not healthy and now >= next_calibration_status:
+                            baseline = processor.alpha_frames_seen/processor.config['analysis']['update_rate_hz']
+                            reason = ('尚未收到新鲜EEG数据' if last_raw_at is None else
+                                'EEG数据中断，检查OpenBCI GUI的数据流和LSL输出' if now-last_raw_at > 1 else
+                                last_feature.get('reason', '等待滤波稳定和分析窗口') if last_feature else
+                                '等待滤波稳定和分析窗口')
+                            print(f'ALPHA CHECK 校准中：有效基线={baseline:.1f}/20s; {reason}; 无需按键，等待第1轮提示。', flush=True)
+                            next_calibration_status = now+5
                         for condition, marker_at in alpha_check.advance(now, healthy):
                             recorder.write('task_marker', now, {'condition': condition, 'scheduled_at_monotonic': marker_at}, live=True)
                             print(f'ALPHA CHECK \u7b2c{alpha_check.index//2+1}\u8f6e '+('\u7741\u773c' if condition == 'eyes_open' else '\u95ed\u773c')+'; 20s', flush=True)
@@ -595,6 +644,8 @@ def run(args, config):
             if not alpha_check.complete:
                 alpha_check.abort('stopped_before_protocol_end', time.monotonic())
             print(f'ALPHA CHECK {alpha_check.status}; reason={alpha_check.failure_reason}', flush=True)
+            if alpha_check.started is None:
+                print('ALPHA CHECK 校准未完成，三轮睁眼/闭眼检查尚未开始。', flush=True)
             voice.say('\u7ed3\u675f, \u68c0\u67e5\u5b8c\u6210' if alpha_check.complete else '\u7ed3\u675f, \u68c0\u67e5\u672a\u5b8c\u6210')
         runtime.stop('stopped')
         if inlet:

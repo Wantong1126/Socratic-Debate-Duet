@@ -9,7 +9,7 @@ from unittest.mock import patch
 import numpy as np
 
 from src.sdd.audition_features import EnergyProcessor, recompute
-from src.sdd.mapping_audition import CheckVoice, EyesOpenClosedCheck, covered_seconds, prepare_replay, receiver_port_candidates, start_receiver
+from src.sdd.mapping_audition import CheckVoice, EyesOpenClosedCheck, covered_seconds, fresh_alpha_check_output, prepare_replay, receiver_port_candidates, start_receiver
 from src.sdd.mapping_render import make_trace, score_for
 from src.sdd.music_mapping import CANDIDATES, MusicMapping, load_config, music_packet, validate_packet
 from src.sdd.replay_source import RawSampleReplay
@@ -286,6 +286,42 @@ class MappingTests(unittest.TestCase):
         self.assertEqual(check.index, phase)
         self.assertEqual(check.advance(120, True), [])
         self.assertFalse(check.complete)
+
+    def test_alpha_check_calibration_resets_allow_all_six_markers(self):
+        check = EyesOpenClosedCheck(seconds=2)
+        for reason in ('timestamp_gap_processor_reset', 'stale_or_invalid_timestamp_processor_reset'):
+            self.assertFalse(check.processor_reset(reason, 1))
+            self.assertIsNone(check.failure_reason)
+            self.assertEqual(check.advance(2, False), [])
+        markers = []
+        for tick in np.arange(10, 22.25, .25):
+            markers.extend(check.advance(float(tick), True))
+        self.assertTrue(check.complete)
+        self.assertEqual([condition for condition, _ in markers], list(check.phases))
+
+    def test_alpha_check_processor_reset_after_first_marker_aborts(self):
+        for reason in ('timestamp_gap_processor_reset', 'stale_or_invalid_timestamp_processor_reset'):
+            check = EyesOpenClosedCheck()
+            check.advance(0, True)
+            self.assertTrue(check.processor_reset(reason, .5))
+            self.assertEqual(check.failure_reason, reason)
+            self.assertEqual(check.advance(1, True), [])
+            self.assertFalse(check.complete)
+
+    def test_repeated_alpha_output_preserves_existing_recordings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            requested = Path(directory)/'check'
+            self.assertEqual(fresh_alpha_check_output(requested), requested)
+            requested.mkdir()
+            record = requested/'records.jsonl'
+            record.write_text('original evidence', encoding='utf-8')
+            first = fresh_alpha_check_output(requested)
+            self.assertEqual(first.name, 'check_retry01')
+            first.mkdir()
+            second = fresh_alpha_check_output(requested)
+            self.assertEqual(second.name, 'check_retry02')
+            self.assertFalse(second.exists())
+            self.assertEqual(record.read_text(encoding='utf-8'), 'original evidence')
 
     def test_alpha_check_reset_and_delayed_timer_cannot_complete(self):
         check = EyesOpenClosedCheck(seconds=2)
