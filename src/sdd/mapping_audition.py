@@ -671,7 +671,7 @@ def run(args, config):
 def main(argv=None):
     os.chdir(ROOT)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--config', default='config/mapping_audition.json')
+    parser.add_argument('--config', default='config/mapping_audition_brightness_contrast.json')
     parser.add_argument('--mode', choices=('manual', 'replay', 'live'), default='replay')
     parser.add_argument('--candidate', choices=CANDIDATES, default='colour')
     parser.add_argument('--input', choices=EnergyProcessor.INPUTS, default='f3_energy',

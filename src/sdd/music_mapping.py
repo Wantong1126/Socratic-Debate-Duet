@@ -14,12 +14,15 @@ MUSIC_FIELDS = ('auditionLevelDb', 'musicGroup1', 'musicGroup2', 'musicGroup3', 
 MUSIC_RANGES = ((-18, 0), *((0, 1),)*4, (0, .4), (.5, 5), (0, .35), (0, 4), (40, 160), (0, 2), (0, .9), (0, 1), (0, 2))
 
 
-def load_config(path='config/mapping_audition.json'):
+def load_config(path='config/mapping_audition_brightness_contrast.json'):
     c = json.loads(Path(path).read_text(encoding='utf-8'))
     if c['minimum_hold_seconds'] < 1.35:
         raise ValueError('minimum hold must allow the existing 1.35s voicing crossfade')
     if not 40 <= c['tempo_bpm'] <= 160 or c['smooth_seconds'] <= 0:
         raise ValueError('invalid tempo or smoothing')
+    exponent = c.get('brightness_exponent', 1.0)
+    if isinstance(exponent, bool) or not isinstance(exponent, (int, float)) or not math.isfinite(exponent) or exponent <= 0:
+        raise ValueError('brightness exponent must be finite and positive')
     if len(c['voice_weights']) != len(c['base_midi']) or len(c['base_midi']) > 6:
         raise ValueError('base notes and weights must match the six-slot voice')
     for notes in [c['base_midi'], c['pitch_midi'], *c['harmony_midi']]:
@@ -128,8 +131,11 @@ class MusicMapping:
         elif self.candidate == 'pitch':
             midi[-1] = c['pitch_midi'][self.state]
         elif self.candidate == 'brightness':
+            # Continuous shaping after the existing EMA; old configs remain linear.
+            position = x ** c.get('brightness_exponent', 1.0)
             for i in range(4):
-                controls[f'musicGroup{i+1}'] = lerp([c['groups_low'][i], c['groups_high'][i]])
+                low, high = c['groups_low'][i], c['groups_high'][i]
+                controls[f'musicGroup{i+1}'] = low + position * (high - low)
         elif self.candidate == 'colour':
             controls['musicColour'] = x*2
         elif self.candidate == 'harmony':

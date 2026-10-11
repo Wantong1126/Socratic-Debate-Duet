@@ -1,0 +1,111 @@
+{
+  "session": "reports/sdd_v1/live_sessions/obci_eeg1_20260919_194100",
+  "fragment_start_seconds": 60.0,
+  "fragment_seconds": 24.0,
+  "control_hz": 4.0,
+  "output_directory": "reports/sdd_v1/mapping_audition/brightness_contrast_20261011",
+  "smooth_seconds": 0.9,
+  "hysteresis": 0.06,
+  "minimum_hold_seconds": 1.5,
+  "tempo_bpm": 90.0,
+  "fixed_frame": [
+    0.68,
+    0.24,
+    0.1,
+    0.12,
+    0.04,
+    1.0,
+    0.72,
+    0.3,
+    0.1
+  ],
+  "groups_low": [
+    0.95,
+    0.05,
+    0.006,
+    0.001
+  ],
+  "groups_high": [
+    0.3,
+    0.85,
+    0.8,
+    0.38
+  ],
+  "level_db": [
+    -12.0,
+    0.0
+  ],
+  "base_midi": [
+    44,
+    51,
+    55,
+    60,
+    63
+  ],
+  "pitch_midi": [
+    63,
+    65,
+    67
+  ],
+  "harmony_names": [
+    "Abmaj7",
+    "Cmaj7(#11)/G",
+    "Dbmaj9",
+    "Bb13sus4"
+  ],
+  "harmony_midi": [
+    [
+      44,
+      51,
+      55,
+      60,
+      63
+    ],
+    [
+      43,
+      48,
+      52,
+      59,
+      66
+    ],
+    [
+      49,
+      53,
+      56,
+      60,
+      63
+    ],
+    [
+      46,
+      51,
+      56,
+      60,
+      67
+    ]
+  ],
+  "voice_weights": [
+    0.26,
+    0.16,
+    0.18,
+    0.22,
+    0.18
+  ],
+  "colour_names": [
+    "rounded_wood",
+    "hollow_reed",
+    "glass_organ"
+  ],
+  "reimagination_semitones": 2.0,
+  "reimagination": {
+    "attack_seconds": 2.0,
+    "hold_seconds": 3.0,
+    "release_seconds": 2.0,
+    "cooldown_seconds": 1.0
+  },
+  "reserved_for_reimagination": [
+    "pitch",
+    "harmony"
+  ],
+  "evidence": "2026-10-11: project author approved the contrast in manual audition and real posterior-alpha audition. Selected as the mapping_audition default; original config/mapping_audition.json retained for comparison. Sustained maximum brightness for approximately 20 seconds sounded harsh; comfort has NOT passed. No timbre parameters, alpha calibration, or other mappings changed in this default-selection update.",
+  "brightness_exponent": 3.0
+}

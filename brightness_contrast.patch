@@ -1,0 +1,181 @@
+diff --git a/docs/LISTENING_GUIDE.md b/docs/LISTENING_GUIDE.md
+index 794d622..329c1f6 100644
+--- a/docs/LISTENING_GUIDE.md
++++ b/docs/LISTENING_GUIDE.md
+@@ -1,5 +1,32 @@
+ # Current listening guide — 2026-10-07
+ 
++## Optional brightness contrast audition — 2026-10-11
++
++Use `--config config/mapping_audition_brightness_contrast.json` with the existing
++manual or replay command. The original default configuration remains available
++as the comparison condition. The new configuration uses low harmonic-group
++weights `[0.95, 0.05, 0.006, 0.001]` and high weights
++`[0.30, 0.85, 0.80, 0.38]`. After the existing 0.9-second EMA, the continuous
++position `x` becomes `x ** 3` before interpolation between these endpoints.
++Thus x=0.5 produces a position of 0.125, making the middle darker and concentrating
++more change near the high end. These are reference positions, not three discrete
++states. Alpha measurement, calibration, OSC fields and the SynthDef are unchanged.
++The SynthDef retains its existing group-energy normalization and limiter;
++perceived loudness and comfort still require listening on the actual receiver.
++
++Compare manual old/new first, then replay the same successful recording
++`alpha_open_closed_20261011_04_retry01` at `--start 53 --duration 118`.
++The optional curve cannot recover alpha values already clamped to 1. Record
++audibility and comfort separately; neither is established by a numerical test.
++
++For an informal design check, let someone else randomize short sound pairs at
++amounts 0.25/0.5 and 0.5/0.75, without showing the values. Ask which is brighter
++and separately rate comfort. A provisional target such as 8/10 correct for each
++pair type is a design checkpoint, not a statistical significance claim. Next,
++check whether participants hear the same direction of change in real recordings.
++The ability to distinguish isolated sounds does not establish physiological
++association, ownership, or reflection during debate.
++
+ From `D:\sdd-sonification`, run:
+ 
+ ```powershell
+diff --git a/src/sdd/music_mapping.py b/src/sdd/music_mapping.py
+index 37f80d9..24f2796 100644
+--- a/src/sdd/music_mapping.py
++++ b/src/sdd/music_mapping.py
+@@ -20,6 +20,9 @@ def load_config(path='config/mapping_audition.json'):
+         raise ValueError('minimum hold must allow the existing 1.35s voicing crossfade')
+     if not 40 <= c['tempo_bpm'] <= 160 or c['smooth_seconds'] <= 0:
+         raise ValueError('invalid tempo or smoothing')
++    exponent = c.get('brightness_exponent', 1.0)
++    if isinstance(exponent, bool) or not isinstance(exponent, (int, float)) or not math.isfinite(exponent) or exponent <= 0:
++        raise ValueError('brightness exponent must be finite and positive')
+     if len(c['voice_weights']) != len(c['base_midi']) or len(c['base_midi']) > 6:
+         raise ValueError('base notes and weights must match the six-slot voice')
+     for notes in [c['base_midi'], c['pitch_midi'], *c['harmony_midi']]:
+@@ -128,8 +131,11 @@ class MusicMapping:
+         elif self.candidate == 'pitch':
+             midi[-1] = c['pitch_midi'][self.state]
+         elif self.candidate == 'brightness':
++            # Continuous shaping after the existing EMA; old configs remain linear.
++            position = x ** c.get('brightness_exponent', 1.0)
+             for i in range(4):
+-                controls[f'musicGroup{i+1}'] = lerp([c['groups_low'][i], c['groups_high'][i]])
++                low, high = c['groups_low'][i], c['groups_high'][i]
++                controls[f'musicGroup{i+1}'] = low + position * (high - low)
+         elif self.candidate == 'colour':
+             controls['musicColour'] = x*2
+         elif self.candidate == 'harmony':
+diff --git a/config/mapping_audition_brightness_contrast.json b/config/mapping_audition_brightness_contrast.json
+new file mode 100644
+index 0000000..170bdd7
+--- /dev/null
++++ b/config/mapping_audition_brightness_contrast.json
+@@ -0,0 +1,111 @@
++{
++  "session": "reports/sdd_v1/live_sessions/obci_eeg1_20260919_194100",
++  "fragment_start_seconds": 60.0,
++  "fragment_seconds": 24.0,
++  "control_hz": 4.0,
++  "output_directory": "reports/sdd_v1/mapping_audition/brightness_contrast_20261011",
++  "smooth_seconds": 0.9,
++  "hysteresis": 0.06,
++  "minimum_hold_seconds": 1.5,
++  "tempo_bpm": 90.0,
++  "fixed_frame": [
++    0.68,
++    0.24,
++    0.1,
++    0.12,
++    0.04,
++    1.0,
++    0.72,
++    0.3,
++    0.1
++  ],
++  "groups_low": [
++    0.95,
++    0.05,
++    0.006,
++    0.001
++  ],
++  "groups_high": [
++    0.3,
++    0.85,
++    0.8,
++    0.38
++  ],
++  "level_db": [
++    -12.0,
++    0.0
++  ],
++  "base_midi": [
++    44,
++    51,
++    55,
++    60,
++    63
++  ],
++  "pitch_midi": [
++    63,
++    65,
++    67
++  ],
++  "harmony_names": [
++    "Abmaj7",
++    "Cmaj7(#11)/G",
++    "Dbmaj9",
++    "Bb13sus4"
++  ],
++  "harmony_midi": [
++    [
++      44,
++      51,
++      55,
++      60,
++      63
++    ],
++    [
++      43,
++      48,
++      52,
++      59,
++      66
++    ],
++    [
++      49,
++      53,
++      56,
++      60,
++      63
++    ],
++    [
++      46,
++      51,
++      56,
++      60,
++      67
++    ]
++  ],
++  "voice_weights": [
++    0.26,
++    0.16,
++    0.18,
++    0.22,
++    0.18
++  ],
++  "colour_names": [
++    "rounded_wood",
++    "hollow_reed",
++    "glass_organ"
++  ],
++  "reimagination_semitones": 2.0,
++  "reimagination": {
++    "attack_seconds": 2.0,
++    "hold_seconds": 3.0,
++    "release_seconds": 2.0,
++    "cooldown_seconds": 1.0
++  },
++  "reserved_for_reimagination": [
++    "pitch",
++    "harmony"
++  ],
++  "evidence": "2026-10-11: optional brightness contrast audition; darker low/middle and stronger high harmonic endpoint. Continuous cubic control curve; human audition pending. Original config and alpha calibration unchanged.",
++  "brightness_exponent": 3.0
++}

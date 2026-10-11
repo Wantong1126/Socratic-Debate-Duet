@@ -1,5 +1,39 @@
 # Current listening guide — 2026-10-07
 
+## Default brightness contrast audition — 2026-10-11
+
+The default configuration is now `config/mapping_audition_brightness_contrast.json`
+for the existing manual, replay and live commands. Use
+`--config config/mapping_audition.json` to select the unchanged original configuration
+for comparison. The new configuration uses low harmonic-group
+weights `[0.95, 0.05, 0.006, 0.001]` and high weights
+`[0.30, 0.85, 0.80, 0.38]`. After the existing 0.9-second EMA, the continuous
+position `x` becomes `x ** 3` before interpolation between these endpoints.
+Thus x=0.5 produces a position of 0.125, making the middle darker and concentrating
+more change near the high end. These are reference positions, not three discrete
+states. Alpha measurement, calibration, OSC fields and the SynthDef are unchanged.
+The SynthDef retains its existing group-energy normalization and limiter;
+perceived loudness and comfort still require listening on the actual receiver.
+
+Compare manual old/new first, then replay the same successful recording
+`alpha_open_closed_20261011_04_retry01` at `--start 53 --duration 118`.
+The contrast curve cannot recover alpha values already clamped to 1. Record
+audibility and comfort separately; neither is established by a numerical test.
+
+Author listening record (2026-10-11): the project author approved the contrast
+in both manual audition and real posterior-alpha audition. Sustained maximum
+brightness for approximately 20 seconds sounded harsh; comfort has **not passed**.
+This default-selection update does not change timbre parameters, alpha calibration
+or any other mapping. Contrast approval does not imply comfort approval.
+
+For an informal design check, let someone else randomize short sound pairs at
+amounts 0.25/0.5 and 0.5/0.75, without showing the values. Ask which is brighter
+and separately rate comfort. A provisional target such as 8/10 correct for each
+pair type is a design checkpoint, not a statistical significance claim. Next,
+check whether participants hear the same direction of change in real recordings.
+The ability to distinguish isolated sounds does not establish physiological
+association, ownership, or reflection during debate.
+
 From `D:\sdd-sonification`, run:
 
 ```powershell
